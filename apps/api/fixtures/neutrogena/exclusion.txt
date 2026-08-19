@@ -1,0 +1,25 @@
+# Neutrogena demo exclusion brief (we own this text).
+# Format: category|pattern  — case-insensitive substring on title + snippet + url
+# Categories: kill (crisis/adverse), job (hiring spam), spam (brand-as-username)
+# Any match → safety=kill, gate=discard. Velocity never overrides.
+
+kill|product recall
+kill|adverse event
+kill|anaphylaxis
+kill|class action
+kill|lawsuit
+kill|fda warning
+kill|hospitalized
+kill|died after
+kill|boycott
+
+job|we're hiring
+job|job opening
+job|now hiring
+job|careers at
+job|apply now
+job|hiring for
+
+spam|u/neutrogena
+spam|/user/neutrogena
+spam|@neutrogena

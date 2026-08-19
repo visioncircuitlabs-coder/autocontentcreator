@@ -4,7 +4,7 @@ import os
 import sqlite3
 from pathlib import Path
 
-from models import Signal
+from models import Score, Signal
 
 DEFAULT_SQLITE_PATH = "data/demo.db"
 
@@ -129,6 +129,37 @@ def upsert_signals(signals: list[Signal]) -> None:
                     s.raw_ref,
                 )
                 for s in signals
+            ],
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def upsert_scores(scores: list[Score]) -> None:
+    """Persist scorer rows. One score per signal_id."""
+    init_db()
+    conn = connect()
+    try:
+        conn.executemany(
+            """
+            INSERT OR REPLACE INTO scores (
+                signal_id, brand_fit, velocity, safety, reason,
+                gate, model, prompt_version
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            [
+                (
+                    s.signal_id,
+                    s.brand_fit,
+                    s.velocity,
+                    s.safety,
+                    s.reason,
+                    s.gate,
+                    s.model,
+                    s.prompt_version,
+                )
+                for s in scores
             ],
         )
         conn.commit()
