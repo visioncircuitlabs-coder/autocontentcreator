@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1117">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <title>Content Machine — Interactive Architecture</title>
 <style>
   :root{
@@ -15,7 +18,7 @@
     --human:#22c55e;  --human-bg:#0f2a1a;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;padding:32px 16px 80px;line-height:1.45}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;padding:32px 16px 80px;padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(80px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));line-height:1.45;-webkit-tap-highlight-color:transparent}
   .wrap{max-width:980px;margin:0 auto}
   h1{font-size:26px;font-weight:700;margin-bottom:6px}
   .sub{color:var(--muted);font-size:15px;margin-bottom:10px}
@@ -29,8 +32,9 @@
   .layer h2{font-size:13px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:4px}
   .layer .desc{font-size:14px;color:var(--muted);margin-bottom:16px}
   .row{display:flex;flex-wrap:wrap;gap:12px;align-items:stretch}
-  .card{border-radius:12px;padding:12px 14px;flex:1 1 180px;min-width:170px;border:1px solid;cursor:pointer;transition:transform .12s ease, box-shadow .12s ease;position:relative}
+  .card{border-radius:12px;padding:12px 14px;flex:1 1 180px;min-width:170px;border:1px solid;cursor:pointer;transition:transform .12s ease, box-shadow .12s ease;position:relative;min-height:88px}
   .card:hover{transform:translateY(-3px);box-shadow:0 6px 24px rgba(0,0,0,.45)}
+  .card:active{transform:scale(.98)}
   .card::after{content:"⊕";position:absolute;top:10px;right:12px;color:var(--muted);font-size:14px;opacity:.7}
   .card .tag{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:1px;display:inline-block;margin-bottom:6px;padding:2px 8px;border-radius:20px}
   .card h3{font-size:15px;margin-bottom:4px}
@@ -77,13 +81,29 @@
   .wild a{color:#7ab5ff;text-decoration:none;font-size:12.5px}
   .wild a:hover{text-decoration:underline}
   .pending{color:var(--muted);font-style:italic;font-size:13.5px}
+  @media (max-width:720px){
+    body{padding:16px 12px 96px}
+    h1{font-size:22px}
+    .sub{font-size:14px}
+    .hint{display:block;border-radius:12px;margin-bottom:16px}
+    .legend{gap:8px;margin-bottom:20px}
+    .lg{flex:1 1 100%;font-size:12.5px}
+    .layer{padding:14px;border-radius:12px}
+    .card{flex:1 1 100%;min-width:0;padding:14px 16px 14px 14px}
+    .loopband{flex-direction:column;align-items:flex-start}
+    .modal{top:auto;left:0;right:0;bottom:0;width:100%;max-height:92vh;border-left:none;border-top:1px solid var(--line);border-radius:16px 16px 0 0;transform:translateY(105%);padding:16px 16px 40px}
+    .modal.open{transform:translateY(0)}
+    .modal .close{float:none;display:block;width:100%;padding:12px;margin-bottom:12px;font-size:16px}
+    .modal h2{font-size:20px}
+    footer{font-size:12px}
+  }
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>The Content Machine — interactive architecture</h1>
   <div class="sub">Rule: <b style="color:var(--code)">code</b> wherever the path is predictable · <b style="color:var(--agent)">agents</b> only where the path can't be known in advance · <b style="color:var(--judge)">AI-in-a-box</b> for judgment without autonomy</div>
-  <div class="hint">👆 <b>Click any box</b> to see how it works inside — and who already runs this for real in the industry</div>
+  <div class="hint">👆 <b>Tap any box</b> to see how it works inside — and who already runs this for real in the industry</div>
 
   <div class="legend">
     <div class="lg"><span class="dot" style="background:var(--code)"></span>⚙️ Deterministic code / loop <small>· cheap, testable, never hallucinates</small></div>
