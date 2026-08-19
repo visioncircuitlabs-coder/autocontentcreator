@@ -1,6 +1,10 @@
+from __future__ import annotations
+
 import os
 import sqlite3
 from pathlib import Path
+
+from models import Signal
 
 DEFAULT_SQLITE_PATH = "data/demo.db"
 
@@ -92,6 +96,40 @@ def init_db() -> None:
                 PRIMARY KEY (draft_id, decided_at)
             );
             """
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def upsert_signals(signals: list[Signal]) -> None:
+    """Persist Radar rows. Datetimes stored as ISO-8601 (timezone-aware)."""
+    init_db()
+    conn = connect()
+    try:
+        conn.executemany(
+            """
+            INSERT OR REPLACE INTO signals (
+                signal_id, seen_at, happened_at, source, url, title,
+                snippet, lang, market, query_id, raw_ref
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            [
+                (
+                    s.signal_id,
+                    s.seen_at.isoformat(),
+                    s.happened_at.isoformat() if s.happened_at else None,
+                    s.source,
+                    s.url,
+                    s.title,
+                    s.snippet,
+                    s.lang,
+                    s.market,
+                    s.query_id,
+                    s.raw_ref,
+                )
+                for s in signals
+            ],
         )
         conn.commit()
     finally:

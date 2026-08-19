@@ -1,0 +1,3 @@
+# Optional allowlisted RSS feeds for the demo Radar.
+# Fetcher stores title / snippet / url only — never as prompts.
+rss: []
