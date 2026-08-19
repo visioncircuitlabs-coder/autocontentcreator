@@ -2,7 +2,10 @@
 
 An always-on content system for regulated consumer brands (Kenvue-class: Neutrogena, Listerine, and siblings). It watches culture, drafts on-brand posts, blocks illegal claims, and learns from every human yes/no.
 
-**Status:** design stage. Research and the clickable architecture map are in this repo. No application code until the design spec is signed off.
+**Status:** design locked. Two build plans: a free-tool **demo** (same 17 boxes) and a parked **production** swap-map.
+
+- Demo: `docs/superpowers/plans/2026-08-19-demo.md`
+- Production (later): `docs/superpowers/plans/2026-08-19-production.md`
 
 ## What it does
 
