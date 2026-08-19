@@ -97,7 +97,7 @@
     <h2>Layer 1 · Trend Radar — runs by itself (the heartbeat)</h2>
     <div class="desc">A scheduled loop, every few hours. Almost no AI cost — intelligence only where it counts.</div>
     <div class="row">
-      <div class="card c-code" data-id="fetcher"><span class="tag">code · loop</span><h3>Source Fetcher</h3><p>Pulls Google Trends, Reddit, news RSS, competitor feeds. Pure plumbing.</p></div>
+      <div class="card c-code" data-id="fetcher"><span class="tag">code · loop</span><h3>Source Fetcher</h3><p>Licensed social + GDELT news + official TikTok + schema extract. One signal shape. No scrape-the-web.</p></div>
       <div class="card c-judge" data-id="scorer"><span class="tag">AI-in-a-box</span><h3>Relevance Scorer</h3><p>"Is this trend relevant to skincare + this brand? Score 1–10." Fast, cheap model.</p></div>
       <div class="card c-agent" data-id="researcher"><span class="tag">agent</span><h3>Deep-Dive Researcher</h3><p>Only fires for hot trends (8+). Searches, reads, follows leads. Capped budget per run.</p></div>
     </div>
@@ -166,15 +166,15 @@
 const DETAILS = {
   fetcher: {
     type:'code', tname:'⚙️ code · scheduled loop', title:'Source Fetcher',
-    desc:'The machine’s alarm clock and newspaper delivery. Every 6 hours it wakes up and collects raw signals from the outside world. No AI involved — just reliable plumbing.',
+    desc:'The alarm clock. Every 6 hours it collects only from an allowlist into one signal shape. It does not decide if something is on-brand — that is the Scorer. Hardened Aug 19 against the SOTA scorecard.',
     steps:[
-      'A scheduler fires every 6 hours (a "cron job" — the same tech that sends your bank statements on time).',
-      'It pulls from each source: Google Trends for search spikes, Reddit skincare communities, beauty-news RSS feeds, competitor Instagram pages.',
-      'Everything is cleaned into one standard shape: a "signal" — what happened, where, when, and a link.',
-      'Duplicates are removed (the same viral story appears in 5 places — we keep one).',
-      'Fresh signals are handed to the Relevance Scorer.'
+      'A scheduler fires every 6 hours. Each pipe is independent: one dead vendor never stops the others.',
+      'Licensed social: Brandwatch or Meltwater (US/global). India vernacular: Wizikey or Konnect. Queries are compiled Booleans with exclusion snippets — not “search everything.”',
+      'News, recalls, regulator quotes: GDELT. TikTok culture: official Creative Center / Discovery API only. Named pages (brand.com, ASCI, a competitor article): Firecrawl /extract with a schema.',
+      'Every hit becomes the same row: when, where, url or vendor id, short licensed snippet, which query caught it.',
+      'Duplicates collapse. Scraped pages are stored as data (url + hash), never as instructions. The batch goes to the Relevance Scorer.'
     ],
-    notes:[['Cost','Nearly free — no AI calls. A few rupees a month of server time.'],['If a source breaks','The loop logs it and continues with the others. One dead feed never stops the machine.']]
+    notes:[['Cost','Vendor listen is the bill. Our code is cheap. No AI in this box.'],['If a source breaks','Log it and continue. If the provider is late, we are late. We do not invent rows.'],['Forbidden','trendFinder as-is, TikTok scrape, Meta Content Library, Douyin-as-TikTok, Meltwater tweet bodies.']]
   },
   scorer: {
     type:'judge', tname:'🧠 AI-in-a-box', title:'Relevance Scorer',
@@ -371,8 +371,9 @@ const DETAILS = {
 // Verified industry references — researched & fact-checked Aug 2026 by a 20-agent research fleet
 const INDUSTRY = {
   fetcher: [
-    {who:"trendFinder (open-source, by Firecrawl's co-founder)", conf:"high", note:"A 6-file script with 4.1k GitHub stars doing exactly this: scheduled run → fetch 7 sites + X → digest to Slack. We verified the code line-by-line — it ran a real marketing team's daily radar with zero servers (GitHub Actions cron). Unmaintained since Feb 2025, so we build our own, but it's the proven blueprint.", url:"https://github.com/ericciarla/trendFinder", linkTitle:"github.com/ericciarla/trendFinder"},
-    {who:"Firecrawl Monitor", conf:"high", note:"The hosted productization of the same pattern — scheduled watching with an AI judge that ignores cosmetic page changes. Our buy-vs-build fallback if the DIY radar ever outgrows us.", url:"https://www.firecrawl.dev/monitor", linkTitle:"firecrawl.dev/monitor"}
+    {who:"Brandwatch / Meltwater — licensed listen", conf:"high", note:"SOTA social ingest is a paid API with compiled Boolean queries and exclusion snippets, not a scrape. Meltwater's X path is IDs-only (ToS). We buy one of these for US/global. India needs a vernacular add-on (Wizikey or Konnect).", url:"https://developers.brandwatch.com/docs/creating-queries", linkTitle:"Brandwatch query docs"},
+    {who:"trendFinder shape (do not run the repo)", conf:"high", note:"Allowlist + 24h window + schema extract is the blueprint. The GitHub repo is unmaintained since Feb 2025 and treats scraped pages like prompts — we rebuild the shape, we do not deploy that code.", url:"https://github.com/ericciarla/trendFinder", linkTitle:"github.com/ericciarla/trendFinder"},
+    {who:"GDELT + official TikTok Discovery", conf:"high", note:"GDELT is the cheap news/recall layer. TikTok culture only through their official Creative Center / Discovery API. Meta Content Library is research-only — not a commercial firehose. CrowdTangle is gone.", url:"https://www.gdeltproject.org/", linkTitle:"gdeltproject.org"}
   ],
   scorer: [
     {who:"trendFinder's two-stage filter", conf:"high", note:"They filter cheaply twice: the scraper extracts only today's on-topic stories, then ONE model call ranks the survivors. The model never sees raw pages — that's why the daily loop costs almost nothing. We copy this shape exactly.", url:"https://www.firecrawl.dev/blog/trend-finder-typescript", linkTitle:"architecture walkthrough"},
