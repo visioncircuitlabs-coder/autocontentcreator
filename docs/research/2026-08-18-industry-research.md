@@ -36,8 +36,10 @@ AI agent platform for sports content. Early-stage, demo-led, **no named paying c
 - **Approval dial** (item-by-item → sampled once trust earned, mode logged per item).
 - Typed canonical entities; freshness inherited from source ("if a provider is late, the agent is late"); rollback as first-class; audit trail as product.
 
-### Cerebras — infra, not a competitor (confidence: high)
-Wafer-scale chips; API serves ~2 open models at ~3,000 tok/s, $0.35/$0.75 per M tokens. OpenAI partnership confirmed (Ultrafast tier, GPT-5.6 Sol via OpenAI's API at 750 tok/s). Use for high-volume cheap steps (trend scoring) only; route via gateway (OpenRouter-style) — their catalog churns. Speed only matters where a human is waiting.
+### Cerebras — two products, do not collapse them
+**Cerebras Knowledge (the company brain) — Brand Brain blueprint (confidence: high on shape, medium on vanity metrics).** Internal retrieval system launched ~Q2 2026. Independent write-ups (Jul 2026) describe: meet data where it lives (Slack/docs/code/DBs), one shared Postgres embeddings table, distill-before-embed, hybrid retrieval (full-text + vectors + rarity + age decay), rank fusion + rerank + citations, project-scoped search, MCP so *agents* query the same layer as humans. They rejected “migrate everything into a new wiki.” This is how Layer 2 should work. Full note: `2026-08-19-cerebras-company-brain.md`. 15k queries/day is vendor-published.
+
+**Cerebras Inference — infra only (confidence: high).** Wafer-scale chips; API serves a small catalog of open models at ~3,000 tok/s, $0.35/$0.75 per M tokens. OpenAI partnership confirmed (Ultrafast tier). Use for high-volume cheap steps (trend scoring) only; route via gateway — their catalog churns. Speed only matters where a human is waiting. Wrong engine for final brand copy.
 
 ### trendFinder (open-source) — our Trend Radar blueprint (confidence: high)
 4.1k stars, MIT, ~6 files, unmaintained since Feb 2025. Pipeline verified line-by-line: getCronSources → scrapeSources (Firecrawl /extract with schema) → generateDraft (one LLM call) → Slack webhook. Runs free on GitHub Actions cron. Fact-check corrections: current HEAD uses OpenAI o3-mini with NO schema enforcement on the final call (a fragility, not a pattern); X free tier = 1 account. We build our own version with schema enforcement everywhere.
@@ -62,3 +64,6 @@ Mature claims-review AI exists mostly for **finance** (Saifr/Fidelity, Red Oak, 
 - Plain-code state machine orchestrator; Claude Agent SDK inside generation steps; no CrewAI.
 - Rollback and freshness-decay as day-one features (Machina).
 - Positioning: mid-market/India gap that Adobe's complexity and pricing leaves open; sell outcome, not "AI" (Lieberman).
+- Brand Brain is a Cerebras-Knowledge-style retrieval layer, not a folder of pasted prompts: ingest from where brand/legal already write, distill decisions before embedding, hybrid retrieval so claim strings match exactly, cite every use, scope by brand/SKU/market (Cerebras Knowledge, 2026).
+- Day-one publish path is 100% human on benefit claims. An 80/20 auto-approve split is a later *logged* setting on the approval dial, never the default (reference pitch deck is a reference, not the spec — see `private deck notes (not in this repo)`).
+- Simulate, paid micro-test, amplify, and GEO/AI-recall are phase-2 / sibling capabilities. They do not redraw the four-layer factory.

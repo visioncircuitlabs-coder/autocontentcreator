@@ -107,7 +107,7 @@
 
   <div class="layer">
     <h2>Layer 2 · Brand Brain — the memory (not a loop, not an agent)</h2>
-    <div class="desc">The single source of truth. Every agent reads from it; nothing creates without it.</div>
+    <div class="desc">The single source of truth — built like Cerebras Knowledge, not like a wiki nobody updates. We ingest from the files brand and legal already live in, distill them, and let every agent <em>query</em> them with citations. Nothing creates without it.</div>
     <div class="row">
       <div class="card c-store" data-id="brandbook"><span class="tag">memory</span><h3>Brand Book</h3><p>Values, tone of voice, visual identity, do's &amp; don'ts.</p></div>
       <div class="card c-store" data-id="facts"><span class="tag">memory</span><h3>Product Facts</h3><p>Ingredients, approved claims, forbidden claims ("cures", "heals").</p></div>
@@ -147,7 +147,7 @@
 
   <div class="layer" style="margin-top:24px;border-color:#3d4655">
     <h2>The industry verdict — what 10 fact-checked dossiers agree on</h2>
-    <div class="desc">A 20-agent research fleet studied Adobe GenStudio, Writer, Typeface, Jasper, storyarb, Machina Sports, Cerebras, trendFinder, the agent-framework landscape, and compliance AI. Every finding was independently fact-checked (Aug 2026). Four things they ALL agree on:</div>
+    <div class="desc">A 20-agent research fleet studied Adobe GenStudio, Writer, Typeface, Jasper, storyarb, Machina Sports, Cerebras Knowledge (their company brain) plus Cerebras inference, trendFinder, the agent-framework landscape, and compliance AI. Every finding was independently fact-checked (Aug 2026). Four things they ALL agree on:</div>
     <div class="row">
       <div class="card c-code" style="cursor:default"><span class="tag">consensus</span><h3>Loops win, agents serve</h3><p>Every shipped system — even the ones branded "agentic" — is a deterministic pipeline with bounded AI steps inside. CrewAI, the autonomy flagship, literally added deterministic Flows and recommends them for production.</p></div>
       <div class="card c-judge" style="cursor:default"><span class="tag">consensus</span><h3>Compliance IS the product</h3><p>Generation is commoditized. What Coca-Cola-class brands pay for is guardrails: claims libraries, locked disclaimers, brand scores, audit trails. And beauty/health has no dedicated compliance AI yet — a real gap.</p></div>
@@ -208,9 +208,10 @@ const DETAILS = {
       'Tone-of-voice rules with examples: 10 on-voice sentences, 10 off-voice sentences — examples teach AI better than adjectives.',
       'Visual identity: colors, typography, photography style, layout rules.',
       'Do’s and don’ts: topics to avoid, humor limits, competitor mention policy.',
-      'Stored as structured documents; the relevant slices get injected into every agent’s instructions automatically.'
+      'Ingested from the files brand already maintains (Google Docs, PDFs, DAM) — we do not make them retype a second wiki.',
+      'Stored as structured, cited documents; agents query the relevant slice instead of receiving the whole book pasted into a prompt.'
     ],
-    notes:[['Who edits it','Humans only. The machine reads it, never writes it.'],['Why it matters','This is the difference between "AI content" and "OUR content." Weak brand book = generic output, always.']]
+    notes:[['Who edits it','Humans only. The machine reads it, never writes the canonical rules.'],['Why it matters','This is the difference between "AI content" and "OUR content." Weak brand book = generic output, always.']]
   },
   facts: {
     type:'store', tname:'🗄️ memory · legally loaded', title:'Product Facts',
@@ -219,8 +220,8 @@ const DETAILS = {
       'Each product: ingredients, benefits, usage instructions.',
       'The claims matrix — the crown jewel: every marketing claim mapped to its status: ✅ approved ("dermatologist tested"), ⚠️ conditional (needs a disclaimer), ❌ forbidden ("cures acne" — that’s a drug claim).',
       'Market-specific rules: what’s fine in India (ASCI rules) may be illegal in the US (FDA/FTC) and vice versa.',
-      'The Compliance Judge checks every draft against this matrix, line by line.',
-      'Only humans (ideally with legal sign-off) can edit it. Every change is logged.'
+      'The Compliance Judge checks every draft against this matrix, line by line — exact string match for the claim, plus meaning-check for lookalikes.',
+      'Retired claims age-decay to zero so a 2019 line cannot sneak back in. Only humans (ideally with legal sign-off) can edit the matrix. Every change is logged.'
     ],
     notes:[['Why this design','Compliance lives in DATA, not in AI vibes. Update the matrix once, and every future draft obeys — no retraining, no hoping.']]
   },
@@ -240,6 +241,7 @@ const DETAILS = {
     desc:'Every draft ever made, every verdict, every human decision WITH its reason. This is how the machine gets better every week without any "retraining."',
     steps:[
       'Each draft is stored with: the trend that inspired it, the compliance verdict, your approve/reject, and your comment.',
+      'Before it is searchable, the decision is distilled: the question, the decision, the reason — raw comments stay for keyword search only (Cerebras Knowledge pattern).',
       'When building a new brief, the Brief Builder pulls the 3 most relevant PAST WINNERS as examples: "write like these, they got approved."',
       'It also pulls relevant rejections: "avoid this — it was rejected because X."',
       'Over months this becomes the moat: a taste-memory no competitor can copy, because it’s made of YOUR decisions.'
@@ -374,17 +376,19 @@ const INDUSTRY = {
   ],
   scorer: [
     {who:"trendFinder's two-stage filter", conf:"high", note:"They filter cheaply twice: the scraper extracts only today's on-topic stories, then ONE model call ranks the survivors. The model never sees raw pages — that's why the daily loop costs almost nothing. We copy this shape exactly.", url:"https://www.firecrawl.dev/blog/trend-finder-typescript", linkTitle:"architecture walkthrough"},
-    {who:"Cerebras (fast, cheap inference)", conf:"high", note:"Chip company serving open models at ~3,000 tokens/sec for $0.35–0.75 per million tokens — roughly 10× cheaper than frontier models (live pricing verified Aug 2026). Right engine for high-volume scoring; wrong one for final brand copy. And never hard-wired — routed through a gateway so backends stay swappable.", url:"https://www.cerebras.ai/pricing", linkTitle:"cerebras.ai/pricing"}
+    {who:"Cerebras Inference (the other Cerebras — chips, not the company brain)", conf:"high", note:"Same company, different product. Open models at ~3,000 tokens/sec for $0.35–0.75 per million tokens — roughly 10× cheaper than frontier models (live pricing verified Aug 2026). Right engine for high-volume scoring; wrong one for final brand copy. Never hard-wired — routed through a gateway. Their Knowledge system (the company brain) is cited on the Brand Brain cards, not here.", url:"https://www.cerebras.ai/pricing", linkTitle:"cerebras.ai/pricing"}
   ],
   researcher: [
     {who:"Anthropic — 'Building Effective Agents'", conf:"high", note:"The industry's canonical design guide: grant real autonomy only when the number of steps can't be known in advance but progress can be verified. Deep-dive research is exactly that case — which is why this is one of only three agents in our whole machine.", url:"https://www.anthropic.com/engineering/building-effective-agents", linkTitle:"the canonical guide"},
     {who:"storyarb (Alex Lieberman)", conf:"high", note:"Their only agent-like system (beta, Dec 2025) combs engagement data, enriches leads, drafts outreach — and still routes every draft through a human. Lieberman's public ladder: don't attempt autonomous agents ('Phase 4') until AI works inside single bounded steps first. Our capped researcher is deliberately Phase 2–3.", url:"https://thestandard.storyarb.com/p/alex-lieberman-says-youre-wrong-about-ai", linkTitle:"Lieberman interview (Dec 2025)"}
   ],
   brandbook: [
+    {who:"Cerebras Knowledge (the company brain)", conf:"high", note:"Not their chips — their internal retrieval layer (write-up ~Jul 2026). They refused to build a new wiki. They ingest Slack/docs/code where knowledge already lives, distill it, and let humans AND agents query one index with citations. That is how this Brand Book is stored and read. 15k queries/day is vendor-published.", url:"https://www.cerebras.ai/blog/how-we-built-our-knowledge-base", linkTitle:"Cerebras Knowledge write-up"},
     {who:"Jasper IQ", conf:"high", note:"Jasper's enterprise moat (Ulta Beauty and Sanofi are customers) is exactly this box: voice, style rules, audiences and approved knowledge in ONE persistent layer every agent reads automatically — explicitly contrasted with pasting brand instructions into each prompt.", url:"https://www.jasper.ai/jasper-iq", linkTitle:"jasper.ai/jasper-iq"},
     {who:"Typeface Arc Graph", conf:"high", note:"The ex-Adobe-CTO's ~$1B-valued platform stores brand guidelines, voice, visual identity and personas as a dedicated data layer that grounds every generation. Verified live Aug 2026, with P&G, AB InBev and Sally Beauty on the logo bar.", url:"https://www.typeface.ai/", linkTitle:"typeface.ai"}
   ],
   facts: [
+    {who:"Cerebras Knowledge — exact match + meaning", conf:"high", note:"Their retrieval fuses full-text search (catches the literal approved claim string) with embeddings (catches paraphrases like 'skin-doctor approved'). Claims compliance needs both. Vectors alone will blur 'dermatologist tested' into something legal never signed.", url:"https://mer.vin/2026/07/how-cerebras-built-a-15k-query-day-internal-knowledge-base/", linkTitle:"architecture breakdown"},
     {who:"Writer — Product Claims Checker", conf:"high", note:"A live, shipped product (page checked this week): upload copy plus your approved-claims list, and AI marks which claims are approved and which aren't. The genius: compliance becomes a COMPARISON against a claims library — bounded and reliable — never an open 'is this legal?' question. Skincare brand Curology and E.L.F. Beauty are customers. Our claims matrix is this exact idea.", url:"https://writer.com/agents/product-claims-check/", linkTitle:"writer.com claims checker"},
     {who:"Adobe GenStudio — approved fragments", conf:"high", note:"Adobe never lets AI generate regulated text: claims and disclaimers are stored word-for-word and inserted after generation as locked blocks. The AI writes around them, never through them. Used by Coca-Cola, Estée Lauder and Pfizer-class brands.", url:"https://business.adobe.com/products/genstudio.html", linkTitle:"Adobe GenStudio"}
   ],
@@ -393,6 +397,7 @@ const INDUSTRY = {
     {who:"trendFinder", conf:"high", note:"The proven shape of a trend shelf: a daily digest a human can act on, not a firehose. Ours adds scoring, decay, and one-click 'create from this trend.'", url:"https://github.com/ericciarla/trendFinder", linkTitle:"the repo"}
   ],
   track: [
+    {who:"Cerebras Knowledge — distill before you store", conf:"high", note:"They do not embed raw Slack. An LLM rewrites each thread into question + resolution + systems involved, then embeds THAT. We do the same to every approve/reject: the reason becomes a clean memory, not a messy comment thread. Significant accuracy gain in their (vendor-described) tests.", url:"https://www.monoclick.ai/blog/cerebras-knowledge-base-lessons-for-ecommerce", linkTitle:"what transfers from Cerebras Knowledge"},
     {who:"Adobe Brand Intelligence (Apr 2026)", conf:"med", note:"Adobe's newest bet, announced at Summit 2026 (partly still rolling out): turn every human approval, rejection and annotation into a continuously-updated brand knowledge base that generators and checkers draw from. That is literally this box — the industry's biggest player just declared it the moat.", url:"https://business.adobe.com/products/brand-intelligence.html", linkTitle:"Brand Intelligence"},
     {who:"Typeface Arc Loop", conf:"med", note:"Announced March 2026 as the next phase of their orchestration engine: a closed loop feeding marketing performance back into how the AI operates. Same thesis, from the other billion-dollar player.", url:"https://www.typeface.ai/blog/introducing-typeface-arc-agents", linkTitle:"Arc launch post"}
   ],

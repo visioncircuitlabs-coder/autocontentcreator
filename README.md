@@ -49,4 +49,4 @@ CI on GitHub Actions. App in Docker. Secrets only in `.env` (never in git). Curr
 
 ## Repo
 
-Private. All work stays on the D: drive. Feature work happens in `.worktrees/`.
+Private at [visioncircuitlabs-coder/autocontentcreator](https://github.com/visioncircuitlabs-coder/autocontentcreator). All work stays on the D: drive. Feature work happens in `.worktrees/`.
