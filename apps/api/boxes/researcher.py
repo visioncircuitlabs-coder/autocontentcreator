@@ -116,6 +116,10 @@ def build_client() -> httpx.Client:
     )
 
 
+def url_host(url: str) -> str:
+    return (urlparse(str(url)).hostname or "").lower()
+
+
 def wrap_source(url: str, body: str) -> str:
     safe_url = (url or "").replace("<", "").replace(">", "").replace("\n", " ").strip()
     return f"<source url={safe_url}>\n{body}\n</source>"
@@ -211,6 +215,10 @@ def read_findings(
     return _heuristic_read(angle, url, body)
 
 
+def _finding_key(item: dict) -> tuple[str, str]:
+    return (str(item.get("text") or "").strip(), str(item.get("url") or "").strip())
+
+
 def skeptic_filter(
     findings: list[dict],
     *,
@@ -258,9 +266,18 @@ def run_skeptic(
         out = chat.complete_json(SKEPTIC_SYSTEM, user, SkepticOut)
         if not isinstance(out, SkepticOut):
             out = SkepticOut.model_validate(out)
-        survivors = [item.model_dump() for item in out.survivors]
+        original_by_key = {_finding_key(item): item for item in kept}
+        allowed_keys: set[tuple[str, str]] = set()
+        invented: list[str] = []
+        for item in out.survivors:
+            key = (item.text.strip(), (item.url or "").strip())
+            if key in original_by_key:
+                allowed_keys.add(key)
+            else:
+                invented.append(f"dropped (not in original): {item.text.strip()[:160]}")
+        survivors = [item for item in kept if _finding_key(item) in allowed_keys]
         kept2, note2 = skeptic_filter(survivors, fetched_urls=fetched_urls)
-        extra = [item for item in out.dropped if item]
+        extra = [item for item in out.dropped if item] + invented
         combined = note
         if extra:
             combined = f"{note}; llm: {'; '.join(extra)}"
@@ -277,7 +294,11 @@ def _body_hash(body: str) -> str:
 
 
 def _get(
-    client: httpx.Client, url: str, budget: ResearchBudget
+    client: httpx.Client,
+    url: str,
+    budget: ResearchBudget,
+    *,
+    allowed_host: str,
 ) -> str | None:
     if not budget.allow_get():
         return None
@@ -286,6 +307,12 @@ def _get(
         response = client.get(url)
         if response.status_code >= 400:
             logger.warning("research GET %s -> %s", url, response.status_code)
+            return None
+        final_host = url_host(str(response.url))
+        if not allowed_host or final_host != allowed_host:
+            logger.warning(
+                "research GET %s redirected off-host to %s", url, response.url
+            )
             return None
         return response.text or ""
     except Exception as exc:
@@ -377,6 +404,7 @@ def run_research(
         fetched_ok: set[str] = set()
         claimed_links: set[str] = set()
         fetched_at = stamp.isoformat()
+        allowed_host = url_host(signal.url)
 
         def remember(url: str, body: str | None) -> None:
             if url in seen_source_urls:
@@ -395,7 +423,9 @@ def run_research(
         for angle in angles:
             if not budget.allow_get():
                 break
-            seed_body = _get(client, signal.url, budget)
+            seed_body = _get(
+                client, signal.url, budget, allowed_host=allowed_host
+            )
             if seed_body is None:
                 remember(signal.url, None)
                 continue
@@ -414,7 +444,7 @@ def run_research(
                     break
             if link is None or not budget.allow_get():
                 continue
-            extra = _get(client, link, budget)
+            extra = _get(client, link, budget, allowed_host=allowed_host)
             if extra is None:
                 remember(link, None)
                 continue

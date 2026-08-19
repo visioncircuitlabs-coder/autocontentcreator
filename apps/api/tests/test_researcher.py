@@ -269,3 +269,85 @@ def test_run_research_persists_to_reports(tmp_path, monkeypatch) -> None:
     assert row["capped_at"] == report.capped_at
     assert report.sources
     assert all("url" in src and "hash" in src for src in report.sources)
+
+
+def test_same_host_redirect_off_host_is_not_fed() -> None:
+    from boxes.researcher import run_research
+
+    trap = "https://news.example/trap"
+    leak = "https://evil.example/payload"
+    secret = "OFF-HOST SECRET PAYLOAD"
+    seed_html = _html(
+        "Barrier-cream talk is rising among Indian shoppers.",
+        [trap],
+    )
+    captured: list[str] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured.append(str(request.url))
+        url = str(request.url)
+        if url.rstrip("/") == SEED_URL:
+            return httpx.Response(200, text=seed_html)
+        if "news.example/trap" in url:
+            return httpx.Response(302, headers={"Location": leak}, text="redirect")
+        if "evil.example" in url:
+            return httpx.Response(200, text=_html(secret, []))
+        return httpx.Response(404, text="missing")
+
+    client = httpx.Client(
+        transport=httpx.MockTransport(handler),
+        follow_redirects=True,
+    )
+    signal = _signal()
+    report = run_research(signal, _score(signal), client=client, persist=False)
+    dumped = report.model_dump_json()
+    assert secret not in dumped
+    assert leak not in [src["url"] for src in report.sources]
+    assert not any(secret in (src.get("quote") or "") for src in report.sources)
+
+
+def test_llm_skeptic_cannot_invent_new_claims() -> None:
+    from boxes.researcher import FindingOut, SkepticOut, run_skeptic
+
+    original = [
+        {
+            "text": "Barrier-cream talk is rising in India",
+            "url": SEED_URL,
+        },
+        {
+            "text": "Shoppers compare ceramides",
+            "url": "https://news.example/a",
+        },
+    ]
+    invented_unsourced = "Brand-new unsourced sentence about a miracle cream"
+    invented_with_url = "This cream is #1 guaranteed miracle"
+
+    class FakeChat:
+        def complete_json(self, system: str, user: str, schema: type) -> BaseModel:
+            assert schema is SkepticOut
+            return SkepticOut(
+                survivors=[
+                    FindingOut(
+                        text="Barrier-cream talk is rising in India",
+                        url=SEED_URL,
+                    ),
+                    FindingOut(text=invented_unsourced, url=""),
+                    FindingOut(text=invented_with_url, url=SEED_URL),
+                ],
+                dropped=[],
+            )
+
+    kept, note = run_skeptic(
+        original,
+        fetched_urls={SEED_URL, "https://news.example/a"},
+        chat=FakeChat(),
+    )
+    texts = [item["text"] for item in kept]
+    assert "Barrier-cream talk is rising in India" in texts
+    assert invented_unsourced not in texts
+    assert invented_with_url not in texts
+    assert all(
+        (item["text"], item["url"])
+        in {(row["text"], row["url"]) for row in original}
+        for item in kept
+    )
