@@ -3,9 +3,10 @@ from __future__ import annotations
 import json
 import os
 import sqlite3
+from datetime import datetime, timezone
 from pathlib import Path
 
-from models import Brief, Score, Signal, TrendReport
+from models import Brief, Decision, Draft, Score, Signal, TrendReport
 
 DEFAULT_SQLITE_PATH = "data/demo.db"
 
@@ -20,6 +21,14 @@ def connect() -> sqlite3.Connection:
     conn = sqlite3.connect(path)
     conn.row_factory = sqlite3.Row
     return conn
+
+
+def _ensure_column(
+    conn: sqlite3.Connection, table: str, column: str, ddl: str
+) -> None:
+    cols = {row[1] for row in conn.execute(f"PRAGMA table_info({table})")}
+    if column not in cols:
+        conn.execute(f"ALTER TABLE {table} ADD COLUMN {ddl}")
 
 
 def init_db() -> None:
@@ -91,7 +100,8 @@ def init_db() -> None:
                 image_path TEXT,
                 judge TEXT,
                 rules TEXT NOT NULL,
-                round INTEGER NOT NULL
+                round INTEGER NOT NULL,
+                flag_human INTEGER NOT NULL DEFAULT 0
             );
 
             CREATE TABLE IF NOT EXISTS decisions (
@@ -102,7 +112,25 @@ def init_db() -> None:
                 decided_at TEXT NOT NULL,
                 PRIMARY KEY (draft_id, decided_at)
             );
+
+            CREATE TABLE IF NOT EXISTS track_record (
+                draft_id TEXT NOT NULL,
+                decided_at TEXT NOT NULL,
+                user TEXT NOT NULL,
+                verdict TEXT NOT NULL,
+                reason TEXT NOT NULL,
+                distilled TEXT NOT NULL,
+                caption TEXT NOT NULL DEFAULT '',
+                judge TEXT,
+                sku TEXT,
+                market TEXT,
+                flag_human INTEGER NOT NULL DEFAULT 0,
+                PRIMARY KEY (draft_id, decided_at)
+            );
             """
+        )
+        _ensure_column(
+            conn, "drafts", "flag_human", "flag_human INTEGER NOT NULL DEFAULT 0"
         )
         conn.commit()
     finally:
@@ -216,6 +244,102 @@ def _json_load(value, default):
     return json.loads(value)
 
 
+def _parse_dt(value: str | None) -> datetime | None:
+    if not value:
+        return None
+    text = str(value).strip()
+    if text.endswith("Z"):
+        text = text[:-1] + "+00:00"
+    dt = datetime.fromisoformat(text)
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt
+
+
+def _signal_from_row(row: sqlite3.Row) -> Signal:
+    return Signal(
+        signal_id=row["signal_id"],
+        seen_at=_parse_dt(row["seen_at"]) or datetime.now(timezone.utc),
+        happened_at=_parse_dt(row["happened_at"]),
+        source=row["source"],
+        url=row["url"],
+        title=row["title"],
+        snippet=row["snippet"],
+        lang=row["lang"],
+        market=row["market"],
+        query_id=row["query_id"],
+        raw_ref=row["raw_ref"] or "",
+    )
+
+
+def _score_from_row(row: sqlite3.Row) -> Score:
+    return Score(
+        signal_id=row["signal_id"],
+        brand_fit=row["brand_fit"],
+        velocity=row["velocity"],
+        safety=row["safety"],
+        reason=row["reason"],
+        gate=row["gate"],
+        model=row["model"],
+        prompt_version=row["prompt_version"],
+    )
+
+
+def _report_from_row(row: sqlite3.Row) -> TrendReport:
+    return TrendReport(
+        report_id=row["report_id"],
+        signal_id=row["signal_id"],
+        what=row["what"],
+        why_now=row["why_now"],
+        who=row["who"],
+        angles=_json_load(row["angles"], []),
+        risks=_json_load(row["risks"], []),
+        sources=_json_load(row["sources"], []),
+        skeptic=row["skeptic"],
+        spent=_json_load(row["spent"], {}),
+        capped_at=row["capped_at"],
+    )
+
+
+def _flag_human_from_row(row: sqlite3.Row, judge: dict | None) -> bool:
+    flag = False
+    keys = row.keys()
+    if "flag_human" in keys and row["flag_human"] is not None:
+        flag = bool(row["flag_human"])
+    if not flag and isinstance(judge, dict):
+        flag = bool(judge.get("flag_human"))
+    return flag
+
+
+def _draft_from_row(row: sqlite3.Row) -> Draft:
+    judge = _json_load(row["judge"], None)
+    flag = _flag_human_from_row(row, judge if isinstance(judge, dict) else None)
+    if isinstance(judge, dict):
+        judge = dict(judge)
+        judge["flag_human"] = flag
+    return Draft(
+        draft_id=row["draft_id"],
+        brief_id=row["brief_id"],
+        caption=row["caption"],
+        variant=row["variant"],
+        image_path=row["image_path"],
+        judge=judge,
+        rules=_json_load(row["rules"], []),
+        round=row["round"],
+        flag_human=flag,
+    )
+
+
+def _decision_from_row(row: sqlite3.Row) -> Decision:
+    return Decision(
+        draft_id=row["draft_id"],
+        user=row["user"],
+        verdict=row["verdict"],
+        reason=row["reason"],
+        decided_at=_parse_dt(row["decided_at"]) or datetime.now(timezone.utc),
+    )
+
+
 def get_report(report_id: str) -> TrendReport | None:
     """Load one TrendReport, or None if missing."""
     init_db()
@@ -227,19 +351,7 @@ def get_report(report_id: str) -> TrendReport | None:
         ).fetchone()
         if row is None:
             return None
-        return TrendReport(
-            report_id=row["report_id"],
-            signal_id=row["signal_id"],
-            what=row["what"],
-            why_now=row["why_now"],
-            who=row["who"],
-            angles=_json_load(row["angles"], []),
-            risks=_json_load(row["risks"], []),
-            sources=_json_load(row["sources"], []),
-            skeptic=row["skeptic"],
-            spent=_json_load(row["spent"], {}),
-            capped_at=row["capped_at"],
-        )
+        return _report_from_row(row)
     finally:
         conn.close()
 
@@ -273,5 +385,216 @@ def get_brief(brief_id: str) -> Brief | None:
         if row is None:
             return None
         return Brief.model_validate_json(row["pack"])
+    finally:
+        conn.close()
+
+
+def upsert_draft(draft: Draft) -> None:
+    """Persist a factory draft. flag_human is a column and copied into judge JSON."""
+    init_db()
+    judge = dict(draft.judge) if isinstance(draft.judge, dict) else {}
+    if draft.judge is not None and not isinstance(draft.judge, dict):
+        judge = {"value": draft.judge}
+    flag = bool(draft.flag_human) or bool(judge.get("flag_human"))
+    judge["flag_human"] = flag
+    payload = judge if draft.judge is not None or flag else None
+    conn = connect()
+    try:
+        conn.execute(
+            """
+            INSERT OR REPLACE INTO drafts (
+                draft_id, brief_id, caption, variant, image_path,
+                judge, rules, round, flag_human
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                draft.draft_id,
+                draft.brief_id,
+                draft.caption,
+                draft.variant,
+                draft.image_path,
+                json.dumps(payload) if payload is not None else None,
+                json.dumps(list(draft.rules or [])),
+                draft.round,
+                1 if flag else 0,
+            ),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def get_draft(draft_id: str) -> Draft | None:
+    init_db()
+    conn = connect()
+    try:
+        row = conn.execute(
+            "SELECT * FROM drafts WHERE draft_id = ?",
+            (draft_id,),
+        ).fetchone()
+        if row is None:
+            return None
+        return _draft_from_row(row)
+    finally:
+        conn.close()
+
+
+def insert_decision(decision: Decision) -> None:
+    init_db()
+    conn = connect()
+    try:
+        conn.execute(
+            """
+            INSERT INTO decisions (draft_id, user, verdict, reason, decided_at)
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            (
+                decision.draft_id,
+                decision.user,
+                decision.verdict,
+                decision.reason,
+                decision.decided_at.isoformat(),
+            ),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def insert_track_record(entry: dict) -> None:
+    init_db()
+    conn = connect()
+    try:
+        judge = entry.get("judge")
+        conn.execute(
+            """
+            INSERT OR REPLACE INTO track_record (
+                draft_id, decided_at, user, verdict, reason, distilled,
+                caption, judge, sku, market, flag_human
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                entry["draft_id"],
+                entry["decided_at"],
+                entry["user"],
+                entry["verdict"],
+                entry["reason"],
+                entry.get("distilled") or entry["reason"],
+                entry.get("caption") or "",
+                json.dumps(judge) if judge is not None else None,
+                entry.get("sku") or "",
+                entry.get("market") or "",
+                1 if entry.get("flag_human") else 0,
+            ),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def list_signals() -> list[Signal]:
+    init_db()
+    conn = connect()
+    try:
+        rows = conn.execute(
+            "SELECT * FROM signals ORDER BY seen_at DESC, signal_id"
+        ).fetchall()
+        return [_signal_from_row(row) for row in rows]
+    finally:
+        conn.close()
+
+
+def list_scores() -> list[Score]:
+    init_db()
+    conn = connect()
+    try:
+        rows = conn.execute(
+            "SELECT * FROM scores ORDER BY signal_id"
+        ).fetchall()
+        return [_score_from_row(row) for row in rows]
+    finally:
+        conn.close()
+
+
+def list_reports() -> list[TrendReport]:
+    init_db()
+    conn = connect()
+    try:
+        rows = conn.execute(
+            "SELECT * FROM reports ORDER BY report_id"
+        ).fetchall()
+        return [_report_from_row(row) for row in rows]
+    finally:
+        conn.close()
+
+
+def list_drafts() -> list[Draft]:
+    init_db()
+    conn = connect()
+    try:
+        rows = conn.execute(
+            "SELECT * FROM drafts ORDER BY round DESC, draft_id"
+        ).fetchall()
+        return [_draft_from_row(row) for row in rows]
+    finally:
+        conn.close()
+
+
+def list_queue() -> list[Draft]:
+    """Drafts that have not yet been approved or rejected."""
+    init_db()
+    conn = connect()
+    try:
+        rows = conn.execute(
+            """
+            SELECT d.* FROM drafts d
+            WHERE NOT EXISTS (
+                SELECT 1 FROM decisions x WHERE x.draft_id = d.draft_id
+            )
+            ORDER BY d.round DESC, d.draft_id
+            """
+        ).fetchall()
+        return [_draft_from_row(row) for row in rows]
+    finally:
+        conn.close()
+
+
+def list_decisions() -> list[Decision]:
+    init_db()
+    conn = connect()
+    try:
+        rows = conn.execute(
+            "SELECT * FROM decisions ORDER BY decided_at DESC"
+        ).fetchall()
+        return [_decision_from_row(row) for row in rows]
+    finally:
+        conn.close()
+
+
+def list_track_record() -> list[dict]:
+    init_db()
+    conn = connect()
+    try:
+        rows = conn.execute(
+            "SELECT * FROM track_record ORDER BY decided_at DESC"
+        ).fetchall()
+        out: list[dict] = []
+        for row in rows:
+            out.append(
+                {
+                    "draft_id": row["draft_id"],
+                    "decided_at": row["decided_at"],
+                    "user": row["user"],
+                    "verdict": row["verdict"],
+                    "reason": row["reason"],
+                    "distilled": row["distilled"],
+                    "caption": row["caption"],
+                    "judge": _json_load(row["judge"], None),
+                    "sku": row["sku"] or "",
+                    "market": row["market"] or "",
+                    "flag_human": bool(row["flag_human"]),
+                }
+            )
+        return out
     finally:
         conn.close()

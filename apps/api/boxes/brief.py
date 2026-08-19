@@ -23,9 +23,10 @@ def load_track_record_examples(
     market: str,
     n: int = 3,
 ) -> tuple[list[dict], list[dict]]:
-    """3 wins + 3 losses. Empty until the Track Record box exists."""
-    _ = (sku, market, n)
-    return [], []
+    """3 wins + 3 losses from the Track Record ledger. Empty is allowed."""
+    from boxes.feedback import load_track_examples
+
+    return load_track_examples(sku, market, n)
 
 
 def load_brief(brief_id: str) -> Brief:
