@@ -18,6 +18,23 @@ GDELT_DOC_URL = "https://api.gdeltproject.org/api/v2/doc/doc"
 GDELT_QUERY = "neutrogena OR skincare"
 
 
+def _articles_or_fail(payload: object) -> list[dict]:
+    """HTTP 200 is not success if GDELT sent an error or no article list."""
+    if isinstance(payload, list):
+        return [row for row in payload if isinstance(row, dict)]
+    if isinstance(payload, dict):
+        err = payload.get("error")
+        if err:
+            raise RuntimeError(f"GDELT error: {err}")
+        if "articles" not in payload:
+            raise RuntimeError("GDELT response missing article list")
+        raw = payload.get("articles")
+        if not isinstance(raw, list):
+            raise RuntimeError("GDELT article list is not a list")
+        return [row for row in raw if isinstance(row, dict)]
+    raise RuntimeError("GDELT returned unexpected JSON")
+
+
 class GdeltSource:
     name = "gdelt"
 
@@ -37,18 +54,14 @@ class GdeltSource:
             timeout=REQUEST_TIMEOUT,
         )
         response.raise_for_status()
+        if not response.content or not response.content.strip():
+            raise RuntimeError("GDELT returned an empty body")
         try:
             payload = response.json()
         except ValueError as exc:
             raise RuntimeError("GDELT returned non-JSON") from exc
 
-        articles: list[dict] = []
-        if isinstance(payload, dict):
-            raw = payload.get("articles") or []
-            if isinstance(raw, list):
-                articles = [row for row in raw if isinstance(row, dict)]
-        elif isinstance(payload, list):
-            articles = [row for row in payload if isinstance(row, dict)]
+        articles = _articles_or_fail(payload)
 
         signals: list[Signal] = []
         for row in articles:

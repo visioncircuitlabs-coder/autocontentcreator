@@ -208,6 +208,31 @@ def test_dead_source_logs_and_continues(caplog: pytest.LogCaptureFixture) -> Non
     assert any("gdelt" in rec.message.lower() for rec in caplog.records)
 
 
+def test_gdelt_200_error_json_is_dead_source(caplog: pytest.LogCaptureFixture) -> None:
+    from boxes.fetcher import run_fetch
+
+    mapping = _live_mapping()
+    mapping["api.gdeltproject.org"] = httpx.Response(
+        200, json={"error": "query too broad"}
+    )
+    client = _client_for(mapping)
+    with caplog.at_level("WARNING"):
+        signals = run_fetch(client=client, persist=False)
+    assert any(s.source == "reddit" for s in signals)
+    assert any(s.source == "news_rss" for s in signals)
+    assert all(s.source != "gdelt" for s in signals)
+    assert any("gdelt" in rec.message.lower() for rec in caplog.records)
+    assert any("query too broad" in rec.message.lower() for rec in caplog.records)
+
+
+def test_gdelt_200_missing_article_list_is_dead_source() -> None:
+    from adapters.gdelt import GdeltSource
+
+    client = _client_for({"api.gdeltproject.org": httpx.Response(200, json={})})
+    with pytest.raises(RuntimeError, match="article"):
+        GdeltSource(client).fetch("skincare_in")
+
+
 def test_one_reddit_403_does_not_drop_the_other() -> None:
     from adapters.reddit_json import RedditJsonSource
 
@@ -239,10 +264,8 @@ def test_run_fetch_persists_signals(tmp_path, monkeypatch) -> None:
     assert stored == {s.url for s in signals}
 
 
-def test_post_radar_fetch_returns_signal_list(monkeypatch) -> None:
-    from main import app
-
-    fake = Signal(
+def _fake_signal() -> Signal:
+    return Signal(
         signal_id="abc",
         seen_at=datetime(2026, 8, 19, 10, 0, tzinfo=timezone.utc),
         happened_at=None,
@@ -252,7 +275,12 @@ def test_post_radar_fetch_returns_signal_list(monkeypatch) -> None:
         snippet="A snippet",
         query_id="skincare_in",
     )
-    monkeypatch.setattr("main.run_fetch", lambda: [fake])
+
+
+def test_post_radar_fetch_returns_signal_list(monkeypatch) -> None:
+    from main import app
+
+    monkeypatch.setattr("main.run_fetch", lambda: [_fake_signal()])
     response = TestClient(app).post("/radar/fetch")
     assert response.status_code == 200
     body = response.json()
@@ -260,6 +288,37 @@ def test_post_radar_fetch_returns_signal_list(monkeypatch) -> None:
     assert body[0]["url"] == "https://example.com/x"
     assert body[0]["market"] == "IN"
     assert body[0]["source"] == "gdelt"
+
+
+def test_radar_fetch_rate_limit(monkeypatch) -> None:
+    from main import app, reset_rate_limit
+
+    monkeypatch.setattr("main.run_fetch", lambda: [_fake_signal()])
+    reset_rate_limit()
+    client = TestClient(app)
+    for _ in range(6):
+        assert client.post("/radar/fetch").status_code == 200
+    limited = client.post("/radar/fetch")
+    assert limited.status_code == 429
+    body = limited.json()
+    assert "error" in body
+    assert "stack" not in body.get("error", "").lower()
+    assert "trace" not in body.get("error", "").lower()
+    health = client.get("/health")
+    assert health.status_code == 200
+    assert health.json() == {"ok": True}
+
+
+def test_allow_radar_fetch_window() -> None:
+    from main import allow_radar_fetch, reset_rate_limit
+
+    reset_rate_limit()
+    t0 = 1_000_000.0
+    for i in range(6):
+        assert allow_radar_fetch("1.1.1.1", now=t0 + i) is True
+    assert allow_radar_fetch("1.1.1.1", now=t0 + 6) is False
+    assert allow_radar_fetch("2.2.2.2", now=t0 + 6) is True
+    assert allow_radar_fetch("1.1.1.1", now=t0 + 61) is True
 
 
 def test_default_sources_are_free_allowlist() -> None:
