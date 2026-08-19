@@ -62,6 +62,7 @@ class Draft(BaseModel):
     judge: dict | None
     rules: list[str]
     round: int
+    flag_human: bool = False
 
 
 class Decision(BaseModel):
