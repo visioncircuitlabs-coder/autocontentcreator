@@ -1,6 +1,6 @@
 # Box 4 — Brand Book (hardened)
 
-Status: ready for your yes / change. No app code. Radar (boxes 1–3) is locked.
+Status: **locked** (you said yes to all). Next boxes 5–17 written in the same pass. No app code.
 
 The soul of the brand, as a retrieval layer — not a PDF nobody opens, not a second wiki people forget to update.
 

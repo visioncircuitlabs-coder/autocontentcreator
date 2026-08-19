@@ -130,9 +130,9 @@
     <div class="desc">The single source of truth — built like Cerebras Knowledge, not like a wiki nobody updates. We ingest from the files brand and legal already live in, distill them, and let every agent <em>query</em> them with citations. Nothing creates without it.</div>
     <div class="row">
       <div class="card c-store" data-id="brandbook"><span class="tag">memory</span><h3>Brand Book</h3><p>Query with citations. Humans verify. Not a second wiki. Not the claims library.</p></div>
-      <div class="card c-store" data-id="facts"><span class="tag">memory</span><h3>Product Facts</h3><p>Ingredients, approved claims, forbidden claims ("cures", "heals").</p></div>
-      <div class="card c-store" data-id="trends"><span class="tag">memory</span><h3>Trend Reports</h3><p>What the radar found, scored and summarized.</p></div>
-      <div class="card c-store" data-id="track"><span class="tag">memory</span><h3>Track Record</h3><p>Past content + what got approved, rejected, and why.</p></div>
+      <div class="card c-store" data-id="facts"><span class="tag">memory</span><h3>Product Facts</h3><p>Claims as objects. Compare, don't ask "is this legal?" Harvest only on human approve.</p></div>
+      <div class="card c-store" data-id="trends"><span class="tag">memory</span><h3>Trend Reports</h3><p>Cited shelf that decays. A spike is not a brief until it's safe.</p></div>
+      <div class="card c-store" data-id="track"><span class="tag">memory</span><h3>Track Record</h3><p>Named human + reason. CTR never overrides a legal no.</p></div>
     </div>
   </div>
 
@@ -142,12 +142,12 @@
     <h2>Layer 3 · Content Factory — a state machine with agents inside</h2>
     <div class="desc">The conveyor belt is code. The workers on the belt are agents. Every piece moves left → right.</div>
     <div class="row">
-      <div class="card c-code" data-id="brief"><span class="tag">code</span><h3>1 · Brief Builder</h3><p>Assembles context: chosen trend + brand rules + past learnings. No AI.</p></div>
-      <div class="card c-agent" data-id="strategist"><span class="tag">agent</span><h3>2 · Strategist</h3><p>Turns the brief into campaign concepts &amp; angles.</p></div>
-      <div class="card c-agent" data-id="copywriter"><span class="tag">agent</span><h3>3 · Copywriter</h3><p>Writes captions, hooks, hashtags in brand voice.</p></div>
-      <div class="card c-agent" data-id="artdirector"><span class="tag">agent</span><h3>4 · Art Director</h3><p>Designs the visual: prompt, layout, image generation.</p></div>
-      <div class="card c-judge" data-id="judge"><span class="tag">AI-in-a-box</span><h3>5 · Compliance Judge</h3><p>Fixed rubric: claims check, regulatory rules, brand safety. Verdict + reasons.</p></div>
-      <div class="card c-code" data-id="hardrules"><span class="tag">code</span><h3>6 · Hard Rules</h3><p>Banned-word list, required disclaimers, format checks. Zero AI — cannot be sweet-talked.</p></div>
+      <div class="card c-code" data-id="brief"><span class="tag">code</span><h3>1 · Brief Builder</h3><p>Code packs trend + claims + 3 wins + 3 losses. Agents do not hunt context.</p></div>
+      <div class="card c-agent" data-id="strategist"><span class="tag">agent</span><h3>2 · Strategist</h3><p>Grid: angle × persona × claim-safe pain × channel × Indic register.</p></div>
+      <div class="card c-agent" data-id="copywriter"><span class="tag">agent</span><h3>3 · Copywriter</h3><p>Examples + rules while writing. Filter then rank. 2–3 variants to the Judge.</p></div>
+      <div class="card c-agent" data-id="artdirector"><span class="tag">agent</span><h3>4 · Art Director</h3><p>AI paints unlocked zones. Code locks logo, type, disclaimer.</p></div>
+      <div class="card c-judge" data-id="judge"><span class="tag">AI-in-a-box</span><h3>5 · Compliance Judge</h3><p>Compare to the claims library. Flag and fix. Second judge on health lines.</p></div>
+      <div class="card c-code" data-id="hardrules"><span class="tag">code</span><h3>6 · Hard Rules</h3><p>Gazette lists and #ad in code. No model. ASCI label tree as a toggle.</p></div>
     </div>
     <div class="loopband" data-id="looper">🔁 <span><b>The improvement loop:</b> if the Judge rejects a draft, it goes back to the Copywriter / Art Director with the reasons — <b>maximum 3 rounds</b>, then it either passes or gets flagged for you. <u>Click to see why this cap matters.</u></span></div>
   </div>
@@ -158,9 +158,9 @@
     <h2>Layer 4 · Command Center — humans in charge</h2>
     <div class="desc">Your dashboard. The machine proposes; you dispose.</div>
     <div class="row">
-      <div class="card c-human" data-id="review"><span class="tag">human</span><h3>Review &amp; Approve</h3><p>See drafts with the trend that inspired them and the compliance verdict. Approve, reject, or comment.</p></div>
-      <div class="card c-code" data-id="export"><span class="tag">code</span><h3>Preview &amp; Export</h3><p>Pixel-perfect Instagram/LinkedIn previews. Export packs. (Real publishing: later.)</p></div>
-      <div class="card c-code" data-id="feedback"><span class="tag">code</span><h3>Feedback Writer</h3><p>Your rejections + reasons are written back into the Brand Brain's track record.</p></div>
+      <div class="card c-human" data-id="review"><span class="tag">human</span><h3>Review &amp; Approve</h3><p>Builder cannot approve. Last yes on publish/send/spend. 100% human on benefit claims.</p></div>
+      <div class="card c-code" data-id="export"><span class="tag">code</span><h3>Preview &amp; Export</h3><p>Preview. Export paused. Expire is a button. Prove time-to-dark.</p></div>
+      <div class="card c-code" data-id="feedback"><span class="tag">code</span><h3>Feedback Writer</h3><p>Reason required. Distill same day. CTR cannot undo a legal no.</p></div>
     </div>
     <div class="note">↩ That last box closes the loop: every approval or rejection makes tomorrow's drafts better. That's the "machine that learns" part.</div>
   </div>
@@ -234,7 +234,7 @@ const DETAILS = {
   },
   facts: {
     type:'store', tname:'🗄️ memory · legally loaded', title:'Product Facts',
-    desc:'The compliance source of truth: what each product IS and what may legally be said about it. The most protected data in the whole machine.',
+    desc:'What we may legally say — objects, not vibes. Compare copy to the library. Harvest only on human approve. Hardened Aug 19.',
     steps:[
       'Each product: ingredients, benefits, usage instructions.',
       'The claims matrix — the crown jewel: every marketing claim mapped to its status: ✅ approved ("dermatologist tested"), ⚠️ conditional (needs a disclaimer), ❌ forbidden ("cures acne" — that’s a drug claim).',
@@ -242,18 +242,18 @@ const DETAILS = {
       'The Compliance Judge checks every draft against this matrix, line by line — exact string match for the claim, plus meaning-check for lookalikes.',
       'Retired claims age-decay to zero so a 2019 line cannot sneak back in. Only humans (ideally with legal sign-off) can edit the matrix. Every change is logged.'
     ],
-    notes:[['Why this design','Compliance lives in DATA, not in AI vibes. Update the matrix once, and every future draft obeys — no retraining, no hoping.']]
+    notes:[['Why this design','Compliance lives in DATA, not in AI vibes. Update the matrix once, and every future draft obeys — no retraining, no hoping.'],['Forbidden','“AI, is this legal?” Buying Veeva for a beauty pilot. AdCompliance.in as clearance.']]
   },
   trends: {
     type:'store', tname:'🗄️ memory', title:'Trend Reports',
-    desc:'The radar’s output shelf — what’s happening in the world, pre-digested for creation.',
+    desc:'Cited shelf that decays. A spike is not a brief until it is on-brand and not an adverse-event story. Hardened Aug 19.',
     steps:[
       'Every deep-dive report is stored with its score, sources, and suggested angles.',
       'Reports decay: a trend from 3 weeks ago automatically loses priority — freshness is baked into the ranking.',
       'The dashboard shows this shelf as your "what’s hot" feed.',
       'When you press "create from this trend", the report becomes the seed of the brief.'
     ],
-    notes:[['Why decay matters','Nothing is more embarrassing than a brand jumping on a trend two weeks late. The machine forgets on purpose.']]
+    notes:[['Why decay matters','Nothing is more embarrassing than a brand jumping on a trend two weeks late. The machine forgets on purpose.'],['Forbidden','Evergreen trend wiki. Cloning Xiaohongshu winners as copy. Consumer slang used as a claim.']]
   },
   track: {
     type:'store', tname:'🗄️ memory · the learning organ', title:'Track Record',
@@ -265,30 +265,30 @@ const DETAILS = {
       'It also pulls relevant rejections: "avoid this — it was rejected because X."',
       'Over months this becomes the moat: a taste-memory no competitor can copy, because it’s made of YOUR decisions.'
     ],
-    notes:[['The founder insight','The machine doesn’t learn by magic. It learns because rejections carry reasons. One-click rejects teach nothing — the UI will nudge for a reason every time.']]
+    notes:[['The founder insight','The machine doesn’t learn by magic. It learns because rejections carry reasons. One-click rejects teach nothing — the UI will nudge for a reason every time.'],['Forbidden','Comments that die at publish. Silent “learning approval patterns.” CTR overriding a legal no.']]
   },
   brief: {
     type:'code', tname:'⚙️ code', title:'Brief Builder',
     desc:'The factory’s prep station. Before any agent creates anything, code assembles a complete, consistent briefing pack. Deterministic — same inputs, same brief, every time.',
     steps:[
       'You pick a trend (or ask for a campaign on a theme).',
-      'Code gathers: the trend report + brand voice rules + the claims matrix for featured products + 3 past winners + format specs (e.g. "Instagram carousel, 5 slides").',
+      'Code gathers: the trend report + brand voice slice + the claims matrix for featured products + 3 past winners + 3 rejections + format specs (e.g. "Instagram carousel, 5 slides").',
       'It assembles one structured brief document — the same shape every time.',
       'Every agent downstream works from THIS brief only. No agent goes hunting for context on its own.'
     ],
-    notes:[['Why code, not AI','A predictable brief means reproducible quality and testable behavior. This is where most amateur AI pipelines go wrong — they let agents gather their own context and get chaos.']]
+    notes:[['Why code, not AI','A predictable brief means reproducible quality and testable behavior. This is where most amateur AI pipelines go wrong — they let agents gather their own context and get chaos.'],['Forbidden','Blank-prompt “write a campaign.” Agents hunting their own context.']]
   },
   strategist: {
     type:'agent', tname:'🤖 agent', title:'Strategist',
     desc:'The idea person. Takes one brief and explores the creative space: what are the different ways this brand could ride this trend?',
     steps:[
       'Reads the brief (trend + brand + history).',
-      'Generates 3–5 distinct campaign concepts — not variations of one idea, but genuinely different angles (educational, playful, myth-busting, user-story…).',
+      'Generates a grid, not one idea: angle × claim-safe pain × persona × channel × Indic register (pure Hindi / Hinglish / Roman). Disease names are not pain axes.',
       'For each: the core idea, the hook, why it fits both trend and brand, and suggested formats.',
       'For campaign-pack requests: also a mini content calendar (post 1, post 2, post 3…).',
       'Concepts go to you OR straight to the Copywriter, depending on the mode you chose.'
     ],
-    notes:[['Why an agent','Idea generation is exactly where you WANT exploration and surprise. Constraining this into a fixed script would give you beige content.']]
+    notes:[['Why an agent','Idea generation is exactly where you WANT exploration and surprise. Constraining this into a fixed script would give you beige content.'],['Forbidden','PCOS/thyroid/diabetes pain grids. Competitor-ad clones. “No re-approval” after a tweak.']]
   },
   copywriter: {
     type:'agent', tname:'🤖 agent', title:'Copywriter',
@@ -296,11 +296,11 @@ const DETAILS = {
     steps:[
       'Takes one concept + the brand voice rules + past approved examples.',
       'Writes the caption: hook line, body, call-to-action, hashtags — tuned per platform (Instagram ≠ LinkedIn).',
-      'Produces 2–3 variants so there’s always a choice.',
-      'Self-checks against the voice rules before submitting.',
+      'Many candidates → filter then rank (Jacquard). 2–3 survivors go to the Judge.',
+      'Rules apply while writing, from examples, not adjectives.',
       'When the Compliance Judge sends a draft back, THIS agent does the rewrite, guided by the judge’s specific reasons.'
     ],
-    notes:[['Model choice','This is where the premium model earns its cost — voice fidelity is the product. Routine tasks elsewhere use cheaper models.']]
+    notes:[['Model choice','This is where the premium model earns its cost — voice fidelity is the product. Routine tasks elsewhere use cheaper models.'],['Forbidden','Buying Persado as Brand Brain. Unsubstantiated #1 / guaranteed.']]
   },
   artdirector: {
     type:'agent', tname:'🤖 agent', title:'Art Director',
@@ -312,7 +312,7 @@ const DETAILS = {
       'Applies brand elements deterministically IN CODE — logo placement, fonts, color overlays are done by a template engine, not by the image AI (AI still can’t reliably render your logo).',
       'Submits the composed visual with the copy as one draft.'
     ],
-    notes:[['The pro trick','Generated imagery + coded brand layer. Every serious brand-content system separates these — the AI makes the picture, code makes it ON-BRAND.']]
+    notes:[['The pro trick','Generated imagery + coded brand layer. Adobe’s real lock table has four modes. Cap Flux edits (~6 turns degrade).'],['Forbidden','Prompting the registered logo. CapCut/剪映 for the SVG. Recraft “generate logos.”']]
   },
   judge: {
     type:'judge', tname:'🧠 AI-in-a-box · fixed rubric', title:'Compliance Judge',
@@ -325,7 +325,7 @@ const DETAILS = {
       'Verdict: PASS, or FAIL with numbered, specific reasons — which is exactly what the Copywriter needs to fix it.',
       'High-risk drafts get a second, independent judge call — two AIs must agree before a health claim passes.'
     ],
-    notes:[['Never an agent','An agent "deciding what’s probably fine" is how brands end up in regulatory trouble. Fixed rubric + data-driven rules = auditable, defensible, sellable.'],['The moat','Fast content is a commodity. TRUSTED content is a product.']]
+    notes:[['Never an agent','An agent "deciding what’s probably fine" is how brands end up in regulatory trouble. Fixed rubric + data-driven rules = auditable, defensible, sellable.'],['The moat','Fast content is a commodity. TRUSTED content is a product.'],['Forbidden','One LLM “is this legal?” A 3-second scanner as clearance.']]
   },
   hardrules: {
     type:'code', tname:'⚙️ code · unbribable', title:'Hard Rules',
@@ -337,7 +337,7 @@ const DETAILS = {
       'Accessibility: alt-text present for every visual.',
       'Any failure = automatic bounce-back with the exact violation. No judgment involved, so no argument possible.'
     ],
-    notes:[['Why both this AND the Judge','The Judge understands meaning ("this implies a medical cure"). Hard Rules catch the literal ("the word ‘cures’ appears"). Belt and suspenders — auditors love the belt.']]
+    notes:[['Why both this AND the Judge','The Judge understands meaning ("this implies a medical cure"). Hard Rules catch the literal ("the word ‘cures’ appears"). Belt and suspenders — auditors love the belt.'],['ASCI AI labels','High = block (label does not cure). Medium = inject label. Low = log. Do not stamp every caption AI-generated.']]
   },
   looper: {
     type:'judge', tname:'🔁 loop · capped at 3', title:'The Improvement Loop',
@@ -349,7 +349,7 @@ const DETAILS = {
       'After 3 rounds without a pass: STOP. The draft is flagged to you with its history — "here’s what it kept failing on."',
       'A stubborn failure is usually a signal the CONCEPT is un-compliant, not the wording — exactly the thing a human should decide.'
     ],
-    notes:[['Why cap at 3','Uncapped AI loops burn money and rarely improve after round 3. Code enforces the stop — the agents don’t get a vote.'],['Industry name','This pattern is called "evaluator–optimizer" — the standard quality loop in modern AI systems.']]
+    notes:[['Why cap at 3','Uncapped AI loops burn money and rarely improve after round 3. Code enforces the stop — the agents don’t get a vote. Only the failed claim is rewritten.'],['Industry name','Evaluator–optimizer. Not CrewAI’s uncapped sample. Not LangGraph-as-the-whole-belt.']]
   },
   review: {
     type:'human', tname:'👤 human · final authority', title:'Review & Approve',
@@ -361,7 +361,7 @@ const DETAILS = {
       'Batch actions for speed — review a week of content in ten minutes.',
       'Every decision is recorded: who, when, why.'
     ],
-    notes:[['For the future SaaS','This is where a brand’s own approval chain plugs in later (marketer → brand manager → legal). The pilot keeps it simple: you.']]
+    notes:[['For the future SaaS','This is where a brand’s own approval chain plugs in later (marketer → brand manager → legal). The pilot keeps it simple: you.'],['Day one','100% human on benefit claims. Builder cannot approve. An agent is never the signature. 80/20 auto-approve is a later logged dial.']]
   },
   export: {
     type:'code', tname:'⚙️ code', title:'Preview & Export',
@@ -372,7 +372,7 @@ const DETAILS = {
       'A "campaign deck" view for showing a client: trend → insight → concept → posts, on one page.',
       'Real platform publishing (via official APIs) is a later slice — the machine’s value doesn’t depend on it.'
     ],
-    notes:[['Why previews matter','Demo quality lives here. A caption in a gray box is a tool; the same caption inside a perfect Instagram frame is a product.']]
+    notes:[['Why previews matter','Demo quality lives here. A caption in a gray box is a tool; the same caption inside a perfect Instagram frame is a product.'],['Export','Paused/draft only. Expire is a button. Prove time-to-dark. No publish-in-one-go inside the ESP.']]
   },
   feedback: {
     type:'code', tname:'⚙️ code · closes the loop', title:'Feedback Writer',
@@ -383,7 +383,7 @@ const DETAILS = {
       'These distilled learnings are injected into future briefs automatically.',
       'Trend outcomes flow back to the radar: trends that produced approved content get their sources boosted.'
     ],
-    notes:[['Why this is the moat','Month 1: a good content tool. Month 6: a machine tuned to one brand’s taste by hundreds of real decisions. THAT is what a competitor cannot copy.']]
+    notes:[['Why this is the moat','Month 1: a good content tool. Month 6: a machine tuned to one brand’s taste by hundreds of real decisions. THAT is what a competitor cannot copy.'],['Forbidden','One-click reject. CTR overriding a legal no.']]
   }
 };
 
