@@ -1,0 +1,61 @@
+{
+  "disclaimer": "UNOFFICIAL DEMO fixture — not Kenvue-approved. Neutrogena-like voice for Content Machine demos only.",
+  "brand": "Neutrogena (unofficial demo)",
+  "market_default": "IN",
+  "cards": [
+    {
+      "card_id": "voice-in-instagram",
+      "market": "IN",
+      "channel": "instagram",
+      "title": "IN Instagram voice",
+      "voice": "Warm, clear, science-backed without jargon. Hinglish ok for hooks; benefits stay plain English. Never joke about skin disease.",
+      "do": [
+        "Lead with skin feel and routine fit for Indian weather",
+        "Cite dermatologist-tested when the claim is approved",
+        "Keep CTA soft: try, explore, add to routine"
+      ],
+      "dont": [
+        "Never claim cures, heals, or #1 rankings",
+        "No competitor dunking",
+        "No medical advice or disease treatment language"
+      ],
+      "verify_state": "verified",
+      "expires_at": "2027-08-19T00:00:00+05:30",
+      "source_ref": "fixtures/neutrogena/brand.json#voice-in-instagram"
+    },
+    {
+      "card_id": "voice-in-linkedin",
+      "market": "IN",
+      "channel": "linkedin",
+      "title": "IN LinkedIn voice",
+      "voice": "Professional, evidence-first. Speak to pharmacists and derm partners. No slang.",
+      "do": [
+        "Lead with formulation facts and market fit",
+        "Use approved claim language only"
+      ],
+      "dont": [
+        "No consumer slang as a claim",
+        "No disease-cure framing"
+      ],
+      "verify_state": "verified",
+      "expires_at": "2027-08-19T00:00:00+05:30",
+      "source_ref": "fixtures/neutrogena/brand.json#voice-in-linkedin"
+    },
+    {
+      "card_id": "visual-in-default",
+      "market": "IN",
+      "channel": "*",
+      "title": "IN visual kit (all channels)",
+      "voice": "Clean clinical white + soft blue accents. Real skin tones. Logo clear-space locked in code.",
+      "do": [
+        "Composite logo.svg and disclaimer.txt in code, never in the image model"
+      ],
+      "dont": [
+        "Do not let the model redraw the logo or invent legal text"
+      ],
+      "verify_state": "verified",
+      "expires_at": "2027-08-19T00:00:00+05:30",
+      "source_ref": "fixtures/neutrogena/brand.json#visual-in-default"
+    }
+  ]
+}

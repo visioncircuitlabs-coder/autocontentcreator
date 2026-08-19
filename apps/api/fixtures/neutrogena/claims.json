@@ -1,0 +1,64 @@
+{
+  "disclaimer": "UNOFFICIAL DEMO claims — not Kenvue-approved. For Content Machine demos only. Do not ship as real legal copy.",
+  "brand": "Neutrogena (unofficial demo)",
+  "market_default": "IN",
+  "claims": [
+    {
+      "claim_id": "approved-derm-tested",
+      "text": "dermatologist tested",
+      "sku": "DEMO-HYDRO-BOOST",
+      "market": "IN",
+      "evidence_ref": "fixtures/neutrogena/claims.json#approved-derm-tested",
+      "status": "approved",
+      "expires_at": null,
+      "lookalikes": [
+        "dermatologist-tested",
+        "dermatologist–tested",
+        "derm tested"
+      ]
+    },
+    {
+      "claim_id": "forbidden-cures-acne",
+      "text": "cures acne",
+      "sku": "*",
+      "market": "IN",
+      "evidence_ref": "fixtures/neutrogena/claims.json#forbidden-cures-acne",
+      "status": "forbidden",
+      "expires_at": null,
+      "lookalikes": [
+        "cure acne",
+        "cures acne!",
+        "acne cure"
+      ]
+    },
+    {
+      "claim_id": "forbidden-heals",
+      "text": "heals",
+      "sku": "*",
+      "market": "IN",
+      "evidence_ref": "fixtures/neutrogena/claims.json#forbidden-heals",
+      "status": "forbidden",
+      "expires_at": null,
+      "lookalikes": [
+        "heal",
+        "healed",
+        "healing"
+      ]
+    },
+    {
+      "claim_id": "forbidden-number-one-sunscreen",
+      "text": "#1 sunscreen",
+      "sku": "*",
+      "market": "IN",
+      "evidence_ref": "fixtures/neutrogena/claims.json#forbidden-number-one-sunscreen",
+      "status": "forbidden",
+      "expires_at": null,
+      "lookalikes": [
+        "number 1 sunscreen",
+        "number one sunscreen",
+        "no.1 sunscreen",
+        "#1 sun screen"
+      ]
+    }
+  ]
+}
