@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Protocol
 
 from pydantic import BaseModel
@@ -13,3 +14,7 @@ class TrendSource(Protocol):
 
 class ChatModel(Protocol):
     def complete_json(self, system: str, user: str, schema: type) -> BaseModel: ...
+
+
+class ImageGen(Protocol):
+    def generate(self, prompt: str, out_path: Path) -> Path: ...
