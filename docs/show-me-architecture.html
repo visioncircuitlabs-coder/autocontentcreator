@@ -119,7 +119,7 @@
     <div class="row">
       <div class="card c-code" data-id="fetcher"><span class="tag">code · loop</span><h3>Source Fetcher</h3><p>Licensed social + GDELT news + official TikTok + schema extract. One signal shape. No scrape-the-web.</p></div>
       <div class="card c-judge" data-id="scorer"><span class="tag">AI-in-a-box</span><h3>Relevance Scorer</h3><p>Two cheap scores: brand-fit and velocity. Safety can kill a spike. 8+ wakes research.</p></div>
-      <div class="card c-agent" data-id="researcher"><span class="tag">agent</span><h3>Deep-Dive Researcher</h3><p>Only fires for hot trends (8+). Searches, reads, follows leads. Capped budget per run.</p></div>
+      <div class="card c-agent" data-id="researcher"><span class="tag">agent</span><h3>Deep-Dive Researcher</h3><p>Diamond: parallel workers + separate skeptic. Trusted sites only. Must file when the cap hits.</p></div>
     </div>
   </div>
 
@@ -210,15 +210,15 @@ const DETAILS = {
   },
   researcher: {
     type:'agent', tname:'🤖 agent · triggered & capped', title:'Deep-Dive Researcher',
-    desc:'The only part of the radar with real autonomy. When a trend scores 8+, this agent investigates like a junior strategist would — but inside strict limits.',
+    desc:'The only radar box that may wander. Diamond: split → parallel workers → separate skeptic → cited report. Hardened Aug 19 against the SOTA scorecard.',
     steps:[
-      'Receives one hot trend and the brand context.',
-      'Searches the web, reads the top sources, and — this is the agent part — decides what to look up next based on what it finds.',
-      'Compiles a Trend Report: what’s happening, why now, who’s driving it, content angles, and risks (is this trend controversial? fading?).',
-      'Hard caps enforced by code: max searches, max spend, max time. Then it MUST file its report.',
-      'Report lands in the Brand Brain’s Trend Reports shelf.'
+      'Fires only on a Scorer deep_dive (8+, not killed). One signal in. Brand slice is queried from the Brand Brain with citations — not the whole book pasted in.',
+      'A planner splits 3–5 angles. Workers read in parallel, trusted sites + the seed url only. The model that reads HTML cannot use tools.',
+      'A separate skeptic tries to kill each finding (wrong, stale, no real source). Survivors only.',
+      'Code caps searches, spend, and minutes. When the cap hits it MUST file, even if thin. Thin + sourced beats a loop that never stops.',
+      'Trend Report lands on the shelf: what / why now / who / angles (not copy) / risks / sources with url+hash. This box never starts the factory.'
     ],
-    notes:[['Cost','₹5–20 per deep-dive. Only runs a few times a day, only on winners.'],['The cage','The agent chooses its path; code chooses its limits. That combination is the whole trick of modern agent design.']]
+    notes:[['Cost','₹5–20 per dive. Only winners, a few times a day.'],['The cage','Workers choose the next click inside the allowlist. Code chooses the limits.'],['Forbidden','Open-web Deep Research on Gmail/Drive. Uncapped loops. Writer grading its own homework. Web pages as instructions.']]
   },
   brandbook: {
     type:'store', tname:'🗄️ memory', title:'Brand Book',
@@ -400,8 +400,9 @@ const INDUSTRY = {
     {who:"Cerebras Inference (the other Cerebras — chips, not the company brain)", conf:"high", note:"Same company, different product. Open models at ~3,000 tokens/sec for $0.35–0.75 per million tokens — roughly 10× cheaper than frontier models (live pricing verified Aug 2026). Right engine for high-volume scoring; wrong one for final brand copy. Never hard-wired — routed through a gateway. Their Knowledge system (the company brain) is cited on the Brand Brain cards, not here.", url:"https://www.cerebras.ai/pricing", linkTitle:"cerebras.ai/pricing"}
   ],
   researcher: [
-    {who:"Anthropic — 'Building Effective Agents'", conf:"high", note:"The industry's canonical design guide: grant real autonomy only when the number of steps can't be known in advance but progress can be verified. Deep-dive research is exactly that case — which is why this is one of only three agents in our whole machine.", url:"https://www.anthropic.com/engineering/building-effective-agents", linkTitle:"the canonical guide"},
-    {who:"storyarb (Alex Lieberman)", conf:"high", note:"Their only agent-like system (beta, Dec 2025) combs engagement data, enriches leads, drafts outreach — and still routes every draft through a human. Lieberman's public ladder: don't attempt autonomous agents ('Phase 4') until AI works inside single bounded steps first. Our capped researcher is deliberately Phase 2–3.", url:"https://thestandard.storyarb.com/p/alex-lieberman-says-youre-wrong-about-ai", linkTitle:"Lieberman interview (Dec 2025)"}
+    {who:"EXM7777 diamond + gpt-researcher", conf:"high", note:"Split → parallel workers → separate skeptic → merge. Same shape in a Jul 2026 operator article (~4k bookmarks) and in assafelovic/gpt-researcher (alive Jul 2026). We steal the shape. The skeptic is not optional.", url:"https://github.com/assafelovic/gpt-researcher", linkTitle:"gpt-researcher"},
+    {who:"Anthropic — Building Effective Agents", conf:"high", note:"Autonomy only when the path cannot be known in advance but progress can be checked. This is the one radar box that qualifies. Trusted-site Deep Research is allowed; mailbox/Drive-connected research is not.", url:"https://www.anthropic.com/engineering/building-effective-agents", linkTitle:"the canonical guide"},
+    {who:"DeerFlow caps (not the harness)", conf:"high", note:"ByteDance deer-flow (MIT, live): max sub-agents per run, sandbox, permission default off. We steal the numbers. We do not make DeerFlow the factory.", url:"https://github.com/bytedance/deer-flow", linkTitle:"bytedance/deer-flow"}
   ],
   brandbook: [
     {who:"Cerebras Knowledge (the company brain)", conf:"high", note:"Not their chips — their internal retrieval layer (write-up ~Jul 2026). They refused to build a new wiki. They ingest Slack/docs/code where knowledge already lives, distill it, and let humans AND agents query one index with citations. That is how this Brand Book is stored and read. 15k queries/day is vendor-published.", url:"https://www.cerebras.ai/blog/how-we-built-our-knowledge-base", linkTitle:"Cerebras Knowledge write-up"},

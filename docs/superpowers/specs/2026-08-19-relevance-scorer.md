@@ -1,6 +1,6 @@
 # Box 2 — Relevance Scorer (hardened)
 
-Status: ready for your yes / change. No app code. Source Fetcher is locked.
+Status: **locked** (you said yes). Next box is Deep-Dive Researcher. No app code.
 
 The bouncer. It reads a batch of signals and answers two cheap questions. It does not research, brief, or write.
 
