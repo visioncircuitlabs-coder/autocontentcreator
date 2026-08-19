@@ -1,0 +1,4 @@
+name: content-machine
+
+include:
+  - path: infra/docker-compose.yml

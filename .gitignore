@@ -6,6 +6,9 @@ worktrees/
 .claude/
 .firecrawl/
 .grok/
+.superpowers/
+.npm-cache/
+.pip-cache/
 
 # Secrets and local env
 .env
@@ -24,6 +27,11 @@ build/
 .mypy_cache/
 coverage/
 htmlcov/
+.next/
+out/
+*.tsbuildinfo
+*.db
+data/
 
 # OS / editor
 .DS_Store

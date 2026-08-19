@@ -1,0 +1,35 @@
+services:
+  api:
+    build:
+      context: ../apps/api
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      APP_ENV: ${APP_ENV:-development}
+      APP_TZ: ${APP_TZ:-Asia/Kolkata}
+      SQLITE_PATH: /data/demo.db
+      CHAT_MODEL: ${CHAT_MODEL:-gemini/gemini-2.0-flash}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      IMAGE_GEN_URL: ${IMAGE_GEN_URL:-}
+      IMAGE_GEN_KEY: ${IMAGE_GEN_KEY:-}
+      IMAGE_GEN_MODE: ${IMAGE_GEN_MODE:-stub}
+    env_file:
+      - path: ../.env
+        required: false
+    volumes:
+      - ../data:/data
+
+  web:
+    build:
+      context: ../apps/web
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+    depends_on:
+      - api

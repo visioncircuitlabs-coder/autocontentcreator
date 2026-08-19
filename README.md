@@ -2,7 +2,7 @@
 
 An always-on content system for regulated consumer brands (Kenvue-class: Neutrogena, Listerine, and siblings). It watches culture, drafts on-brand posts, blocks illegal claims, and learns from every human yes/no.
 
-**Status:** design locked. Two build plans: a free-tool **demo** (same 17 boxes) and a parked **production** swap-map.
+**Status:** demo shell is up. Same 17-box machine as production; boxes land in later tasks. Two plans: a free-tool **demo** and a parked **production** swap-map.
 
 - Demo: `docs/superpowers/plans/2026-08-19-demo.md`
 - Production (later): `docs/superpowers/plans/2026-08-19-production.md`
@@ -32,13 +32,38 @@ Every box is clickable. Each panel ends with who already ships a version of that
 | `private deck notes (not in this repo)` | What we take / reject from the reference pitch deck |
 | `docs/research/sota/2026-08-19-sota-scorecard.md` | Chosen process + tools per box (X + GitHub swarm, Aug 19) |
 
-## How we will run it (later)
+## How to run the demo shell
+
+Copy `.env.example` to `.env` (keys can stay empty). Then from the repo root:
 
 ```text
 docker compose up
 ```
 
-Nothing to start yet — there is no app until the spec is approved.
+- Command Center shell: http://localhost:3000
+- API health: http://localhost:8000/health → `{"ok": true}`
+
+SQLite will live at `./data/demo.db` on this machine. Compose mounts `./data` into the API container as `/data`.
+
+Without Docker (PowerShell, from this worktree):
+
+```text
+cd apps\api
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+pytest
+uvicorn main:app --reload --port 8000
+```
+
+```text
+cd apps\web
+npm install
+npm test
+npm run dev
+```
+
+Web talks to the API at `NEXT_PUBLIC_API_URL` (default `http://localhost:8000`).
 
 ## How we will deploy it (later)
 

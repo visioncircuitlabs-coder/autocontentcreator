@@ -4,23 +4,34 @@ CEO/product owner is not a developer. Explain what changed and why, not the plum
 
 ## Where we are
 
-Design stage. Do **not** scaffold the app, add UI frameworks, or write implementation code until the written design spec is reviewed and the user says to plan implementation.
+Demo scaffold is in. Empty machine: FastAPI health + Next.js shell. Do **not** add the 17 boxes or Command Center pages until the next plan tasks say so.
 
-Current artifacts live under `docs/`. The interactive map is `docs/show-me-architecture.html`.
+Architecture map: `docs/show-me-architecture.html`. Specs: `docs/superpowers/specs/`. Plans: `docs/superpowers/plans/`.
 
 ## Commands
 
-There is no app yet. When one exists:
+From the repo root:
 
 ```text
 docker compose up
-npm test          # or the project-equivalent once chosen
 ```
 
-Until then:
+API (from `apps/api`):
 
-- Open `docs/show-me-architecture.html` in a browser to review the architecture.
-- Keep everything on `D:\PROJECTS\autocontentcreator` (C: is full). Isolated work goes in `.worktrees/`.
+```text
+pytest
+uvicorn main:app --reload --port 8000
+```
+
+Web (from `apps/web`):
+
+```text
+npm test
+npm run build
+npm run dev
+```
+
+Keep everything on `D:\PROJECTS\autocontentcreator` (C: is full). Isolated work goes in `.worktrees/`.
 
 ## Conventions
 
@@ -40,7 +51,7 @@ Until then:
 - [ ] Did you avoid committing `.claude/`, `.firecrawl/`, `.env`, or any `.pptx`?
 - [ ] If you changed the architecture map, does every new box still have a "who already does this" reference or an explicit "ours, no industry twin" note?
 - [ ] If you added a computed value (score, ETA, brand score), is it shown, logged, or tested?
-- [ ] No app code until the design spec is signed off.
+- [ ] Did you leave the 17 boxes and Command Center pages to their own tasks?
 
 ## Gotchas
 
