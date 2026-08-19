@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+import json
 import os
 import sqlite3
 from pathlib import Path
 
-from models import Score, Signal
+from models import Score, Signal, TrendReport
 
 DEFAULT_SQLITE_PATH = "data/demo.db"
 
@@ -160,6 +161,40 @@ def upsert_scores(scores: list[Score]) -> None:
                     s.prompt_version,
                 )
                 for s in scores
+            ],
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def upsert_reports(reports: list[TrendReport]) -> None:
+    """Persist deep-dive rows. One report per report_id."""
+    init_db()
+    conn = connect()
+    try:
+        conn.executemany(
+            """
+            INSERT OR REPLACE INTO reports (
+                report_id, signal_id, what, why_now, who,
+                angles, risks, sources, skeptic, spent, capped_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            [
+                (
+                    r.report_id,
+                    r.signal_id,
+                    r.what,
+                    r.why_now,
+                    r.who,
+                    json.dumps(r.angles),
+                    json.dumps(r.risks),
+                    json.dumps(r.sources),
+                    r.skeptic,
+                    json.dumps(r.spent),
+                    r.capped_at,
+                )
+                for r in reports
             ],
         )
         conn.commit()
