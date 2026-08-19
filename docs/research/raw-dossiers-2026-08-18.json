@@ -1,0 +1,1212 @@
+{
+  "summary": "Research who has built working AI content machines for brands; fact-check each finding",
+  "agentCount": 20,
+  "logs": [
+    "10/10 dossiers completed and verified"
+  ],
+  "result": {
+    "dossiers": [
+      {
+        "key": "adobe-genstudio",
+        "dossier": {
+          "name": "Adobe GenStudio",
+          "category": "enterprise",
+          "what_they_built": "Adobe GenStudio is Adobe's flagship \"content supply chain\" for big brands: one connected system where teams plan campaigns, store approved assets, mass-produce ad and email variants with AI inside pre-approved brand templates, score every asset against brand guidelines, route it through human legal and creative approval, and publish straight to Meta, TikTok, Google, Amazon, CTV, and even ChatGPT ads. In April 2026 they added \"Brand Intelligence,\" which turns uploaded brand guidelines plus every human approval, rejection, and annotation into a continuously-updated brand knowledge base that both the AI generators and the automated brand checks draw from. It is a live, heavily-promoted product with named Fortune 500 users — the strongest existing proof that big brands will pay for a trend-speed-plus-compliance content machine, and also the incumbent any startup in this space must differentiate against.",
+          "proof_points": [
+            "Customer logos on the GenStudio page: Coca-Cola, Pfizer, IBM, Kate Spade, Newell, Estee Lauder, Coach, Lenovo, Kinesso (IPG agency), JLL, Lumen - heavy CPG/consumer presence, though logos alone do not prove production depth",
+            "Lumen Technologies named case study with VP-level quote: '35x more content, 65% faster... reacting to trends in real time' using GenStudio for Performance Marketing",
+            "Adobe's own marketing org cut creative cycles from 3 weeks to 3 days and produced tens of thousands of assets for a single campaign - GenStudio was productized from this internal use",
+            "Adobe press claims: roughly 90% of Adobe's top 50 enterprise accounts have adopted at least one AI-first offering (GenStudio for Performance Marketing, Firefly Services); '20,000+ global brands' on Adobe overall",
+            "Coca-Cola co-developed Firefly Design Intelligence with Adobe ('StyleIDs' that translate brand guidelines into automated design systems); Estee Lauder named as using Firefly and GenStudio to shorten campaign launch times",
+            "Xfinity (Comcast) Chief Growth Officer quoted in the April 2026 Brand Intelligence launch as embedding it into marketing workflows",
+            "Ecosystem partnerships announced 2025-2026: OpenAI (ChatGPT Ads channel), NVIDIA (3D product digital twins), ad delivery integrations with Meta, TikTok, LinkedIn, Google CM360, Amazon Ads, YouTube, Pinterest, Reddit, The Trade Desk"
+          ],
+          "architecture_insights": [
+            "Two-zone generation model: creative teams build brand-approved templates in Adobe Express that define exactly which elements are editable, swappable, or locked; marketers can only generate inside the unlocked zones, so every variant arrives on-brand by construction, not by hoping the model behaves",
+            "Regulated text is never generated: 'approved content fragments' (word-for-word claims, disclaimers, citations) are pulled from the Experience Manager DAM and inserted post-generation as locked verbatim blocks - the AI writes around them, never through them",
+            "Automated brand check layer: brands upload guidelines (voice, tone, channel rules; an AI assistant detects conflicts within the guidelines themselves), then every generated asset gets a brand score based on those rules plus high-performing benchmarks, before any human sees it",
+            "Human review is a first-class pipeline stage, not an afterthought: built-in approval workflows route assets through creative, legal, and marketing ops; Workfront integration adds version comparison, comments, and annotations; compliance workflows cover channel rules, ADA accessibility testing of generated content, and validation against disclosure libraries",
+            "Brand memory ('Brand Intelligence', April 2026): a structured brand ontology that continuously learns from review-cycle feedback, annotations, rejections, and approvals - converting human judgment into machine-usable brand knowledge that agents and validators consume",
+            "Multi-model by modality with BYO option: copy via Azure OpenAI and WRITER Palmyra, images via Firefly Image Model 5 and Google Nano Banana, video via Veo, voiceover via ElevenLabs, or route through your own hosted models",
+            "Locked production workflows: creative teams pre-build and approve asset-adaptation pipelines in Firefly Creative Production; marketers just apply them to approved assets and outputs land in the DAM - scale comes from parameterizing pre-approved pipelines, not free generation",
+            "Closed performance loop: automated ad tagging from naming conventions, cross-channel dashboards, 'performance signals' that alert when ads fatigue, and a coming 'next best creative' feature that turns performance data into new variants in one click",
+            "Agents are layered on top of the structured foundation (metadata, DAM, review workflows), acting as 'permissioned collaborators' for brief synthesis and workflow routing (Workfront's Workflow Optimization Agent) - not autonomous creators"
+          ],
+          "lessons_for_us": [
+            "Compliance is the product, not a feature bolted on: Adobe's entire pitch to CPG brands is guardrails (locked templates, verbatim disclaimers, brand scores, legal routing) - generation itself is commoditized across third-party models they happily resell",
+            "Solve trend speed by pre-approving the container, not fast-tracking the approval: their 'in-moment marketing' (content in hours, not weeks) works because templates, disclaimers, and production workflows were approved in advance - per-trend, only the variant inside the unlocked zones is new, so nothing waits on legal",
+            "Never generate regulated text - inject it: keep claims and disclaimers as locked, versioned, word-for-word fragments inserted after generation; this converts an unsolvable LLM-reliability problem into a simple templating problem",
+            "Score before humans see it: an automated brand check that grades every asset against uploaded guidelines makes human review a fast yes/no on pre-filtered content instead of a bottleneck - and the score doubles as a customer-visible trust signal",
+            "Treat every approval and rejection as training data: Adobe's newest bet (Brand Intelligence) is that the durable moat is a brand memory built from accumulated human review decisions - our system should log and structure reviewer feedback from day one, even before we use it",
+            "Close the loop with performance: fatigue alerts and 'refresh this underperforming ad' signals feeding back into generation is what turns a content tool into a growth engine - it is also the part Lumen's quote celebrates",
+            "Positioning gap for us: GenStudio is a sprawling multi-product enterprise suite sold via consultations to Fortune 500s; a focused, affordable, fast-onboarding version of the same architecture (template guardrails + brand score + approval routing + trend triggers) for mid-market and Indian brands is exactly the space Adobe's pricing and complexity leaves open",
+            "Multi-model routing is table stakes: pick the best model per modality (copy/image/video/voice) and let customers bring their own - do not marry one provider"
+          ],
+          "loops_vs_agents": "Adobe's design is a strong vote for deterministic pipelines with agents at the edges. The content production core is essentially a constrained loop: pre-approved template in, variants generated only in unlocked zones, verbatim compliance fragments injected, automated brand score, human approval gate, publish, watch performance, regenerate. Nothing creative-critical is left to autonomous agent judgment. Agents appear only where Adobe has first built structure for them to stand on - a brand ontology, metadata, DAM, and formal review workflows - and even then they act as \"permissioned collaborators\" doing orchestration work (synthesizing briefs, routing tasks, suggesting workflow optimizations, flagging refreshes), with humans still owning approval. The April 2026 press language is explicit that reliable agentic workflows require \"unifying the underlying foundation of enterprise context\" first. Translation for us: build the deterministic loop with hard guardrails and human gates first; add agents later for planning and routing, not for unsupervised brand-facing output.",
+          "key_links": [
+            {
+              "title": "Adobe GenStudio overview (customer logos, Brand Intelligence, six-pillar architecture)",
+              "url": "https://business.adobe.com/products/genstudio.html"
+            },
+            {
+              "title": "GenStudio for Performance Marketing (Lumen 35x case study, use cases, multi-model)",
+              "url": "https://business.adobe.com/products/genstudio/performance-marketing.html"
+            },
+            {
+              "title": "Brand governance feature page (brand scoring, approval routing, compliance workflows)",
+              "url": "https://business.adobe.com/products/genstudio/performance-marketing/brand-compliance.html"
+            },
+            {
+              "title": "Adobe blog: From campaigns to continuous performance (locked templates, approved fragments, full innovation list)",
+              "url": "https://business.adobe.com/blog/from-campaigns-to-continuous-performance"
+            },
+            {
+              "title": "Adobe press release, April 2026: Brand Intelligence launch (ontology, learning from approvals/rejections, Xfinity, OpenAI, NVIDIA)",
+              "url": "https://news.adobe.com/news/2026/04/adobe-introduces-brand-intelligence"
+            },
+            {
+              "title": "Adobe press release, June 2025: GenStudio video/display ad expansion",
+              "url": "https://news.adobe.com/news/2025/06/adobe-expands-genstudio-with-suite-ai-powered-innovations"
+            },
+            {
+              "title": "Lumen Technologies customer story",
+              "url": "https://business.adobe.com/customer-success-stories/lumen.html"
+            },
+            {
+              "title": "Adobe Brand Intelligence product page",
+              "url": "https://business.adobe.com/products/brand-intelligence.html"
+            }
+          ]
+        },
+        "verdict": {
+          "credible": true,
+          "evidence": "Strongest independent evidence: Adobe Experience League product documentation shows shipped, operational features — a 'Create a ChatGPT Ad Experience' user guide describes the exact pipeline the dossier claims (guidelines/assets → generation → brand and channel checks → approval → publish → activation in the same flow as Meta/Google CM360), proving the compliance-gated architecture is a working product, not marketing copy. This is corroborated by independent trade press (destinationCRM coverage of Adobe MAX confirming Firefly Image Model 5 and ElevenLabs partner models), the verbatim April 20, 2026 Adobe Summit press release for Brand Intelligence (including the Xfinity quote and the 'unifying the underlying foundation of enterprise context' language), a Feb 9, 2026 Adobe blog confirming the OpenAI ChatGPT ads pilot with WPP, and a June 2025 Adobe press release plus named case study for Lumen. Continued releases through June 2026 (GenStudio for Commerce Media Networks) confirm the product is live and actively expanding.",
+          "corrections": [
+            "The April 2026 Brand Intelligence launch was partly forward-looking: the press release uses future tense throughout ('will provide a continuously-learning engine', 'will enable teams') and some capabilities (e.g., instruction access natively within creative tools, the campaign brief canvas, the June 2026 Simulate Skill) were announced as 'coming soon' — the dossier's framing that all of this was 'added' in April 2026 overstates what had shipped at announcement time.",
+            "Lumen's '35x more content, 65% faster' is vendor-published customer testimony on Adobe's own pages, not an independent measurement, and other tellings of the same story give different figures (LinkedIn summaries say 'tripled content production speed'; Adobe's June 2025 press release says campaign launch time fell from 25 days to 9 days). Real customer, real quotes — but the specific multipliers are unaudited marketing metrics.",
+            "The ChatGPT ads channel is shipped inside GenStudio (documented in the user guide), but ads in ChatGPT itself were still an OpenAI pilot as of Feb 2026 — Adobe was running its own ads (Acrobat Studio, Firefly) via WPP as a test partner, so 'publish straight to ChatGPT ads' describes a pilot-stage channel, not a generally available one.",
+            "The Xfinity quote in the April 2026 release is confirmed verbatim, but I could not verify the 'Chief Growth Officer' title attribution from the fetched content — treat the exact title as unconfirmed.",
+            "The '90% of top 50 enterprise accounts' and '20,000+ global brands' figures were not independently checked; the dossier correctly labels them as Adobe press claims, and they should be treated as such."
+          ],
+          "confidence": "high"
+        }
+      },
+      {
+        "key": "writer",
+        "dossier": {
+          "name": "Writer (writer.com)",
+          "category": "enterprise",
+          "what_they_built": "Writer is a full-stack enterprise AI platform (own Palmyra models, a graph-based knowledge store, no-code and Python app builders) that big brands use to generate and police marketing content. Their Product Claims Checker is deliberately simple: you upload your copy plus a document of pre-approved claims, and the AI marks which claims in the copy are approved and which are not — the free version is a standalone web tool, and the enterprise version plugs into PIM systems and applies your brand guidelines and risk rules automatically. Their retail/CPG pitch is speed with guardrails: generate product pages, ads, and campaigns at scale while brand, legal, and regulatory checks run inside the workflow instead of in a weeks-long legal review queue.",
+          "proof_points": [
+            "$200M Series C at a $1.9B valuation (Nov 2024, Iconiq-led per their blog); ~$369M total raised per Tracxn's 2026 profile; earlier press cited tripled revenue and 250+ enterprise customers",
+            "Named customers on their own pages: American Eagle, Vanguard, Salesforce, Qualcomm, Uber, Accenture, Hilton, Ally, Dropbox, KPMG, Intuit, Mars, E.L.F. Beauty, Adore Me, Curology, EE (BT Group), Vodafone UK",
+            "CPG/health/beauty specifics: Curology (dermatology/skincare) case study claims 50% productivity gain 'while maintaining accuracy and compliance for dual brands'; E.L.F. Beauty and Mars named as customers; an unnamed 'major health and wellness retailer' claims $80M annual savings across 24 brands (marketing claim, no named source)",
+            "Retail metrics (vendor-reported): American Eagle shifted 40% of media spend to AI with double-digit productivity gains (webinar with their CMO); EE scaled content for 4,500+ products with a named exec quote; Vodafone UK +30% search rankings; unnamed Fortune 100 retailer $50M net-sales-value uplift and 65% lower cost per SKU (unverifiable, no named customer)",
+            "Product Claims Checker is live in production as a free public agent (running on their Palmyra X4 model) plus an enterprise tier — this is a shipped product, not a demo"
+          ],
+          "architecture_insights": [
+            "Claims compliance is a comparison, not a judgment call: the checker's ground truth is a customer-supplied 'claims library' document of pre-approved claims, and the model's job is to match copy against it and flag deviations — auditable, defensible, and much easier to trust than asking an LLM 'is this legal?'",
+            "Compliance runs at generation time, not just review time: brand guidelines, custom voices, and approved messaging are loaded once and applied by default to all outputs, so drafts arrive at legal nearly clean; separate check agents then validate retailer specs, legal claims, and required fields post-draft",
+            "Human-in-the-loop is explicit and final for regulated content: their own delivery team says 'you always, always have that human in the loop... that final ability of control' — AI compresses the review cycle (their poll: 54% of teams waited weeks, 18% months) but never removes the sign-off gate",
+            "Their method is workflow surgery, not agent magic: map the existing end-to-end process, find the bottleneck loops (usually marketing-legal ping-pong), then insert AI at specific touchpoints of that mapped workflow",
+            "Vision models check images too: product imagery can be uploaded and checked for claim compliance (e.g., FDA-relevant claims on packaging), and the enterprise version connects to PIM systems so checks run against actual product data",
+            "They ship a library of narrow single-purpose agents (claims check, PDP copy, alt text, reading-level check) rather than one omni-agent; domain-specific models (Palmyra Med, Palmyra Fin) back the regulated verticals, and they publish an 'agentic AI governance playbook' about supervision and observability",
+            "GTM architecture worth noting: the free claims checker doubles as lead capture; enterprise upsell = integrations (PIM/retail stack connectors) + persistent brand memory + compliance analytics"
+          ],
+          "lessons_for_us": [
+            "Build a claims library as a first-class asset: a curated, versioned document of pre-approved claims per brand. Your compliance check becomes 'does this copy only use approved claims?' — a bounded matching task an LLM does reliably — instead of the unbounded 'is this compliant?' question",
+            "Enforce brand and compliance rules at generation time (system prompt / guardrails baked into the drafting step), then run a separate checker pass on the output. Two cheap deterministic gates beat one expensive human review, and the human gate stays for final sign-off on regulated claims",
+            "Ban-list the superlatives: their own guidance flags 'best', 'only', 'guaranteed', 'completely' as legal landmines and prefers qualified language ('clinically shown to', 'up to X%'). A simple lint-style rule layer catches most of this before the model even sees it",
+            "Check visuals, not just text — claims live on packaging, thumbnails, and ad creative. A vision-model pass over generated or uploaded images is a real differentiator Writer already sells",
+            "Sell speed as the benefit and compliance as the enabler: Writer's whole pitch to brands is 'launch as fast as competitors without legal purgatory'. Their proof metrics (4x output, 50-70% time saved, cost per SKU down 65%) are the language buyers respond to",
+            "Narrow agents win trust: a claims checker that takes two inputs and returns a marked-up report is demoable, explainable, and free-tier-able. Writer uses exactly this as top-of-funnel for the enterprise platform — a viable GTM shape for a smaller player too",
+            "Beauty/health CPG is a proven wedge: Curology and E.L.F. show regulated consumer brands will pay for compliance-guarded content at scale — that segment feels the marketing-vs-legal bottleneck most acutely"
+          ],
+          "loops_vs_agents": "Writer's production design is strongly on the deterministic-loop end despite 'agent' branding. Their compliance products are fixed-shape pipelines: defined inputs (copy + claims library, or copy + style guide), one model pass with pre-loaded guardrails, structured flag-and-recommend output, human final approval. Their implementation methodology is literally 'map the existing workflow, then insert AI at specific steps' — AI slots into a human-designed loop rather than autonomously deciding what to do. Even their forward-looking agentic content (governance playbook, 'agentic AI coming to our platform') frames autonomy as something to be supervised and observable, added incrementally to eliminate steps in known workflows. The implicit lesson: for regulated brand content at enterprise scale, constrained pipelines with source-of-truth documents and human sign-off gates are what ships and sells; open-ended autonomous agents are the roadmap slide, not the deployed product.",
+          "key_links": [
+            {
+              "title": "Product Claims Checker agent (free tool + enterprise pitch)",
+              "url": "https://writer.com/agents/product-claims-check/"
+            },
+            {
+              "title": "Writer for Retail & Consumer (customer spotlights, agent capabilities)",
+              "url": "https://writer.com/solutions/retail/"
+            },
+            {
+              "title": "Generative AI in regulated industries (compliance workflow method, HITL stance)",
+              "url": "https://writer.com/blog/generative-ai-regulated-industries/"
+            },
+            {
+              "title": "Curology customer story (beauty/derm compliance case)",
+              "url": "https://writer.com/blog/curology-customer-story/"
+            },
+            {
+              "title": "Series C announcement ($200M at $1.9B valuation)",
+              "url": "https://writer.com/blog/series-c-funding-writer/"
+            },
+            {
+              "title": "Writer newsroom (funding and customer press)",
+              "url": "https://writer.com/newsroom/"
+            },
+            {
+              "title": "Agentic AI governance playbook",
+              "url": "https://writer.com/guides/agentic-ai-governance/"
+            }
+          ]
+        },
+        "verdict": {
+          "confidence": "high",
+          "corrections": [
+            "Series C was co-led by Premji Invest, Radical Ventures, and ICONIQ Growth (with Adobe Ventures, B Capital, Citi Ventures, IBM Ventures, Salesforce Ventures, Workday Ventures participating) — not 'Iconiq-led'; even Writer's own press release says co-led, so the dossier misreads its cited source",
+            "The ~$369M total-raised figure is an unverified Tracxn number; disclosed rounds (seed + $21M A + $100M B + $200M C) sum closer to ~$326M — treat $369M as secondary-source, not confirmed",
+            "Several 'named customers' are also investors (Accenture, Salesforce, Adobe, IBM, Citi, Workday all participated in funding rounds), so those logos are weaker independent proof than the dossier implies",
+            "The retail metrics (American Eagle 40% media spend, Vodafone +30%, $80M savings, $50M NSV uplift) are entirely vendor-reported with no independent corroboration found — the dossier flags this but they should be treated as marketing claims, not proof points",
+            "Minor staleness: Palmyra X4 does still back the free claims checker per the live page, but Writer's current flagship is Palmyra X6 (launched 2026 per VentureBeat), and the company now brands itself as an 'enterprise AI agent platform' — the dossier's model/positioning snapshot is slightly dated"
+          ],
+          "credible": true,
+          "evidence": "The Product Claims Checker page is live as of today (Aug 2026) and matches the dossier's description exactly ('Check product copy against a list of approved claims', Palmyra X4); the $200M Series C at $1.9B (Nov 12, 2024) is confirmed by TechCrunch; and independent 2026 press (VentureBeat's Palmyra X6 launch coverage) confirms Writer is actively operating with Fortune 500 customers including Accenture, Uber, and Vanguard, with Accenture's own newsroom corroborating the relationship."
+        }
+      },
+      {
+        "key": "typeface",
+        "dossier": {
+          "name": "Typeface (typeface.ai)",
+          "category": "enterprise",
+          "what_they_built": "Typeface, founded in 2022 by ex-Adobe CTO Abhay Parasnis, is an enterprise \"marketing orchestration engine\": big companies feed it their brand rules, and its AI agents then plan, draft, review, and publish on-brand emails, ads, webpages, images, and video at scale. By 2026 it has pivoted its story from \"generate content\" to \"orchestrate entire campaigns with agents\" — the Arc platform bundles a brand-knowledge layer (Arc Graph), channel-specific agents (Arc Agents), a shared workspace with reviews and approvals (Arc Spaces), and a custom-agent builder (Arc Forge). It is clearly alive and thriving, not fading — new product GA announced on CNBC in March 2026 and a booth at Dreamforce '26.",
+          "proof_points": [
+            "Funding: launched from stealth Feb 2023 with $65M (Lightspeed, Menlo Ventures, M12, Google Ventures), then $100M Series B in June 2023 — $165M total at a reported ~$1B valuation",
+            "Customer/partner logo bar on the live 2026 homepage: Asics, Johnson Controls, Medibank, Sally Beauty, Firstsource, Cognizant, TradeStation, State Farm, AB InBev, P&G, plus Google, Microsoft, Salesforce, Sequoia (some of these are partners/investors rather than pure customers)",
+            "Third-party estimates (GetLatka, Nov 2025): ~$34.3M ARR in 2025 (up from ~$8M in 2023), ~247 employees — estimates, not company-confirmed",
+            "Production usage claim (company blog): 'more than 90% of our enterprise customers across the Fortune 500' use Arc Agents; case study of a national home goods supplier generating personalized copy for 500+ local service pages in nine business days",
+            "Momentum through 2026: Multimodal Content Hub GA + TensorTour video acquisition (Jan 2024), Brand Hub & Brand Agent launch (Mar 2025), Marketing Orchestration Engine GA announced on CNBC (Mar 2026), exhibiting at Dreamforce 2026"
+          ],
+          "architecture_insights": [
+            "Brand memory is a dedicated data layer, not a prompt: Arc Graph stores brand guidelines, voice, tone, visual identity, approved layouts, and audience/persona data, and every generation is grounded in it — this is the evolution of their original 'Brand Hub'",
+            "Channel-specific agents instead of one general agent: dedicated agents for Email, Web, Ads, Images, Video, and Brand, each encoding that channel's best practices ('built by marketers, for marketers'), plus Agent Studio / Arc Forge for custom agents",
+            "Compliance is its own agent in the loop: the Brand Agent flags off-brand language, tone, or formatting in real time across all channels — guardrails run as a separate always-on checker, not as instructions inside the generator",
+            "Humans stay in the pipeline: Arc Spaces is a shared canvas that explicitly manages planning, creation, reviews, approvals, and publishing — approval gates are a product feature, not an afterthought",
+            "The core money-making pattern is master-asset-to-variations: one master creative fanned out into localized, resized, persona-tailored variants per channel — a mostly deterministic transformation pipeline",
+            "Distribution is half the product: native integrations with Braze, Salesforce, Contentful, CMSs, DAMs, CRMs, and ESPs, and extension via MCP and APIs, so publishing happens inside the customer's existing stack"
+          ],
+          "lessons_for_us": [
+            "Store brand identity as structured data the pipeline always consults (their Arc Graph), not as text pasted into prompts — it's what makes output consistent across formats and over time",
+            "Run compliance as a separate reviewer step that checks every output against the rules, rather than trusting the generating model to self-police — Typeface productized this as the 'Brand Agent' and enterprises buy it specifically for that",
+            "Build one focused pipeline per channel/format (email vs ad vs page) instead of one do-everything agent — channel-specific rules and templates are where quality comes from",
+            "The highest-ROI feature is variation at scale: take one approved piece and automatically produce localized, resized, audience-specific versions — their flagship case study (500+ pages in 9 days) is exactly this",
+            "Keep a human approval gate before anything publishes; Typeface sells speed of drafts plus controlled approval, not full autonomy — that's what makes compliance-sensitive brands comfortable",
+            "Publishing integrations matter as much as generation — content that lands directly in the customer's email/CMS/ad tools is what turns a demo into a paid workflow",
+            "The category is validated ($165M raised, ~$1B valuation, est. $34M ARR) but Typeface wins with heavy enterprise sales to the Fortune 500; a small player should attack the trend-driven, fast-turnaround niche they are too heavyweight to serve"
+          ],
+          "loops_vs_agents": "Typeface markets everything as \"agents,\" but the actual design is structured orchestration wrapped around bounded agents: a fixed lifecycle (plan, create, review, approve, publish) in Arc Spaces, narrow channel-scoped agents that each do one job, a dedicated guardrail agent that checks outputs, and human approval gates before publishing. Arc Forge's tagline — \"turn workflows into custom agents\" — gives the game away: they start from a deterministic workflow and add agent autonomy only inside well-defined steps. Their 2026 pivot from \"content generation\" to a \"Marketing Orchestration Engine\" suggests the durable enterprise value is in the deterministic pipeline (grounding, guardrails, approvals, publishing), with LLM agents as replaceable workers inside it — strong validation for a loop-first architecture with agents as steps, not free-roaming agents.",
+          "key_links": [
+            {
+              "title": "Typeface homepage — Agentic AI for enterprise marketing (Arc Graph/Agents/Spaces/Forge, customer logos)",
+              "url": "https://www.typeface.ai/"
+            },
+            {
+              "title": "Introducing Typeface Arc Agents (architecture, guardrails, integrations, case study)",
+              "url": "https://www.typeface.ai/blog/introducing-typeface-arc-agents"
+            },
+            {
+              "title": "CNBC (Mar 2026): CEO announces GA of Marketing Orchestration Engine",
+              "url": "https://www.cnbc.com/video/2026/03/04/abhay-parasnis-typeface-ceo-a-fortt-knox-update.html"
+            },
+            {
+              "title": "PR Newswire: $100M Series B, $165M total funding (June 2023)",
+              "url": "https://www.prnewswire.com/news-releases/typeface-announces-100m-in-new-funding-to-fuel-global-expansion-of-its-personalized-generative-ai-platform-for-enterprises-301866644.html"
+            },
+            {
+              "title": "BusinessWire: Multimodal AI Content Hub GA + TensorTour video acquisition (Jan 2024)",
+              "url": "https://www.businesswire.com/news/home/20240125772170/en/Typeface-Announces-GA-of-its-New-Multimodal-AI-Content-Hub-Expands-into-Video-with-TensorTour-Acquisition"
+            },
+            {
+              "title": "GetLatka: Typeface revenue/valuation estimates (2025)",
+              "url": "https://getlatka.com/companies/typeface.ai"
+            }
+          ]
+        },
+        "verdict": {
+          "credible": true,
+          "evidence": "Live scrape of typeface.ai (Aug 2026) confirms an operating product with the exact Arc Graph/Agents/Spaces/Forge portfolio, the claimed customer logo bar, a Dreamforce '26 presence, and a Jan 2026 Cognizant partnership hosted on Cognizant's own newsroom; the March 2026 Marketing Orchestration Engine launch is independently corroborated by Yahoo Finance and Demand Gen Report coverage plus the CEO's LinkedIn post (timestamp decodes to early March 2026). The blog quotes (\"90% of enterprise customers\", \"500+ pages in nine business days\") were verified verbatim at the cited URL.",
+          "corrections": [
+            "The dossier omits Arc Loop: March 2026 launch coverage (Yahoo Finance) describes the engine's core as three capabilities — Arc Graph, Arc Agents, Arc Forge — with Arc Loop announced as the next phase (closed-loop system feeding marketing performance back into AI operation); Arc Spaces is the workspace layer, not listed by press as a core engine capability.",
+            "The '90% of enterprise customers across the Fortune 500' figure is company self-reported marketing copy, and the full sentence reads 'across the Fortune 500 and major brands' — a broader base than pure Fortune 500 customers; no independent verification exists.",
+            "The CNBC-specific GA announcement was not directly verified (the video URL was not fetched); the March 2026 launch itself is well corroborated by other press, so treat the 'announced on CNBC' framing as plausible but unconfirmed.",
+            "Several architecture_insights are inference from marketing pages dressed as fact: 'a mostly deterministic transformation pipeline' for master-asset-to-variations and 'guardrails run as a separate always-on checker, not as instructions inside the generator' describe internals Typeface has never documented publicly — the loops_vs_agents analysis correctly hedges, but the insights bullets state them flatly.",
+            "GetLatka's ~$34.3M ARR and ~247 employees remain unverified third-party estimates (the dossier does flag this correctly); no company-confirmed revenue figure exists.",
+            "Minor: the homepage logo bar also includes Post (Post Consumer Brands), and the dossier's own caveat is right — Google, Microsoft, Salesforce, and Sequoia on that bar are partners/investors, not evidence of customer deployments."
+          ],
+          "confidence": "high"
+        }
+      },
+      {
+        "key": "jasper",
+        "dossier": {
+          "name": "Jasper (jasper.ai)",
+          "category": "enterprise",
+          "what_they_built": "Jasper is an enterprise marketing platform where AI agents do marketing work (research, writing, SEO optimization, translation, personalization) inside structured, repeatable workflows, with a persistent \"brand brain\" (Jasper IQ) that forces every output to match the company's voice, style rules, and approved knowledge. In 2026 their pitch is \"put AI agents to work for marketing\" plus a big new bet on GEO — measuring and improving how often AI answer engines (ChatGPT, Claude, etc.) mention and cite your brand. They started as a prosumer AI-writing tool in 2021, got hammered by ChatGPT, and survived by pivoting hard to enterprise governance and workflows; the enterprise business is real and growing while the old consumer business shrank sharply.",
+          "proof_points": [
+            "Named logos on jasper.ai (Aug 2026): Ulta Beauty, Prudential, Sanofi, Hitachi, Morningstar, HarperCollins, Cushman & Wakefield, iHeartMedia, AAA, Kelly, Helly Hansen; press-cited accounts also include Boeing, UPS, Accenture, CyberArk, William Blair, Wayfair",
+            "Quantified case studies on their site: Cushman & Wakefield 10,000+ hours saved annually; WalkMe 3,000+ hours saved; Bonterra 83% time savings on review responses; Webster First Federal Credit Union 9x organic traffic; Mongoose Media 166% organic traffic; Trusted Media Brands +37.5% RFP responses YoY; iHeartMedia multi-platform campaign built in 1 day vs weeks; Akbank 40% less content-creation time",
+            "Scale (from Jasper press releases, aggregated by sqmagazine.co.uk): 850 enterprise customers Oct 2024, 900+ by May 2025, claimed penetration of nearly 20% of the Fortune 500; enterprise revenue doubled YoY at Oct 2024 and enterprise ARR reportedly tripled in the year ending Feb 2025",
+            "Funding: $125M Series A at $1.5B valuation (Oct 2022, Insight Partners, Coatue, Bessemer, IVP, HubSpot Ventures) with 70,000+ paying subscribers at the time; internal valuation reset ~20% to ~$1.2B in Sept 2023 amid ChatGPT competition; acquired Clipdrop from Stability AI (Feb 2024) for image/multimodal capability",
+            "Forrester Total Economic Impact study (commissioned, Sept 2025): 342% ROI, $3.4M three-year benefit, under-6-month payback, 50% fewer revisions attributed to brand-aligned outputs — composite modeled from 4 customer interviews, so directional not audited",
+            "Caution: third-party trackers (Getlatka/ElectroIQ, echoed on LinkedIn) estimate total revenue fell from ~$120M (2023) to ~$55M (2024) as the prosumer business collapsed — unverified but consistent with the pivot; the enterprise-growth claims come from Jasper's own PR"
+          ],
+          "architecture_insights": [
+            "Three-layer architecture: Jasper IQ (shared context/governance layer) feeds Agents (specialized AI workers) which run inside Content Pipelines (fixed workflow structure), with Canvas as the human-in-the-loop editing surface. Their own copy stresses agents are 'not standalone bots' — they 'operate in context, powered by Jasper IQ and coordinated through pipelines'",
+            "Jasper IQ (the brand brain) has named sub-systems: Brand IQ (Brand Voice + Style Guide + Visual Guidelines), Marketing IQ (marketing best practices fine-tuned into the model layer), Knowledge Base (multimodal: text, docs, images, audio, video, URLs), Audiences/personas, and Governance (controls, permissions, policies). It is persistent and workspace-wide — every agent, workflow, and teammate reads the same context; they explicitly contrast this with a per-person custom GPT",
+            "Brand knowledge stays fresh via live connectors (SharePoint, Salesforce, Google Drive) rather than static uploads — they name staleness as a failure mode. Brand Voice also carries across 25+ languages so translations keep tone",
+            "Every Content Pipeline follows one fixed five-stage lifecycle: Plan -> Create -> Adapt (localize/personalize) -> Activate (push to systems of record) -> Optimize (performance feedback). Agents are slotted into stages; the pipeline shape itself is deterministic and repeatable",
+            "Guardrails are automated checks, not just human review: outputs get flagged 'Doesn't Meet Guidelines' against brand rules, and their GEO agent flow shows an explicit proofreader pass over generated artifacts before export. They also sell public-facing Brand Compliance and GEO diagnostics as scoring tools",
+            "Purpose-built agent library rather than one general agent: Optimization (SEO, taps Semrush), Research, Translation, Personalization (pulls CRM segments), GEO/AEO agent (scores AI-search visibility 0-100, prioritizes content fixes, generates governed content, projects visibility lift)",
+            "Humans orchestrate, agents execute: Canvas is a collaborative surface where 'agents assist with research, drafting, adaptation, and optimization, while humans guide direction and quality'. EmeraldX case study frames it as codifying senior marketers' judgment into agents",
+            "Extension layer: no-code Agent Builder (AI Studio, positioned as IT-approvable), Jasper API, a Jasper MCP server, and 100+/1000+ claimed integrations — they expect to be embedded in existing stacks, not to be the only tool"
+          ],
+          "lessons_for_us": [
+            "Make the brand brain a separate, persistent layer that every agent reads automatically — not brand instructions pasted into each workflow's prompt. Jasper's whole enterprise moat is that voice, style rules, audiences, and approved facts live in one place and apply to every output no matter who or what created it",
+            "Split brand context into distinct stores like they do: voice/tone, hard style rules, visual guidelines, audience personas, and a factual knowledge base — each is edited and enforced differently. A tone model and a compliance rule list are not the same thing",
+            "Run compliance as an automated gate before human eyes: score/flag off-brand output ('doesn't meet guidelines') and add a proofread agent pass before anything is exportable. Humans then review exceptions, not everything",
+            "Fix the workflow shape, vary the content: Jasper sells one deterministic lifecycle (Plan -> Create -> Adapt -> Activate -> Optimize) with agents slotted into stages. That structure is what makes output repeatable, auditable, and sellable to compliance-minded brands",
+            "Keep knowledge live, not uploaded: connectors to the customer's source-of-truth systems beat one-time document dumps, and staleness is a real failure mode for a trend-driven machine",
+            "The generic AI-writing business is dead — Jasper's own revenue history proves it (peak ~$120M, then collapse, then enterprise pivot). Differentiation is brand memory + governance + workflow, exactly the compliance-guarded angle, not better text generation",
+            "GEO / AI-search visibility is the 2026 trend hook: brands now pay to be mentioned and cited by AI answer engines. A 'how visible is your brand in AI answers' score plus content generated to win citations is a proven wedge (Jasper leads with it, partnered with Semrush Aug 2026)",
+            "Publish quantified customer outcomes early: Jasper's case studies all lead with one number (hours saved, traffic multiplied, time-to-launch). For enterprise/brand buyers that beats feature lists"
+          ],
+          "loops_vs_agents": "Jasper's design is a strong vote for deterministic loops with agentic steps, not free-roaming autonomous agents. Agents are specialized workers (research, optimize, translate, personalize) slotted into a fixed five-stage pipeline (Plan -> Create -> Adapt -> Activate -> Optimize), all constrained by one shared context/governance layer (Jasper IQ) and checked by automated brand-compliance gates plus a human orchestration surface (Canvas). Their marketing explicitly rejects 'standalone bots.' The implicit thesis: enterprise brand buyers pay for repeatability, auditability, and governed autonomy — an agent may loop and use tools within its step, but the workflow skeleton, the brand rules, and the human checkpoints are fixed. That is the architecture to copy for a compliance-guarded content machine.",
+          "key_links": [
+            {
+              "title": "Jasper Platform overview (agents + pipelines + IQ architecture, customer case studies)",
+              "url": "https://www.jasper.ai/platform"
+            },
+            {
+              "title": "Jasper IQ — the brand/knowledge context layer (Brand IQ, Marketing IQ, Knowledge Base)",
+              "url": "https://www.jasper.ai/jasper-iq"
+            },
+            {
+              "title": "Jasper Agents library",
+              "url": "https://www.jasper.ai/agents"
+            },
+            {
+              "title": "Jasper GEO / AI-search visibility product",
+              "url": "https://www.jasper.ai/geo"
+            },
+            {
+              "title": "Customer stories index (quantified case studies)",
+              "url": "https://www.jasper.ai/customer-stories"
+            },
+            {
+              "title": "Jasper AI statistics roundup — funding, enterprise customer counts, Forrester TEI (third-party aggregation of Jasper PR)",
+              "url": "https://sqmagazine.co.uk/jasper-ai-statistics/"
+            },
+            {
+              "title": "Forrester TEI press release: 342% ROI claim",
+              "url": "https://www.prnewswire.com/news-releases/marketing-teams-achieved-342-roi-with-jasper-according-to-total-economic-impact-study-302552457.html"
+            },
+            {
+              "title": "$125M Series A at $1.5B valuation (Oct 2022)",
+              "url": "https://www.jasper.ai/blog/jasper-announces-125m-series-a-funding"
+            }
+          ]
+        },
+        "verdict": {
+          "credible": true,
+          "evidence": "jasper.ai is live in 2026 exactly as described (homepage: \"Put AI agents to work for marketing,\" 100+ agents, pipelines, Jasper IQ), and a PR Newswire release dated June 16, 2026 announces the end-to-end GEO Agent; the scraped /geo page independently confirms the dossier's most specific architecture claims (0-100 AI visibility score with a \"43/100 — Poor\" example, citation-rate tracking, an explicit proofreader pass over generated files, Brand Compliance/GEO diagnostic scoring tools). The Semrush partnership is corroborated by a joint webinar and Semrush's own LinkedIn promotion. The valuation cut (~20%, per The Information) and the revenue-collapse narrative are corroborated by independent teardowns (shuttergen, ideaproof) reporting ~$120M to ~$55M revenue and four layoff rounds through mid-2025.",
+          "corrections": [
+            "The framing 'the enterprise business is real and growing' is stated as fact but rests entirely on Jasper's own PR (blog posts aggregated by sqmagazine). Independent sources are more bearish: total revenue estimated down ~54% (~$120M to ~$55M), four rounds of layoffs through mid-2025, and founders out of operating roles. Enterprise ARR growth (doubled/tripled) has no independent confirmation.",
+            "'Partnered with Semrush Aug 2026' misstates timing: the Jasper Optimization Agent + Semrush partnership was already active by roughly Aug-Sep 2025 (joint webinar, Semrush LinkedIn promotion). Also, the GEO Agent itself launched June 16, 2026, not August.",
+            "Enterprise customer counts (850 in Oct 2024, 900+ by May 2025) and 'nearly 20% of the Fortune 500' are self-reported Jasper PR figures echoed by aggregator sites, not independently verified; same for all quantified case-study numbers (hours saved, traffic multiples), which are Jasper marketing-page claims.",
+            "The revenue trajectory is less certain than presented: Contrary Research reported ARR of ~$80M as of Feb 2024, which conflicts with the ~$120M (2023) peak estimate from Getlatka/ElectroIQ; treat all revenue figures as rough third-party estimates with wide variance (the dossier partially flags this).",
+            "'Marketing IQ (marketing best practices fine-tuned into the model layer)' repeats Jasper marketing copy as an architecture fact; there is no independent evidence actual model fine-tuning is involved rather than prompt/context engineering. Similar caution applies to the '100+/1000+ integrations' counts, which are vendor claims."
+          ],
+          "confidence": "high"
+        }
+      },
+      {
+        "key": "storyarb",
+        "dossier": {
+          "name": "storyarb (Alex Lieberman)",
+          "category": "creator",
+          "what_they_built": "storyarb is a human-led B2B content agency, not a software product. Lieberman (Morning Brew co-founder) started it in March 2023 as an executive ghostwriting service and pivoted it into a full content engine: their strategists interview a client's internal experts, turn those interviews into one big anchor piece (a gated playbook or quarterly report), then slice that into newsletters and social posts — with AI assisting the process but humans doing the interviewing, strategy, and writing. By March 2025 it was a mid-7-figure, 18-person agency on 12-month contracts, and their public positioning is explicitly anti-AI-slop ('content only you could publish') even as Lieberman separately runs Tenex, an AI transformation consultancy, and beta-tests AI agents for storyarb clients.",
+          "proof_points": [
+            "Mid 7-figure revenue and 18 employees as of March 2025 (self-reported by Lieberman on alexlieberman.com, two-year anniversary post)",
+            "Named case-study clients with claimed results: Fountain (+300% inbound leads in 100 days, +$1M average contract value growth), Experts Exchange (newsletter with 100K+ subscribers, 47% open rate, monetized via ads), Compound ($5M-$12M+ net worth per referral, meetings booked within 24hrs of publishing), Appriss Retail (+77% ICP meetings booked), Subject (>$10M in MQL pipeline in 3 months) — vendor-published numbers, but attached to named companies and named marketing executives giving testimonials",
+            "Client logo wall includes HubSpot, Typeform, Mozilla, Apollo, Lyra Health, Oyster, Riverside, Attentive, Salesforce Ventures, Curative, Connexall, The Female Quotient",
+            "Business model evidence: 12-month minimum contracts, per-client Notion dashboards, weekly 'content kits' — described in operational detail by CEO Abby Murray, not just marketing copy",
+            "Lieberman's credibility: co-founded Morning Brew (4M+ subscribers, sold to Insider for $75M in 2020); now also Managing Partner of Tenex, an AI engineering/transformation firm — so his AI-agency views come from running both a content agency and an AI consultancy",
+            "They publish their own AI research: 'AI Report 2026' and a 2026 AI Marketing Survey of practicing marketers (findings released January 2026)"
+          ],
+          "architecture_insights": [
+            "Content pipeline is a derivative cascade: SME (subject-matter expert) interviews -> anchor long-form asset (gated playbook / quarterly report) -> weekly editorial newsletter hero section -> exec and company social posts amplifying the anchor. One expensive human-sourced input is atomized into every channel; each channel feeds the next (social feeds email lists, newsletters nurture, long-form converts).",
+            "The 'brand memory' equivalent is human, not vector DB: their rule is writers and client-success staff must be '501-level' on the client's business/product and '301-level' on the industry — and the true 501-level industry knowledge comes from interviewing the client's practitioners. Insight extraction from humans is their moat, explicitly framed as the thing generic AI content cannot replicate.",
+            "AI sits inside the process, not in charge of it: homepage says 'a killer system, whip-smart strategists and writers, and a little help from the robots.' A client testimonial (Connexall) praises them for 'not using or writing generic AI content' — human authorship is a selling point they market.",
+            "Operational stack is deliberately boring: per-client Notion kanban 'content dash' with Zapier and Google Drive integrations; drafting and review live in Google Docs. They moved review OUT of Notion into Google Docs because clients couldn't handle the change management — they optimized for client adoption over tooling elegance.",
+            "Their one true agent (in beta for clients, Dec 2025): combs weekly newsletter opens/clicks, LinkedIn profile views, and website engagement -> enriches those people (company, title, size, location) -> builds a leads list -> drafts customized outreach emails -> human edits and approves -> automated sending. Human-in-the-loop is at the draft-approval gate, before anything leaves the building.",
+            "Measurement is contact-level, not impression-level: they track content-influenced pipeline and 'who' engaged, enriched for warm sales outreach — this is how they justify 12-month contracts and answer the top client objection ('how do you measure ROI?')."
+          ],
+          "lessons_for_us": [
+            "Anchor everything in a source AI can't fabricate. For storyarb that's expert interviews; for a trend-driven brand machine it's verified trend data plus locked brand facts. Generate the derivatives (posts, captions, newsletter blurbs) from that anchor — that's the step where AI is safe and leveraged.",
+            "Even the most AI-forward content agency in 2026 puts the human gate at draft-approval, before publishing. Their beta agent drafts and enriches autonomously but a human edits and approves every outbound message. Our compliance review belongs at the same spot: after generation, before the world sees it.",
+            "Lieberman's four phases of AI adoption (Dec 2025): 1) individuals using ChatGPT, 2) AI baked into one person's process, 3) AI across a multi-person process in one function, 4) AI across functions. His warning: don't attempt Phase 4 (autonomous agents) until 1-3 are crushed. A content machine should be a Phase 2/3 system — deterministic steps with AI inside them — not an agent moonshot.",
+            "There are no shortcuts: his core 2025-2026 message is that real AI integration is a full-time job of rebuilding workflows ('embrace the slog'), and companies that fired marketers expecting AI to replace them will hurt in 2026. Budget hundreds of hours for process design, not just prompts.",
+            "In a world of AI slop, the differentiator is 'content only you can publish' — proprietary insight, real voices, brand-specific knowledge. A brand-memory layer that captures what only this client knows is worth more than better generation.",
+            "Don't market the AI. Lieberman's 2026 prediction: leading with 'we're the AI X' is now a tired, trust-eroding pitch because buyers spent 2025 being burned by shiny AI tools. Sell the outcome (pipeline, trust, consistency), keep the AI in the engine room.",
+            "Measure at the contact level. Clicks don't close deals; their retention story is 'this specific person at your target account read this and we enriched them for outreach.' If our machine can report who engaged rather than how many, it earns long contracts.",
+            "Client-facing simplicity beats internal elegance: they run a 7-figure agency on Notion + Zapier + Google Docs, and even retreated from Notion review to Google Docs because clients resisted. Meet clients in tools they already use."
+          ],
+          "loops_vs_agents": "Lieberman is publicly on the 'deterministic loops first' side. In the December 2025 Standard interview he calls 2025's 'year of AI agents' overhyped: autonomous agents are 'Phase 4' of his adoption ladder while most companies are stuck at Phase 1 (individuals with a ChatGPT tab open), and he advises not even attempting agents until AI is baked into single-person and single-function processes. storyarb's own machine reflects this: a fixed, repeatable pipeline (SME interview -> anchor asset -> newsletter -> social) run by human strategists and writers with AI assisting bounded steps, plus exactly one agent-like system in beta (ABM enrichment and outreach) that still routes every draft through a human for edit and approval. His stated reason implementation fails: rebuilding multiplayer workflows around AI is a full-time job requiring hundreds of hours — plug-and-play autonomy is 'a lie.'",
+          "key_links": [
+            {
+              "title": "storyarb homepage (positioning, case studies, client logos)",
+              "url": "https://www.storyarb.com/"
+            },
+            {
+              "title": "Alex Lieberman: Getting to Know storyarb — 2-year AMA with process/ops details (Mar 2025)",
+              "url": "https://alexlieberman.com/storyarb/"
+            },
+            {
+              "title": "The Standard: Alex Lieberman says you're wrong about AI — 4-phase framework, agent beta (Dec 2025)",
+              "url": "https://thestandard.storyarb.com/p/alex-lieberman-says-youre-wrong-about-ai"
+            },
+            {
+              "title": "storyarb AI Report 2026",
+              "url": "https://www.storyarb.com/ai-report-2026"
+            },
+            {
+              "title": "Lieberman: The Case for Professional Centaurs (Jul 2026, human+AI hybrid thesis)",
+              "url": "https://alexlieberman.com/professional-centaurs/"
+            },
+            {
+              "title": "Fountain case study (3x leads claim)",
+              "url": "https://www.storyarb.com/blog/how-fountains-content-strategy-accelerated-their-go-to-market"
+            },
+            {
+              "title": "Tenex — Lieberman's AI transformation consultancy",
+              "url": "https://www.tenex.co/"
+            }
+          ]
+        },
+        "verdict": {
+          "confidence": "high",
+          "corrections": [
+            "Morning Brew was not cleanly 'sold to Insider for $75M in 2020' — Insider acquired a controlling/majority stake in Oct 2020 in a deal reported at ~$75M; Lieberman retained a stake and remained involved.",
+            "'Attentive' does not appear on the current storyarb homepage logo wall (all other listed logos — HubSpot, Typeform, Mozilla, Apollo, Salesforce Ventures, Riverside, Lyra Health, Oyster, Curative, Connexall, Female Quotient — were confirmed in today's scrape).",
+            "The beta agent is slightly overstated as a working end-to-end system: the Dec 2025 source says 'We're not far from being able to do most of this—in fact, it's something we're beta testing for storyarb clients right now,' i.e. the full comb->enrich->draft->approve->send loop is part-current, part-near-future.",
+            "Fountain's '+$1M average contract value growth' sub-claim was not found on the homepage (only the +300% leads figure); it rests solely on the vendor case-study page and was not independently verified.",
+            "The 'mid 7-figure, 18-person' figures are as of March 2025 and entirely self-reported; no independent source (press, filings) corroborates revenue or headcount — the dossier flags this correctly but it remains unverifiable."
+          ],
+          "credible": true,
+          "evidence": "Live scrape of storyarb.com today (Aug 2026) confirms the agency is operating with the exact case-study numbers, named client executives, logo wall, and the verbatim 'a little help from the robots' positioning; the cited Dec 2025 Standard interview contains verbatim the Phase 1-4 adoption ladder, the 'hundreds of hours of rebuilding workflows' thesis, and 'it's something we're beta testing for storyarb clients right now' for the ABM enrichment agent; and the alexlieberman.com two-year AMA confirms 'mid 7-figure, 18-person agency' plus the Notion/Zapier/Google Docs ops details (including the retreat from Notion review to Google Docs) quoted from CEO Abby. The dossier is a faithful synthesis of primary sources — its main limitation, which it already discloses, is that revenue and client-result numbers are self-reported/vendor-published with no independent corroboration beyond Lieberman's well-documented Morning Brew track record."
+        }
+      },
+      {
+        "key": "machina-sports",
+        "dossier": {
+          "name": "Machina Sports",
+          "category": "niche",
+          "what_they_built": "Machina Sports is an AI agent platform for the sports industry: broadcasters, betting operators, and teams use it to run agents that turn live sports data (fixtures, stats, odds, fan sentiment) into publishable content — match previews, recaps, quizzes, fan chat, personalized newsletters — with a built-in approval and compliance pipeline before anything goes out. They sell it as ready-made agent templates plus an SDK/API, with an open-source free tier (Sports Skills) as the developer on-ramp. Honest caveat: the architecture and positioning are unusually well documented, but public proof of production customers is thin — the homepage logo wall is mostly partners, accelerators, and investors (Sportradar, Sinch, NVIDIA Inception, Antler, Microsoft's GSIC), and no named customer case study surfaced in any fetched source.",
+          "proof_points": [
+            "No named customer case studies found on the site or in search; the claim 'powering AI agents for global broadcasters, sportsbooks, and the teams behind world sport' is marketing copy backed only by a logo wall",
+            "Logo wall names Sportradar (data partner), Entain (major sportsbook group — relationship type unstated), Sinch, NVIDIA Inception, Antler, HYPE Sports Innovation, GSIC powered by Microsoft, Grupo OTG, AMID, Pave — mostly partners/accelerators/investors rather than confirmed paying customers",
+            "Sinch (global messaging/CPaaS company) hosts an official partner page for Machina Sports, confirming a real distribution partnership for messaging channels",
+            "Investor-confirmed funding: a March 2025 LinkedIn post by investor Marcelo Ciampolini says 'a company we invested in last year' and announces the Machina Studio platform launch; also backed by Antler and in NVIDIA Inception",
+            "Real open-source footprint: github.com/machina-sports/sports-skills exists and integrates with Claude Code, Cursor, Copilot, Gemini CLI and other agent tools; they also publish llms.txt/agent.txt/capabilities.json for AI-agent consumption",
+            "Live product surface: public World Cup 2026 API showcase, a Brasileirão (Brazilian league) API, a public status page, and docs — evidence of a running product; but the templates page shows 'Begin customizing — Soon', suggesting self-serve deployment is not fully live and sales are demo-led",
+            "Brazilian-rooted company (founder/CEO Andre Antonelli); strong Brazil market focus (Brasileirão API, pt-br pages)"
+          ],
+          "architecture_insights": [
+            "Three-part mental model on the homepage: Agents (start from templates or build custom) -> Connectors (live data: fixtures, stats, odds, fan sentiment via Sportradar and others) -> Surfaces (API, SDK, MCP, SMS, WhatsApp, RCS, push)",
+            "Five platform layers with explicit contracts between them: (1) approved/live data — every source carries an identity mapping, a rights/privacy class, a freshness expectation, and an owner; (2) sports-native agent — fixtures, players, squads, standings are typed entities, not strings, so references resolve to the same object across data providers; (3) governed workflow — brand and compliance rules applied BEFORE publish; (4) measurable output — record of what shipped, when, under which approval mode, who approved; (5) integration surfaces",
+            "Human review is a configurable dial, not a binary: item-by-item sign-off by a named person for high-risk output, sampled review once a configuration has 'earned trust' — and the active approval mode is recorded next to every published item in an audit trail",
+            "Deployment lifecycle is a six-stage pipeline: Connect (approve source list and rights scope) -> Ground (map entities to canonical IDs) -> Configure (voice, brand/compliance rules, surfaces — buyer changes rules without code changes) -> Approve -> Ship (with delivery confirmation) -> Measure (exportable record feeding the next cycle)",
+            "Templates are pre-configured agent WORKFLOWS, each with named workflow steps and a connector stack (e.g. Sports Betting Copilot: User Profile Sync -> Personalized Analysis, using Sportradar + Machina DB + Machina AI + HubSpot); other templates plug in HeyGen (avatar video), ElevenLabs (voice), Salesforce, Zendesk, Zapier, X/Reddit/YouTube for sentiment",
+            "Hard guardrails baked in as product policy: no wagering advice or selections ever generated (informational market context only), rollback is a first-class feature ('being wrong after the fact is a normal operating condition in live sport'), and portability — source contracts, rules, and records belong to the buyer",
+            "Unusually honest published limitations: coverage equals exactly what connected sources cover, freshness is inherited from the source ('if a provider is late, the agent is late'), and item-by-item approval explicitly bounds throughput by reviewer availability",
+            "Open-source acquisition funnel: Sports Skills gives free public sports-data primitives to AI agents with no signup, feeding the commercial platform; MCP support is currently limited to a World Cup developer preview, not a general transport"
+          ],
+          "lessons_for_us": [
+            "Put brand and compliance rules at the workflow stage, before publishing — not as an after-the-fact check. Machina treats 'approval' as a required pipeline stage, which is exactly the shape a compliance-guarded content machine needs",
+            "Copy their two-tier review dial: every content type gets an approval mode — item-by-item human sign-off while it's new or risky, sampled spot-checks once a configuration has earned trust — and the mode in force is logged with every published piece. This is the cleanest scaling path from 'human reviews everything' to 'humans review samples' without losing accountability",
+            "Keep an audit trail as a product feature: what shipped, when, from which sources, under which approval mode, who approved, and what happened next. It makes each publishing cycle measurable and is also what convinces risk-averse buyers/stakeholders",
+            "Ground generation in typed, canonical entities (a trend, a product, a claim) with identity mapping across sources — Machina's diagnosis is that ungrounded agents 'produce confident, wrong output at the exact moment that output is most visible', which is precisely the trending-moment risk",
+            "Be honest about freshness: your content is only as current as the trend source feeding it. Track a freshness expectation per source and surface it, rather than pretending the pipeline is real-time",
+            "Ship templates, not a blank canvas: pre-configured workflows (named steps + connector stack) per use case are how they package the product; also note their self-serve still says 'Soon' — even a well-funded niche player is demo-led, so don't over-invest in self-serve too early",
+            "Build rollback in from day one — withdrawing or correcting a published piece is a normal operating condition, not an emergency",
+            "Their moat framing is worth stealing: data feed + generic agent framework is not a product; the product is the governed chain from data to shipped, measured output. That chain (rules, approvals, records) is also what's hardest for a customer to rebuild elsewhere"
+          ],
+          "loops_vs_agents": "Machina's design lands firmly on the \"governed loop with agentic steps inside\" end of the spectrum, not autonomous agents. Templates are literally called \"pre-configured agent workflows\" with named sequential steps; every deployment runs the same fixed six-stage chain (Connect, Ground, Configure, Approve, Ship, Measure); and the agent's autonomy is deliberately capped — their own governance page says the agent \"presents evidence and options for a person to act on. It does not issue autonomous advice.\" The agentic part lives inside bounded stages (a live-match runtime loop that re-reads current match state, drafts, and reacts), while publishing is deterministic: rules applied at a fixed workflow stage, a configured human approval gate, delivery confirmation, and a recorded outcome. Their implicit thesis for regulated, brand-sensitive content: let agents reason over live data inside the loop, but make the loop itself — especially the approval and audit stages — deterministic and operator-owned. That is a strong endorsement of the deterministic-pipeline-with-AI-steps architecture over free-running agents for a compliance-guarded content business.",
+          "key_links": [
+            {
+              "title": "Machina Sports homepage",
+              "url": "https://machina.gg/"
+            },
+            {
+              "title": "Platform architecture, governance, and evaluation page (most detailed source)",
+              "url": "https://machina.gg/platform"
+            },
+            {
+              "title": "Agent Templates catalog (12 pre-configured workflows)",
+              "url": "https://machina.gg/templates"
+            },
+            {
+              "title": "Sports Skills — open-source sports data primitives for AI agents",
+              "url": "https://github.com/machina-sports/sports-skills"
+            },
+            {
+              "title": "Product documentation",
+              "url": "https://docs.machina.gg/"
+            },
+            {
+              "title": "Sinch official partner page for Machina Sports (partnership evidence)",
+              "url": "https://sinch.com/partners/machina-sports/"
+            },
+            {
+              "title": "Investor post announcing Machina Studio launch (funding evidence)",
+              "url": "https://www.linkedin.com/posts/marcelo-ciampolini_revolutionizing-sports-with-ai-agents-introducing-activity-7308924598517948416-S1zn"
+            },
+            {
+              "title": "Founder podcast: Building the Agentic AI Stack for Sports (Andre Antonelli)",
+              "url": "https://www.youtube.com/watch?v=E3AIE4S_Euo"
+            }
+          ]
+        },
+        "verdict": {
+          "credible": true,
+          "evidence": "Primary sources verified directly: machina.gg/platform is live (scraped 2026-08-18) and contains verbatim the governance/architecture text the dossier quotes (approval-mode dial, six-stage lifecycle, \"does not issue autonomous advice\", rollback and freshness limitations); github.com/machina-sports/sports-skills is a real MIT-licensed repo with 298 commits and the named agent-tool integrations; and Sinch's own partner page (sinch.com/partners/machina-sports/) independently confirms that partnership. The dossier's central caveat also verified: no named paying customer appears in any independent source, so this is a real, operating, but demo-led early-stage product — exactly as the dossier characterizes it.",
+          "corrections": [
+            "Sportradar is labeled '(data partner)' in the proof points, but the independently confirmed relationship is that Machina joined Sportradar's Futures Hub Accelerator (Sept 2024, per Machina's LinkedIn); the open-source repo itself marks licensed Sportradar data skills as 'coming soon', so a confirmed live data partnership is overstated — Sportradar appears as a connector in templates and as an accelerator relationship.",
+            "The 'investor-confirmed funding' point rests solely on one investor's LinkedIn post; Crunchbase lists the company but shows no disclosed round or amount, so funding is real but size/stage are entirely unverified — treat it as pre-seed/seed-scale backing, not 'well-funded'.",
+            "Minor framing note: nearly all architecture_insights derive from Machina's own /platform page (written by the founder). They are faithfully reported, not invented, but they describe the vendor's stated design, and with zero public customer deployments there is no independent evidence the governed pipeline operates at scale in production."
+          ],
+          "confidence": "high"
+        }
+      },
+      {
+        "key": "cerebras",
+        "dossier": {
+          "name": "Cerebras",
+          "category": "infra",
+          "what_they_built": "Cerebras is a chip company, not a content tool — they build wafer-scale processors (one giant chip instead of racks of GPUs) and sell access to them through a cloud API that runs open-weight language models extremely fast (~3,000 tokens/second, which they market as \"20x faster than OpenAI and Anthropic\"). For a content business they are purely a speed-and-cost layer you could plug in behind a pipeline, and honestly a narrow one: as of mid-2026 they actively serve only about two models (gpt-oss-120b and GLM-4.7/Gemma 4 preview), with no Claude, GPT-5.x, or Gemini. They are relevant to us only if per-call latency or token cost in a multi-step agent loop becomes a real bottleneck.",
+          "proof_points": [
+            "Live self-serve API in production: free tier with $5 credits, Developer tier from $10 pay-as-you-go, Enterprise tier with custom weights and fine-tuning (cerebras.ai/pricing, fetched Aug 2026)",
+            "Published per-token pricing: gpt-oss-120b at $0.35 input / $0.75 output per M tokens at ~3,000 tok/s; Gemma 4 31B preview at $0.99/$1.49 (official pricing page)",
+            "Distribution through real partner channels: AWS Marketplace, OpenRouter, Hugging Face, and Vercel AI Gateway — you can hit Cerebras without a direct account",
+            "Site banner claims a partnership accelerating OpenAI's GPT-5.6-Sol-Ultrafast frontier model (Cerebras blog link; claim from their own site, not independently verified in this research)",
+            "Third-party analysis (morphllm.com, June 2026): Cerebras Code subscriptions at $50/mo (Pro, ~24M tokens/day) and $200/mo (Max) have repeatedly sold out — evidence of real demand",
+            "Independent benchmark site Artificial Analysis tracks Cerebras, but only 2 models vs 50+ at Fireworks/Together — the catalog has genuinely narrowed",
+            "Third-party caveats: free tier ~5 requests/min and ~1M tokens/day; a ~300K tokens/min throttle produces 429 errors below Enterprise tier"
+          ],
+          "architecture_insights": [
+            "Speed comes from hardware, not software cleverness: one wafer-scale chip holds the whole model, avoiding the GPU-cluster communication overhead that caps everyone else's tokens/second",
+            "The trade-off of that hardware is model breadth: each model must be ported to their chip, so the public catalog is ~2 active models while GPU clouds (Fireworks, Together) offer 50+",
+            "OpenAI-compatible API surface, so it slots into any existing pipeline as a drop-in base-URL swap",
+            "They deliberately sell through aggregators (OpenRouter, Vercel AI Gateway, AWS, Hugging Face) — the industry pattern is that fast-inference vendors become interchangeable backends behind a router, not platforms you build on directly",
+            "Rate limits are the real product tiers: free = toy, Developer = 10x limits, Enterprise = dedicated queue priority and custom fine-tuned weights; heavy production use effectively requires a sales conversation",
+            "Their whole marketing thesis is about agents: multi-step agent chains multiply per-call latency, so a 10-20x faster model turns a minutes-long agent run into seconds"
+          ],
+          "lessons_for_us": [
+            "Cerebras is not a competitor and not a content platform — at most it is a cheap, fast engine for the high-volume, low-stakes steps of our pipeline (trend classification, filtering, first-draft generation), while final brand copy stays on a frontier model",
+            "Speed matters most where a human is waiting: if our review/approval UI regenerates a post while the reviewer watches, ~3,000 tok/s makes that feel instant; for scheduled batch generation overnight, speed buys us nothing",
+            "Never hard-code a fast-inference vendor: Cerebras's model lineup visibly churned within a year (Llama and Qwen variants dropped, Code plans migrated models). Route through an OpenRouter-style gateway so the backend is swappable",
+            "The cost math is real: their open-weight models run roughly an order of magnitude cheaper per output token than frontier models — meaningful if our trend-scanning step burns millions of tokens a day, irrelevant at small volume",
+            "Their locked model menu means no Claude/GPT/Gemini — any compliance or brand-voice quality bar we set must be validated per model, and a narrow catalog makes that re-validation more likely, not less",
+            "Prototyping is essentially free: $5 credits then $10 self-serve, so testing whether fast inference improves our loop costs an afternoon, not a contract"
+          ],
+          "loops_vs_agents": "Cerebras's existence is a bet on autonomous agents over deterministic loops: their pitch is that agent chains make many sequential model calls, so per-call latency compounds and speed becomes the product. That logic only pays off in interactive or real-time agent systems where someone (or another system) is waiting on the chain. For a trend-driven brand content machine that runs as a scheduled, deterministic pipeline with human review gates — which is what compliance-guarded content should be — tokens-per-second is rarely the bottleneck; quality, brand memory, and review throughput are. The honest takeaway: build the deterministic loop first on whatever models are best, and reach for Cerebras-class speed only for the specific step where a human is actively waiting on a regeneration, or if you later add real-time agentic features (live comment replies, interactive editing).",
+          "key_links": [
+            {
+              "title": "Cerebras Pricing (official, current tiers and per-token rates)",
+              "url": "https://www.cerebras.ai/pricing"
+            },
+            {
+              "title": "Cerebras Inference product page",
+              "url": "https://www.cerebras.ai/inference"
+            },
+            {
+              "title": "Cerebras model docs (current served-model list)",
+              "url": "https://inference-docs.cerebras.ai/models/overview"
+            },
+            {
+              "title": "Third-party pricing/rate-limit analysis, June 2026 (morphllm)",
+              "url": "https://www.morphllm.com/cerebras-pricing"
+            },
+            {
+              "title": "Cerebras blog: pay-per-token launch",
+              "url": "https://www.cerebras.ai/blog/cerebras-inference-now-available-via-pay-per-token"
+            }
+          ]
+        },
+        "verdict": {
+          "credible": true,
+          "evidence": "OpenAI's own announcement (openai.com/index/previewing-ultrafast/) independently confirms the riskiest claim: an Ultrafast service tier in the OpenAI API \"Powered by Cerebras\" running GPT-5.6 Sol at up to 750 output tokens/sec, with corroborating Hacker News (item 49289844) and Reddit threads. Separately, live scrapes (Aug 2026) of cerebras.ai/pricing and inference-docs.cerebras.ai/models/overview match the dossier's numbers exactly: $5 free credits, Developer tier from $10, Enterprise with custom weights/fine-tuning, gpt-oss-120b at $0.35/$0.75 per M tokens at ~3,000 tok/s, Gemma 4 31B at $0.99/$1.49, a public catalog of exactly 2 models, and the four claimed partner channels (AWS Marketplace, OpenRouter, Hugging Face, Vercel AI Gateway). The product is real, self-serve, and operating today — not vaporware.",
+          "corrections": [
+            "The second public model is Gemma 4 31B (Google DeepMind), not \"GLM-4.7\" — no GLM model appears anywhere in the current public catalog or pricing page; the dossier's \"GLM-4.7/Gemma 4 preview\" conflation is wrong or outdated. Gemma 4 also runs at ~1,800-1,850 tok/s, not the ~3,000 figure (which applies only to gpt-oss-120b).",
+            "The OpenAI partnership is no longer 'not independently verified' — OpenAI's own site confirms it. But note the nuance: GPT-5.6 Sol Ultrafast is sold through OpenAI's API (up to 750 tok/s, '14x faster' per OpenAI), not through Cerebras's own API. So the dossier's 'no GPT-5.x on Cerebras' remains true for Cerebras's API, and 750 tok/s is well below the 3,000 tok/s Cerebras markets for its own open-weight endpoints.",
+            "'Only ~2 models' is accurate for the self-serve public API, but slightly overstated as a company-wide fact: the docs explicitly say 'many additional model families are available through Dedicated Endpoints' (enterprise). The narrow catalog is a public-tier limitation, not the full serving capability.",
+            "Architecture insight 'one wafer-scale chip holds the whole model' is marketing simplification stated as fact — Cerebras's published architecture uses weight streaming from external memory for large models; the low-communication-overhead speed advantage is real, but the mechanism as described is not literally accurate for 120B-parameter models.",
+            "The 'Cerebras Code plans repeatedly sold out' demand claim rests on a single third-party blog (morphllm) and was not independently verified in this check; likewise the specific free-tier rate limits (~5 req/min, ~1M tokens/day, 300K tokens/min throttle) come from third-party sources, not confirmed against Cerebras's official rate-limit docs. Treat both as plausible but unconfirmed.",
+            "'20x faster than OpenAI and Anthropic' is confirmed as Cerebras's own marketing copy on the pricing page (with a fine-print disclaimer that results vary) — the dossier correctly attributes it as marketing, but it should not be treated as a benchmarked fact."
+          ],
+          "confidence": "high"
+        }
+      },
+      {
+        "key": "oss-trendfinder",
+        "dossier": {
+          "name": "trendFinder (ericciarla/trendFinder) + open-source trend radars",
+          "category": "open-source",
+          "what_they_built": "trendFinder is a small open-source TypeScript script (MIT license) by Eric Ciarla, co-founder of Firecrawl, that watches a hand-picked list of websites and X/Twitter accounts once a day, asks an LLM to pull out today's interesting stories, and posts a bullet-point digest to Slack or Discord. It is a blueprint, not a product: about six small files, 4.1k GitHub stars, but effectively unmaintained — the last commit was February 16, 2025, roughly 18 months ago, with 10 open issues and 7 open PRs sitting untouched. My search for other well-maintained dedicated open-source trend radars in 2025-2026 turned up only minor projects (e.g. HasData's social-listening-tool and small LLM-scoring projects under GitHub's social-listening topic) with no evidence of significant traction — this niche has largely been absorbed by hosted products like Firecrawl's own /monitor.",
+          "proof_points": [
+            "4.1k GitHub stars, 452 forks, 30 watchers (verified on the live repo page, Aug 2026)",
+            "README claims it was 'a complete game-changer for the Firecrawl marketing team' — the only named user; this is the maintainer's own company, so partly marketing copy",
+            "Maintenance status: 30 total commits, last commit Feb 16, 2025 ('Update cron.ts'); 10 open issues, 7 open PRs — effectively abandoned as a codebase, alive as a reference architecture",
+            "Author Eric Ciarla is a Firecrawl co-founder; the repo doubles as a Firecrawl marketing/demo asset (official tutorial blog + YouTube walkthrough exist)",
+            "No releases, no tags, no paying customers — this is a free educational tool, not a business"
+          ],
+          "architecture_insights": [
+            "Exact pipeline (4 sequential steps in src/controllers/cron.ts handleCron): getCronSources -> scrapeSources -> generateDraft -> sendDraft. Pure linear function calls, no queue, no state, no database — each run is stateless and self-contained.",
+            "Sources are hardcoded config (src/services/getCronSources.ts): 7 websites (Firecrawl blog, OpenAI news, Anthropic news, Hacker News, Reuters AI, simonwillison.net, AI News newsletter archive) plus exactly 1 X account — because the X API free tier only allows monitoring 1 account per 15 minutes. Most X sources are commented out for this reason.",
+            "Two scraping paths (src/services/scrapeSources.ts): X URLs hit the X API v2 recent-search endpoint (query 'from:user has:media -is:retweet -is:reply', last 24h, max 10 tweets); all other URLs go through Firecrawl /extract with a natural-language prompt plus a Zod schema (headline, link, date_posted) that asks only for TODAY's on-topic stories — the scraper itself does the first relevance filter.",
+            "One LLM call does the editorial work (src/services/generateDraft.ts): Together AI's Llama 3.1 70B Instruct Turbo with schema-enforced JSON output (response_format with a JSON schema) picks ~10 interesting stories and writes a one-line description plus link for each. The .env also supports swapping in DeepSeek or OpenAI.",
+            "Notification is a dumb webhook (src/services/sendDraft.ts): one axios POST of plain text to a Slack or Discord incoming webhook, selected by a NOTIFICATION_DRIVER env var. No approval UI, no dashboard — the Slack channel IS the product surface.",
+            "Scheduling: node-cron in index.ts is shipped commented out (5 PM daily); the official blog recommends running it as a GitHub Actions scheduled workflow (cron '0 17 * * *' + workflow_dispatch for manual runs, API keys in GitHub Secrets) — zero servers, free on public repos.",
+            "Reliability comes from structure, not agents: Zod schemas validate the scrape output, JSON-schema mode constrains the LLM output, and every step is wrapped in try/catch so one failed source doesn't kill the run."
+          ],
+          "lessons_for_us": [
+            "A daily trend radar is a weekend build, not a moat: source list -> scrape -> one LLM call -> Slack webhook. For our brand content machine, this is the 'trend intake' front-end and we should build our own rather than depend on this repo — it's stale (no commits since Feb 2025) and its Firecrawl/Together SDK versions are 18 months old.",
+            "Do the filtering in two cheap stages like they do: the scraper prompt only extracts today's on-topic stories (stage 1), then a single LLM call ranks and summarizes (stage 2). This keeps token costs tiny because the LLM never sees raw pages, only pre-extracted headlines and links.",
+            "End the pipeline at a human, not at publish: trendFinder's output is a 'draft post' dropped into Slack for the team to act on. That's exactly the right shape for a compliance-guarded brand — the automation proposes, a person disposes. Our compliance gate can live at that same seam.",
+            "X/Twitter is the expensive, rate-limited source; websites are the reliable one. Their free X tier could watch only ONE account. Budget for X API paid tiers or lean on web/newsletter/RSS-style sources for trend signal.",
+            "Force JSON schemas on every LLM step (they use Zod + schema-enforced response_format). This is what makes a fully automated daily loop trustworthy enough to run unattended.",
+            "Run the loop on GitHub Actions cron (or any cheap scheduler) — no servers, and for us likely near-zero infra cost, which fits a bootstrap budget.",
+            "The open-source field here is thin and mostly dead or tiny; the pattern has been productized (Firecrawl /monitor now offers scheduled watching + AI diff-judging + webhooks as a hosted service). If we outgrow a DIY loop, that's the buy option to evaluate against building more."
+          ],
+          "loops_vs_agents": "trendFinder is the strongest possible vote for deterministic loops over autonomous agents in trend monitoring: it is a fixed four-step pipeline (fetch source list, scrape, one LLM summarization call, webhook) triggered by a plain cron schedule, with zero agent autonomy — the LLM never decides what to do next, never picks its own sources, and never loops. Intelligence is confined to two narrow, schema-constrained calls (extract today's stories as JSON; rank and describe the top ~10 as JSON), and everything around them is ordinary code with try/catch. That design is why a ~6-file project could reliably run daily unattended for a marketing team. The lesson for our system: use deterministic scheduled loops for the always-on monitoring layer, and reserve agent-style autonomy (if anywhere) for the downstream content-creation step where a human reviews the output anyway.",
+          "key_links": [
+            {
+              "title": "trendFinder GitHub repo (4.1k stars, last commit Feb 2025)",
+              "url": "https://github.com/ericciarla/trendFinder"
+            },
+            {
+              "title": "Firecrawl blog: full step-by-step architecture walkthrough with source code",
+              "url": "https://www.firecrawl.dev/blog/trend-finder-typescript"
+            },
+            {
+              "title": "Demo & setup video by the author",
+              "url": "https://www.youtube.com/watch?v=puimQSun92g"
+            },
+            {
+              "title": "Firecrawl /monitor — the hosted productization of this pattern",
+              "url": "https://www.firecrawl.dev/monitor"
+            },
+            {
+              "title": "HasData social-listening-tool (minor OSS alternative, unverified traction)",
+              "url": "https://github.com/HasData/social-listening-tool"
+            },
+            {
+              "title": "GitHub social-listening topic (other small OSS projects in this niche)",
+              "url": "https://github.com/topics/social-listening?l=javascript"
+            }
+          ]
+        },
+        "verdict": {
+          "credible": true,
+          "evidence": "Direct GitHub API + raw-source verification (Aug 2026): repo live with 4,115 stars, 452 forks, 30 watchers, MIT, exactly 30 commits, last commit 'Update cron.ts' 2025-02-17T00:10Z, and 17 open issues+PRs (matching the 10+7 split). The source files at HEAD match the dossier's pipeline almost line-for-line: handleCron runs getCronSources -> scrapeSources -> generateDraft -> sendDraft; getCronSources.ts hardcodes the exact 7 websites plus x.com/skirano; scrapeSources.ts uses the X v2 recent-search query 'from:USER has:media -is:retweet -is:reply' (24h window, max 10) and Firecrawl /extract with a Zod stories schema; sendDraft.ts is an axios POST to Slack/Discord webhooks switched by NOTIFICATION_DRIVER; index.ts ships node-cron commented out at '0 17 * * *'. README contains the 'complete game-changer for the Firecrawl marketing team' line and the X free-tier 1-account/15-min warning. firecrawl.dev/monitor is live (HTTP 200) with change-detection/AI-judge/webhook copy, confirming the hosted productization claim.",
+          "corrections": [
+            "The LLM in generateDraft.ts at current HEAD is OpenAI o3-mini (reasoning_effort 'medium'), NOT Together AI Llama 3.1 70B Instruct Turbo, and there is NO schema-enforced response_format on that call — output is only prompt-constrained then JSON.parse'd with fallback keys. Comments in scrapeSources.ts explicitly say 'Removed Together import' and 'no longer enforce JSON output via Together'. The dossier describes the earlier blog-post version of the code.",
+            "Consequently the lesson 'Force JSON schemas on every LLM step (they use Zod + schema-enforced response_format)' overstates the repo: schema enforcement exists only on the Firecrawl /extract scraping stage; the final drafting LLM call has no schema mode at all (a known fragility, not a demonstrated pattern).",
+            "'.env also supports swapping in DeepSeek or OpenAI' is stale README documentation, not implemented behavior: the current code hardcodes the OpenAI client and never reads TOGETHER_API_KEY or DEEPSEEK_API_KEY.",
+            "'Most X sources are commented out for this reason' is not true at HEAD — getCronSources.ts contains no commented-out X sources; it has exactly one X account (skirano), included only when X_API_BEARER_TOKEN is set. The 1-account/15-min rationale lives in the README, not as commented-out code.",
+            "Minor: the last-commit timestamp is 2025-02-17T00:10Z UTC (renders as Feb 16, 2025 in US timezones), so 'Feb 16, 2025' is timezone-dependent; the ~18-months-stale characterization is accurate."
+          ],
+          "confidence": "high"
+        }
+      },
+      {
+        "key": "oss-frameworks",
+        "dossier": {
+          "name": "Agent orchestration frameworks 2026 (CrewAI vs LangGraph vs Claude Agent SDK vs plain code)",
+          "category": "open-source",
+          "what_they_built": "These are the open-source toolkits serious teams use to wire multiple AI models together into pipelines: CrewAI lets you describe a \"crew\" of role-based agents (researcher, writer, editor) that hand work to each other; LangGraph makes you draw the pipeline explicitly as a flowchart with saved state at every step; Anthropic's Claude Agent SDK is the Claude Code engine packaged as a library where the model itself drives the loop. All three are real, maintained, and production-grade in mid-2026 — the honest caveat is that a framework only gives you the skeleton, and the market's loudest lesson is that most production content systems end up as controlled workflows, not free-roaming agents.",
+          "proof_points": [
+            "CrewAI (from seed GitHub scrape): 57.2k stars, 8.2k forks, MIT license, active 2026 release tooling; its '100,000+ certified developers' figure comes from its own free courses — a marketing metric, not customer evidence, and the GitHub 'Used by' section showed no named companies",
+            "LangGraph is repeatedly called the de facto production standard in 2026 comparisons, with Anthropic, Replit, LinkedIn, and Uber named as shipping on it (AY Automate roundup); Langfuse's framework comparison shows it leading interest at ~27,100 monthly searches vs CrewAI's ~14,800",
+            "A mid-2026 head-to-head (Developers Digest) judges both Claude Agent SDK and LangGraph 'production-grade' — the SDK is the same engine that powers Claude Code, so it is battle-tested by proxy",
+            "Independent production-readiness rankings put LangGraph highest (checkpointing, streaming, LangSmith tracing), Claude Agent SDK high (safety-first, but lighter orchestration and Claude-only), CrewAI medium (fast to start, limited checkpointing)",
+            "Recurring practitioner pattern across sources: teams prototype on CrewAI in days, then migrate to LangGraph or plain code when reliability and debuggability become the bottleneck"
+          ],
+          "architecture_insights": [
+            "LangGraph models a pipeline as a directed graph with typed shared state; every transition is checkpointed, which is what enables pause-for-human-approval, resume-after-failure, and time-travel debugging — human review gates are a first-class feature, not a bolt-on",
+            "CrewAI now has two layers: Crews (autonomous role-based agents) and Flows (deterministic, event-driven workflows with @start/@listen/@router decorators, structured state, and conditional routing) — its own docs recommend wrapping Crews inside Flows for production, i.e. autonomy only inside controlled steps",
+            "Claude Agent SDK inverts control: Anthropic owns the agent loop, the model decides next steps, and sub-agents are just tools the main agent can call; simplest to run but locked to Claude models and lighter on orchestration primitives",
+            "Anthropic's canonical 'Building effective agents' guidance: use the simplest thing that passes evaluation — often one well-tooled LLM call or a fixed workflow; reserve autonomous agents for tasks where the step count is unknown but progress is verifiable",
+            "None of the frameworks solve production by themselves — observability, retries, brand/state storage, scaling, and integrations remain your job (several comparison posts are written by vendors selling exactly that layer, so read their rankings with that bias in mind)"
+          ],
+          "lessons_for_us": [
+            "A brand content pipeline (trend in → draft → compliance check → human approval → publish) is a known, repeatable process — exactly the case where 2026 best practice says: build a deterministic workflow with LLM calls at each step, not a swarm of autonomous agents",
+            "Compliance guardrails should be fixed checkpoints in the pipeline, not instructions you hope an agent follows; LangGraph's pause/resume human-in-the-loop and persisted state is purpose-built for an approval gate before anything ships",
+            "The strongest signal in the whole landscape: CrewAI, the 'autonomous agents' company, added deterministic Flows and now recommends them for production — even the autonomy vendors concede that reliability beats autonomy",
+            "For a small team, a plain-code state machine (or the Claude Agent SDK for the generation steps) is a legitimate 2026 choice; frameworks earn their keep mainly when you need checkpointed state, branching, and replay — which an approval-gated content machine actually does need",
+            "Skip the migration tax: teams routinely prototype on CrewAI and rebuild on LangGraph when reliability bites; since our pipeline shape is already clear, starting with the explicit-workflow design (LangGraph or plain code) avoids doing it twice",
+            "Discount community-size marketing ('100k certified developers') — the evidence that matters is named production users (Replit, LinkedIn, Uber on LangGraph) and features like checkpointing and tracing"
+          ],
+          "loops_vs_agents": "The 2026 consensus is unambiguous and comes straight from Anthropic's own guidance, echoed by practitioners everywhere: deterministic workflows (state machines / loops with LLM calls at defined steps) win for repeatable business processes needing auditability, fixed SLAs, and lower cost; autonomous agents are justified only when you cannot hardcode the path but can verify progress each step (coding with tests, support with tool feedback). The frameworks' own evolution proves it — LangGraph won production precisely because it \"treats agents as state machines, not chat loops,\" and CrewAI bolted deterministic Flows on top of its autonomous Crews and now markets Flows as the production layer. For a content pipeline with compliance gates, the prevailing pattern is: a deterministic outer loop that owns sequencing, guardrails, and human approval, with bounded agent autonomy (research, drafting) only inside individual steps.",
+          "key_links": [
+            {
+              "title": "CrewAI GitHub (57.2k stars; Crews + Flows architecture)",
+              "url": "https://github.com/crewaiinc/crewai"
+            },
+            {
+              "title": "Anthropic — Building Effective Agents (canonical workflows-vs-agents guidance)",
+              "url": "https://www.anthropic.com/engineering/building-effective-agents"
+            },
+            {
+              "title": "Claude Agent SDK vs LangGraph: Choosing Your Agent Stack in 2026 (Developers Digest)",
+              "url": "https://www.developersdigest.tech/blog/claude-agent-sdk-vs-langgraph"
+            },
+            {
+              "title": "9 Best Multi-Agent Frameworks for Production in 2026 (AY Automate; names Replit/LinkedIn/Uber on LangGraph)",
+              "url": "https://www.ayautomate.com/blog/best-multi-agent-frameworks"
+            },
+            {
+              "title": "Best Multi-Agent Frameworks in 2026 (GuruSup; production-readiness matrix — vendor-biased)",
+              "url": "https://gurusup.com/blog/best-multi-agent-frameworks-2026"
+            },
+            {
+              "title": "Claude Agent SDK docs (official)",
+              "url": "https://code.claude.com/docs/en/agent-sdk/overview"
+            },
+            {
+              "title": "LangGraph docs (official)",
+              "url": "https://langchain-ai.github.io/langgraph/"
+            }
+          ]
+        },
+        "verdict": {
+          "credible": true,
+          "evidence": "Live GitHub scrape of crewAIInc/crewAI (Aug 18, 2026) confirms exactly 57.2k stars, 8.2k forks, MIT license, a commit 10 hours old, releases through v1.14.7, and the Flows @start/@listen/@router architecture in the README; LangChain's published case-study material independently confirms Uber, LinkedIn, and Replit as named LangGraph production users; both secondary sources cited (ayautomate.com, developersdigest.tech) exist and say what the dossier attributes to them.",
+          "corrections": [
+            "The claim that Anthropic is 'shipping on LangGraph' should be dropped: it comes solely from the AY Automate SEO roundup, does not appear in LangChain's own customer lists (which name Uber, LinkedIn, Replit, Elastic, Rakuten), and is almost certainly an error — Anthropic builds its agent products on its own Claude Code/Agent SDK stack, and the AY page elsewhere conflates 'Anthropic Claude integration' with adoption.",
+            "The Uber/LinkedIn/Replit evidence is weaker than 'independently supported' implies: the primary sources are LangChain's own blog, LangChain's LinkedIn post, and the LangChain CEO's tweet — real named case studies, but vendor-published marketing, not third-party reporting.",
+            "The Langfuse search-volume figures (~27,100 vs ~14,800 monthly searches) were not verified and should be treated as a single vendor-blog estimate, not a market statistic."
+          ],
+          "confidence": "high"
+        }
+      },
+      {
+        "key": "compliance-ai",
+        "dossier": {
+          "name": "Marketing-Claims Compliance AI Landscape (beyond Writer)",
+          "category": "enterprise",
+          "what_they_built": "This is a landscape, not one company, and the honest headline is: almost all mature \"AI reviews your marketing claims\" tools were built for finance (SEC/FINRA rules), not beauty. The named players are Luthor AI (AI first-pass review of marketing content against regulations plus your own policies, with a \"consumer-regulated industries\" vertical covering food/pharma/alcohol), Saifr (Fidelity-backed AI that flags risky claims and suggests compliant rewording inside Microsoft Office), IntelligenceBank (a marketing-asset platform that bought the AI compliance scanner Red Marker to flag regulatory risk in print/social/email/web content), and Red Oak (workflow-heavy review for financial firms). For consumer health and beauty specifically, no dedicated AI claims-checker with proven adoption surfaced besides Writer — that market still runs on human consultants (e.g. NutraCompliance), self-regulators (NAD in the US, ASCI in India) doing the monitoring, and generic tools stretched into the vertical. That gap is real and relevant to us.",
+          "proof_points": [
+            "Regulatory pressure on beauty is documented, not hypothetical: FTC sent warning letters to 700+ beauty and personal care brands in April 2023 over questionable marketing claims (BBB National Programs / NAD source)",
+            "ASCI (India) 2024-25 annual report: 98% of 1,015 influencer ads examined required modifications — influencer/social content is the enforcement hot spot in India",
+            "IntelligenceBank acquired Red Marker (AI compliance scanning) in the mid-2020s to bolt claims-flagging onto its digital asset management platform — evidence the category is consolidating into content-ops platforms",
+            "Saifr is backed by Fidelity-affiliated entities and sells to large financial firms; Red Oak has operated since 2010 serving broker-dealers — the money in this category is in finance, not beauty",
+            "Weak evidence caveat: no named customers were found for Luthor AI in fetched pages, and most vendor detail comes from Luthor's own competitor-comparison article (Dec 2025), which is marketing content ranking itself first; its '80% faster review' figure is an unverified vendor claim",
+            "NAD (US ad self-regulator) has real teeth without being a government agency: it refers non-compliant advertisers to the FTC and reports them to platforms like Meta for takedown"
+          ],
+          "architecture_insights": [
+            "Universal pattern across every vendor: AI is a first-pass flagger, a human is the approver. The AI scans content, flags risky claims and missing disclosures, and routes to a human compliance reviewer for judgment calls — no tool lets AI approve or publish on its own",
+            "Two-layer rules: a base layer encoding the actual regulations (SEC/FTC rule sets) plus a custom rules engine encoding the brand's own policies on top (Luthor's design). Rules are configurable per jurisdiction — directly maps to needing separate FTC/FDA and ASCI rule sets",
+            "Constrained generation is the stated best practice for AI-written marketing in cosmetics: generative tools must be limited to a library of pre-substantiated claims and 'banned from making novel promises' (SG Systems regulatory glossary) — the claims library is the brand memory",
+            "Fix, don't just flag: Saifr suggests compliant alternative language and required disclosures at the moment of flagging, inside the authoring tool (MS Office add-in), so creators aren't stalled by a rejection with no path forward",
+            "Post-publication monitoring is a differentiator: Luthor re-scans live websites to catch claims that drift after approval (edits, updated captions) — compliance isn't a one-time gate, it's a loop",
+            "Every tool treats the audit trail as a first-class product feature: tamper-evident records of who approved what, when, and what changed — because the real buyer (legal/compliance) is preparing for an examiner or regulator, not for the marketing team",
+            "Multimedia coverage is now table stakes at the high end: Saifr transcribes video and scans the transcript for claims, since claims live in reels and voiceovers, not just captions"
+          ],
+          "lessons_for_us": [
+            "Build a substantiated-claims library as the core brand-memory asset: every benefit claim the brand is allowed to make, with its evidence attached. The content generator may only rephrase claims from this library, never invent new ones — this single constraint is the industry-recommended way to make AI-generated beauty content safe",
+            "Make the compliance check a deterministic gate in the pipeline, not an agent decision: generate → scan against claims library and rule set → flag with suggested compliant rewording → human approves → publish → periodic re-scan of live posts. Every shipped product in this space follows that shape",
+            "Encode ASCI and FTC/FDA as separate, swappable rule sets. India-specific priorities from ASCI's own enforcement data: influencer disclosure labels and unsubstantiated efficacy claims in social content are where 98% of flagged ads fail",
+            "Log everything into an audit trail from day one — approvals, edits, who signed off. In this category the audit trail IS the product for the legal buyer; it's cheap to build early and painful to retrofit",
+            "When the checker flags a claim, always propose a compliant alternative phrasing (Saifr's pattern). A red X with no fix kills content velocity; a suggested rewrite keeps the machine moving",
+            "There is a genuine market gap: finance has half a dozen funded AI claims-review tools, consumer health & beauty has essentially Writer plus consultants. If our compliance guardrails work well, they may be a sellable feature, not just internal plumbing",
+            "Watch ASCI's draft guidelines requiring disclosure of AI use in advertising (2025-26) — if finalized, AI-generated brand content in India may itself need an 'AI-generated' label, which our pipeline should support as a toggle"
+          ],
+          "loops_vs_agents": "Every production system in this space is a deterministic loop with AI embedded as a classifier/flagger, not an autonomous agent. Even IntelligenceBank, which markets \"AI agents,\" uses them strictly to flag risks inside a human approval workflow. The canonical shape is: scan content → match against rule sets and a pre-approved claims library → flag + suggest fixes → human gate → archive with audit trail → re-scan published content on a schedule. Nothing autonomous ever approves, publishes, or modifies content, because the legal buyer's core requirement is a defensible audit trail showing human accountability. For our system this validates the \"deterministic pipeline with LLM steps inside it\" design over free-running agents: regulators and legal teams don't trust agent judgment, they trust logged, gated, repeatable processes.",
+          "key_links": [
+            {
+              "title": "Luthor AI — Marketing Claims Compliance (FTC rules resource)",
+              "url": "https://www.luthor.ai/resources/marketing-claims"
+            },
+            {
+              "title": "Luthor's Dec 2025 compliance-tools landscape (covers Saifr, IntelligenceBank/Red Marker, Red Oak, Kadince — vendor-authored, biased)",
+              "url": "https://www.luthor.ai/resources/performance-advertising-compliance-tools-rias"
+            },
+            {
+              "title": "FTC Health Products Compliance Guidance (the substantiation bible for US health claims)",
+              "url": "https://www.ftc.gov/business-guidance/resources/health-products-compliance-guidance"
+            },
+            {
+              "title": "NAD on beauty product claims and substantiation (incl. the 700+ FTC warning letters)",
+              "url": "https://bbbprograms.org/media/insights/blog/beauty-product-claims"
+            },
+            {
+              "title": "ASCI Reports — annual complaints, influencer compliance scorecard, AI in advertising",
+              "url": "https://www.ascionline.in/reports/"
+            },
+            {
+              "title": "ASCI Draft Guidelines on AI disclosure in advertising (Lexology)",
+              "url": "https://www.lexology.com/library/detail.aspx?g=733f8311-c492-48bf-8a26-76f535c9247b"
+            },
+            {
+              "title": "Advertising Law Compliance in 2026 — AI and health claim substantiation trends (JD Supra)",
+              "url": "https://www.jdsupra.com/legalnews/advertising-law-compliance-in-2026-five-1601317/"
+            },
+            {
+              "title": "Cosmetic Claims Substantiation glossary — constrained-AI claims-library best practice (SG Systems)",
+              "url": "https://sgsystemsglobal.com/glossary/cosmetic-claims-substantiation/"
+            }
+          ]
+        },
+        "verdict": {
+          "credible": true,
+          "evidence": "Primary sources confirm the landscape is real: IntelligenceBank's own announcement confirms it acquired Red Marker on July 29, 2024; Y Combinator's company directory confirms Luthor AI is a real, operating YC Fall 2024 startup (~$500K seed); ASCI's own Annual Complaints Report 2024-25 communications confirm the exact stat (98% of 1,015 influencer ads examined required modifications); and the FTC's own April 2023 press release confirms the enforcement wave the dossier cites — though the dossier mischaracterizes who received it. The dossier's self-flagged caveats (vendor-authored comparison, unverified '80% faster' figure) proved warranted and accurate.",
+          "corrections": [
+            "The headline proof point is wrong as stated: the FTC's April 2023 action was ~670 (\"almost 700\", not \"700+\") notices of penalty offenses — not exactly warning letters — sent to companies marketing OTC drugs, homeopathic products, dietary supplements, and functional foods. The FTC's own press release does not describe recipients as \"beauty and personal care brands\"; that framing comes from the BBB/NAD beauty blog repackaging it. Beauty overlap exists but the enforcement wave targeted health-product marketers broadly.",
+            "Luthor AI should not be grouped with \"mature\" tools: it is a seed-stage YC Fall 2024 startup with roughly $500K raised (Sept 2024 per tracker data). Its own YC listing markets it as trusted by asset managers, RIAs, lenders, banks, and credit unions — i.e., Luthor is finance-first like the others; its \"consumer-regulated industries\" (food/pharma/alcohol) vertical appears to be aspirational marketing pages with no evidenced adoption, reinforcing rather than softening the finance-only pattern.",
+            "The \"IntelligenceBank acquired Red Marker in the mid-2020s\" claim can be pinned precisely: July 29, 2024 (IntelligenceBank's own announcement).",
+            "Architecture insights are directionally sound but several are vendor self-descriptions stated as fact: the \"universal pattern: AI flags, human approves\" and Saifr/Luthor feature claims (in-Office rewording, post-publication re-scanning, video transcription) derive largely from vendor marketing pages and Luthor's own self-ranking comparison article, not independent verification. Likewise, \"constrained generation is the stated best practice\" rests on one vendor's glossary page (SG Systems, a QMS software seller), so calling it \"the industry-recommended way\" overstates a single vendor's framing."
+          ],
+          "confidence": "medium"
+        }
+      }
+    ]
+  },
+  "workflowProgress": [
+    {
+      "type": "workflow_phase",
+      "index": 1,
+      "title": "Research"
+    },
+    {
+      "type": "workflow_phase",
+      "index": 2,
+      "title": "Verify"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 1,
+      "label": "research:adobe-genstudio",
+      "phaseIndex": 1,
+      "phaseTitle": "Research",
+      "agentId": "a215c12b7da10a79f",
+      "model": "claude-fable-5",
+      "state": "done",
+      "startedAt": 1787053936732,
+      "queuedAt": 1787053933825,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "Adobe GenStudio",
+      "promptPreview": "You are an industry researcher working from the directory D:\\PROJECTS\\autocontentcreator (a Windows machine; keep ALL files you write inside this project's .firecrawl/ subdirectory — never write to C: or /tmp).\n\nTARGET: Adobe GenStudio (category: enterprise)\nFOCUS: Adobe's enterprise generative-AI content platform for brands. How does it structure brand guidelines, content generation, review/appro…",
+      "lastProgressAt": 1787054258641,
+      "tokens": 71271,
+      "toolCalls": 21,
+      "durationMs": 321909,
+      "resultPreview": "{\"name\":\"Adobe GenStudio\",\"category\":\"enterprise\",\"what_they_built\":\"Adobe GenStudio is Adobe's flagship \\\"content supply chain\\\" for big brands: one connected system where teams plan campaigns, store approved assets, mass-produce ad and email variants with AI inside pre-approved brand templates, score every asset against brand guidelines, route it through human legal and creative approval, and pu…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 2,
+      "label": "research:writer",
+      "phaseIndex": 1,
+      "phaseTitle": "Research",
+      "agentId": "a1226abb241df727d",
+      "model": "claude-fable-5",
+      "state": "done",
+      "startedAt": 1787053936853,
+      "queuedAt": 1787053933825,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "Writer (writer.com)",
+      "promptPreview": "You are an industry researcher working from the directory D:\\PROJECTS\\autocontentcreator (a Windows machine; keep ALL files you write inside this project's .firecrawl/ subdirectory — never write to C: or /tmp).\n\nTARGET: Writer (writer.com) (category: enterprise)\nFOCUS: Writer's enterprise AI platform, especially the Product Claims Checker agent and retail/consumer-brand solutions. How do they do c…",
+      "lastProgressAt": 1787054147817,
+      "tokens": 59683,
+      "toolCalls": 10,
+      "durationMs": 210964,
+      "resultPreview": "{\"name\":\"Writer (writer.com)\",\"category\":\"enterprise\",\"what_they_built\":\"Writer is a full-stack enterprise AI platform (own Palmyra models, a graph-based knowledge store, no-code and Python app builders) that big brands use to generate and police marketing content. Their Product Claims Checker is deliberately simple: you upload your copy plus a document of pre-approved claims, and the AI marks whi…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 3,
+      "label": "research:typeface",
+      "phaseIndex": 1,
+      "phaseTitle": "Research",
+      "agentId": "a16c5933971cd3a27",
+      "model": "claude-fable-5",
+      "state": "done",
+      "startedAt": 1787053936696,
+      "queuedAt": 1787053933825,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "Typeface (typeface.ai)",
+      "promptPreview": "You are an industry researcher working from the directory D:\\PROJECTS\\autocontentcreator (a Windows machine; keep ALL files you write inside this project's .firecrawl/ subdirectory — never write to C: or /tmp).\n\nTARGET: Typeface (typeface.ai) (category: enterprise)\nFOCUS: Typeface, founded by ex-Adobe CTO Abhay Parasnis — personalized brand content AI. Search for its current 2026 state, architectu…",
+      "lastProgressAt": 1787054097589,
+      "tokens": 57924,
+      "toolCalls": 20,
+      "durationMs": 160893,
+      "resultPreview": "{\"name\":\"Typeface (typeface.ai)\",\"category\":\"enterprise\",\"what_they_built\":\"Typeface, founded in 2022 by ex-Adobe CTO Abhay Parasnis, is an enterprise \\\"marketing orchestration engine\\\": big companies feed it their brand rules, and its AI agents then plan, draft, review, and publish on-brand emails, ads, webpages, images, and video at scale. By 2026 it has pivoted its story from \\\"generate content…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 4,
+      "label": "research:jasper",
+      "phaseIndex": 1,
+      "phaseTitle": "Research",
+      "agentId": "a13cfc1e180db9441",
+      "model": "claude-fable-5",
+      "state": "done",
+      "startedAt": 1787053936774,
+      "queuedAt": 1787053933825,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "Jasper (jasper.ai)",
+      "promptPreview": "You are an industry researcher working from the directory D:\\PROJECTS\\autocontentcreator (a Windows machine; keep ALL files you write inside this project's .firecrawl/ subdirectory — never write to C: or /tmp).\n\nTARGET: Jasper (jasper.ai) (category: enterprise)\nFOCUS: Jasper's 2026 state: marketing AI agents, brand voice, marketing workflows. How do they structure brand voice/knowledge + agent wor…",
+      "lastProgressAt": 1787054135781,
+      "tokens": 81202,
+      "toolCalls": 11,
+      "durationMs": 199007,
+      "resultPreview": "{\"name\":\"Jasper (jasper.ai)\",\"category\":\"enterprise\",\"what_they_built\":\"Jasper is an enterprise marketing platform where AI agents do marketing work (research, writing, SEO optimization, translation, personalization) inside structured, repeatable workflows, with a persistent \\\"brand brain\\\" (Jasper IQ) that forces every output to match the company's voice, style rules, and approved knowledge. In 2…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 5,
+      "label": "research:storyarb",
+      "phaseIndex": 1,
+      "phaseTitle": "Research",
+      "agentId": "aa21b3ee7016de1ec",
+      "model": "claude-fable-5",
+      "state": "done",
+      "startedAt": 1787053936997,
+      "queuedAt": 1787053933825,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "storyarb (Alex Lieberman)",
+      "promptPreview": "You are an industry researcher working from the directory D:\\PROJECTS\\autocontentcreator (a Windows machine; keep ALL files you write inside this project's .firecrawl/ subdirectory — never write to C: or /tmp).\n\nTARGET: storyarb / Alex Lieberman (category: creator)\nFOCUS: Alex Lieberman's storyarb content agency: how do they combine AI with human writers for B2B brand content? What is their actual…",
+      "lastProgressAt": 1787054130117,
+      "tokens": 64253,
+      "toolCalls": 16,
+      "durationMs": 193120,
+      "resultPreview": "{\"name\":\"storyarb (Alex Lieberman)\",\"category\":\"creator\",\"what_they_built\":\"storyarb is a human-led B2B content agency, not a software product. Lieberman (Morning Brew co-founder) started it in March 2023 as an executive ghostwriting service and pivoted it into a full content engine: their strategists interview a client's internal experts, turn those interviews into one big anchor piece (a gated p…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 6,
+      "label": "research:machina-sports",
+      "phaseIndex": 1,
+      "phaseTitle": "Research",
+      "agentId": "ada6a18d706db892e",
+      "model": "claude-fable-5",
+      "state": "done",
+      "startedAt": 1787053937439,
+      "queuedAt": 1787053933825,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "Machina Sports",
+      "promptPreview": "You are an industry researcher working from the directory D:\\PROJECTS\\autocontentcreator (a Windows machine; keep ALL files you write inside this project's .firecrawl/ subdirectory — never write to C: or /tmp).\n\nTARGET: Machina Sports (category: niche)\nFOCUS: Machina Sports: AI agent platform for sports media content. How is their agent platform architected (templates, workflows, agents)? Which sp…",
+      "lastProgressAt": 1787054172680,
+      "tokens": 58051,
+      "toolCalls": 15,
+      "durationMs": 235240,
+      "resultPreview": "{\"name\":\"Machina Sports\",\"category\":\"niche\",\"what_they_built\":\"Machina Sports is an AI agent platform for the sports industry: broadcasters, betting operators, and teams use it to run agents that turn live sports data (fixtures, stats, odds, fan sentiment) into publishable content — match previews, recaps, quizzes, fan chat, personalized newsletters — with a built-in approval and compliance pipeli…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 7,
+      "label": "research:cerebras",
+      "phaseIndex": 1,
+      "phaseTitle": "Research",
+      "agentId": "af2e9e96eafe9503e",
+      "model": "claude-fable-5",
+      "state": "done",
+      "startedAt": 1787053936907,
+      "queuedAt": 1787053933825,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "Cerebras",
+      "promptPreview": "You are an industry researcher working from the directory D:\\PROJECTS\\autocontentcreator (a Windows machine; keep ALL files you write inside this project's .firecrawl/ subdirectory — never write to C: or /tmp).\n\nTARGET: Cerebras (role: fast inference) (category: infra)\nFOCUS: Cerebras in 2026: they make ultra-fast AI inference hardware/API, not content tools. Clarify honestly what role (if any) Ce…",
+      "lastProgressAt": 1787054055559,
+      "tokens": 39872,
+      "toolCalls": 10,
+      "durationMs": 118652,
+      "resultPreview": "{\"name\":\"Cerebras\",\"category\":\"infra\",\"what_they_built\":\"Cerebras is a chip company, not a content tool — they build wafer-scale processors (one giant chip instead of racks of GPUs) and sell access to them through a cloud API that runs open-weight language models extremely fast (~3,000 tokens/second, which they market as \\\"20x faster than OpenAI and Anthropic\\\"). For a content business they are pu…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 8,
+      "label": "research:oss-trendfinder",
+      "phaseIndex": 1,
+      "phaseTitle": "Research",
+      "agentId": "ab0f583a6bbfb9f3f",
+      "model": "claude-fable-5",
+      "state": "done",
+      "startedAt": 1787053936768,
+      "queuedAt": 1787053933825,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "trendFinder (ericciarla/trendFinder) + open-source trend ra…",
+      "promptPreview": "You are an industry researcher working from the directory D:\\PROJECTS\\autocontentcreator (a Windows machine; keep ALL files you write inside this project's .firecrawl/ subdirectory — never write to C: or /tmp).\n\nTARGET: trendFinder + open-source trend radars (category: open-source)\nFOCUS: The trendFinder repo: exact architecture (sources, cron loop, LLM step, notification). Plus any other notable …",
+      "lastProgressAt": 1787054113180,
+      "tokens": 73992,
+      "toolCalls": 18,
+      "durationMs": 176412,
+      "resultPreview": "{\"name\":\"trendFinder (ericciarla/trendFinder) + open-source trend radars\",\"category\":\"open-source\",\"what_they_built\":\"trendFinder is a small open-source TypeScript script (MIT license) by Eric Ciarla, co-founder of Firecrawl, that watches a hand-picked list of websites and X/Twitter accounts once a day, asks an LLM to pull out today's interesting stories, and posts a bullet-point digest to Slack o…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 9,
+      "label": "research:oss-frameworks",
+      "phaseIndex": 1,
+      "phaseTitle": "Research",
+      "agentId": "aadeaf5e8f7039acb",
+      "model": "claude-fable-5",
+      "state": "done",
+      "startedAt": 1787053936282,
+      "queuedAt": 1787053933825,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "Agent orchestration frameworks 2026 (CrewAI vs LangGraph vs…",
+      "promptPreview": "You are an industry researcher working from the directory D:\\PROJECTS\\autocontentcreator (a Windows machine; keep ALL files you write inside this project's .firecrawl/ subdirectory — never write to C: or /tmp).\n\nTARGET: Agent orchestration frameworks 2026 (category: open-source)\nFOCUS: What do serious teams use in 2026 to orchestrate multi-agent content pipelines: CrewAI vs LangGraph vs Anthropic …",
+      "lastProgressAt": 1787054085726,
+      "tokens": 43123,
+      "toolCalls": 11,
+      "durationMs": 149444,
+      "resultPreview": "{\"name\":\"Agent orchestration frameworks 2026 (CrewAI vs LangGraph vs Claude Agent SDK vs plain code)\",\"category\":\"open-source\",\"what_they_built\":\"These are the open-source toolkits serious teams use to wire multiple AI models together into pipelines: CrewAI lets you describe a \\\"crew\\\" of role-based agents (researcher, writer, editor) that hand work to each other; LangGraph makes you draw the pipe…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 10,
+      "label": "research:compliance-ai",
+      "phaseIndex": 1,
+      "phaseTitle": "Research",
+      "agentId": "afd48f528d73bae8e",
+      "model": "claude-fable-5",
+      "state": "done",
+      "startedAt": 1787053936258,
+      "queuedAt": 1787053933826,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "Marketing-Claims Compliance AI Landscape (beyond Writer)",
+      "promptPreview": "You are an industry researcher working from the directory D:\\PROJECTS\\autocontentcreator (a Windows machine; keep ALL files you write inside this project's .firecrawl/ subdirectory — never write to C: or /tmp).\n\nTARGET: Marketing-claims compliance AI landscape (category: enterprise)\nFOCUS: Who (besides Writer) does automated marketing/advertising claims compliance for consumer health & beauty bran…",
+      "lastProgressAt": 1787054165787,
+      "tokens": 49647,
+      "toolCalls": 15,
+      "durationMs": 229528,
+      "resultPreview": "{\"name\":\"Marketing-Claims Compliance AI Landscape (beyond Writer)\",\"category\":\"enterprise\",\"what_they_built\":\"This is a landscape, not one company, and the honest headline is: almost all mature \\\"AI reviews your marketing claims\\\" tools were built for finance (SEC/FINRA rules), not beauty. The named players are Luthor AI (AI first-pass review of marketing content against regulations plus your own …"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 11,
+      "label": "verify:cerebras",
+      "phaseIndex": 2,
+      "phaseTitle": "Verify",
+      "agentId": "ac8029a1c9cf558c2",
+      "model": "claude-fable-5",
+      "state": "done",
+      "startedAt": 1787054060990,
+      "queuedAt": 1787054058719,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "OpenAI's own announcement (openai.com/index/previewing-ultr…",
+      "promptPreview": "You are a skeptical fact-checker working from D:\\PROJECTS\\autocontentcreator (Windows; write files only into .firecrawl/). Today is August 2026.\n\nA researcher produced this dossier on Cerebras (role: fast inference):\n{\n  \"name\": \"Cerebras\",\n  \"category\": \"infra\",\n  \"what_they_built\": \"Cerebras is a chip company, not a content tool — they build wafer-scale processors (one giant chip instead of rack…",
+      "lastProgressAt": 1787054165426,
+      "tokens": 42524,
+      "toolCalls": 7,
+      "durationMs": 104436,
+      "resultPreview": "{\"credible\":true,\"evidence\":\"OpenAI's own announcement (openai.com/index/previewing-ultrafast/) independently confirms the riskiest claim: an Ultrafast service tier in the OpenAI API \\\"Powered by Cerebras\\\" running GPT-5.6 Sol at up to 750 output tokens/sec, with corroborating Hacker News (item 49289844) and Reddit threads. Separately, live scrapes (Aug 2026) of cerebras.ai/pricing and inference-d…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 12,
+      "label": "verify:oss-frameworks",
+      "phaseIndex": 2,
+      "phaseTitle": "Verify",
+      "agentId": "a0b1caab76a40e245",
+      "model": "claude-fable-5",
+      "state": "done",
+      "startedAt": 1787054089557,
+      "queuedAt": 1787054087613,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "Live GitHub scrape of crewAIInc/crewAI (Aug 18, 2026) confi…",
+      "promptPreview": "You are a skeptical fact-checker working from D:\\PROJECTS\\autocontentcreator (Windows; write files only into .firecrawl/). Today is August 2026.\n\nA researcher produced this dossier on Agent orchestration frameworks 2026:\n{\n  \"name\": \"Agent orchestration frameworks 2026 (CrewAI vs LangGraph vs Claude Agent SDK vs plain code)\",\n  \"category\": \"open-source\",\n  \"what_they_built\": \"These are the open-so…",
+      "lastProgressAt": 1787054229255,
+      "tokens": 42576,
+      "toolCalls": 13,
+      "durationMs": 139698,
+      "resultPreview": "{\"credible\":true,\"evidence\":\"Live GitHub scrape of crewAIInc/crewAI (Aug 18, 2026) confirms exactly 57.2k stars, 8.2k forks, MIT license, a commit 10 hours old, releases through v1.14.7, and the Flows @start/@listen/@router architecture in the README; LangChain's published case-study material independently confirms Uber, LinkedIn, and Replit as named LangGraph production users; both secondary sour…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 13,
+      "label": "verify:typeface",
+      "phaseIndex": 2,
+      "phaseTitle": "Verify",
+      "agentId": "a42ae179f115249b5",
+      "model": "claude-fable-5",
+      "state": "done",
+      "startedAt": 1787054101312,
+      "queuedAt": 1787054099453,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "Live scrape of typeface.ai (Aug 2026) confirms an operating…",
+      "promptPreview": "You are a skeptical fact-checker working from D:\\PROJECTS\\autocontentcreator (Windows; write files only into .firecrawl/). Today is August 2026.\n\nA researcher produced this dossier on Typeface (typeface.ai):\n{\n  \"name\": \"Typeface (typeface.ai)\",\n  \"category\": \"enterprise\",\n  \"what_they_built\": \"Typeface, founded in 2022 by ex-Adobe CTO Abhay Parasnis, is an enterprise \\\"marketing orchestration eng…",
+      "lastProgressAt": 1787054202784,
+      "tokens": 40826,
+      "toolCalls": 7,
+      "durationMs": 101471,
+      "resultPreview": "{\"credible\":true,\"evidence\":\"Live scrape of typeface.ai (Aug 2026) confirms an operating product with the exact Arc Graph/Agents/Spaces/Forge portfolio, the claimed customer logo bar, a Dreamforce '26 presence, and a Jan 2026 Cognizant partnership hosted on Cognizant's own newsroom; the March 2026 Marketing Orchestration Engine launch is independently corroborated by Yahoo Finance and Demand Gen R…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 14,
+      "label": "verify:oss-trendfinder",
+      "phaseIndex": 2,
+      "phaseTitle": "Verify",
+      "agentId": "a56d47f6799c00174",
+      "model": "claude-fable-5",
+      "state": "done",
+      "startedAt": 1787054117121,
+      "queuedAt": 1787054115187,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "Direct GitHub API + raw-source verification (Aug 2026): rep…",
+      "promptPreview": "You are a skeptical fact-checker working from D:\\PROJECTS\\autocontentcreator (Windows; write files only into .firecrawl/). Today is August 2026.\n\nA researcher produced this dossier on trendFinder + open-source trend radars:\n{\n  \"name\": \"trendFinder (ericciarla/trendFinder) + open-source trend radars\",\n  \"category\": \"open-source\",\n  \"what_they_built\": \"trendFinder is a small open-source TypeScript …",
+      "lastProgressAt": 1787054230470,
+      "tokens": 40770,
+      "toolCalls": 8,
+      "durationMs": 113349,
+      "resultPreview": "{\"credible\":true,\"evidence\":\"Direct GitHub API + raw-source verification (Aug 2026): repo live with 4,115 stars, 452 forks, 30 watchers, MIT, exactly 30 commits, last commit 'Update cron.ts' 2025-02-17T00:10Z, and 17 open issues+PRs (matching the 10+7 split). The source files at HEAD match the dossier's pipeline almost line-for-line: handleCron runs getCronSources -> scrapeSources -> generateDraft…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 15,
+      "label": "verify:storyarb",
+      "phaseIndex": 2,
+      "phaseTitle": "Verify",
+      "agentId": "af25fcdc0b981c188",
+      "model": "claude-fable-5",
+      "state": "done",
+      "startedAt": 1787054133952,
+      "queuedAt": 1787054132008,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "high",
+      "promptPreview": "You are a skeptical fact-checker working from D:\\PROJECTS\\autocontentcreator (Windows; write files only into .firecrawl/). Today is August 2026.\n\nA researcher produced this dossier on storyarb / Alex Lieberman:\n{\n  \"name\": \"storyarb (Alex Lieberman)\",\n  \"category\": \"creator\",\n  \"what_they_built\": \"storyarb is a human-led B2B content agency, not a software product. Lieberman (Morning Brew co-founde…",
+      "lastProgressAt": 1787054268542,
+      "tokens": 47323,
+      "toolCalls": 10,
+      "durationMs": 134590,
+      "resultPreview": "{\"confidence\":\"high\",\"corrections\":[\"Morning Brew was not cleanly 'sold to Insider for $75M in 2020' — Insider acquired a controlling/majority stake in Oct 2020 in a deal reported at ~$75M; Lieberman retained a stake and remained involved.\",\"'Attentive' does not appear on the current storyarb homepage logo wall (all other listed logos — HubSpot, Typeform, Mozilla, Apollo, Salesforce Ventures, Rive…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 16,
+      "label": "verify:jasper",
+      "phaseIndex": 2,
+      "phaseTitle": "Verify",
+      "agentId": "af2afd69b888ca66b",
+      "model": "claude-fable-5",
+      "state": "done",
+      "startedAt": 1787054139422,
+      "queuedAt": 1787054137616,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "jasper.ai is live in 2026 exactly as described (homepage: \"…",
+      "promptPreview": "You are a skeptical fact-checker working from D:\\PROJECTS\\autocontentcreator (Windows; write files only into .firecrawl/). Today is August 2026.\n\nA researcher produced this dossier on Jasper (jasper.ai):\n{\n  \"name\": \"Jasper (jasper.ai)\",\n  \"category\": \"enterprise\",\n  \"what_they_built\": \"Jasper is an enterprise marketing platform where AI agents do marketing work (research, writing, SEO optimizatio…",
+      "lastProgressAt": 1787054268479,
+      "tokens": 44166,
+      "toolCalls": 9,
+      "durationMs": 129057,
+      "resultPreview": "{\"credible\":true,\"evidence\":\"jasper.ai is live in 2026 exactly as described (homepage: \\\"Put AI agents to work for marketing,\\\" 100+ agents, pipelines, Jasper IQ), and a PR Newswire release dated June 16, 2026 announces the end-to-end GEO Agent; the scraped /geo page independently confirms the dossier's most specific architecture claims (0-100 AI visibility score with a \\\"43/100 — Poor\\\" example, …"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 17,
+      "label": "verify:writer",
+      "phaseIndex": 2,
+      "phaseTitle": "Verify",
+      "agentId": "a7957828dd1ce51e2",
+      "model": "claude-fable-5",
+      "state": "done",
+      "startedAt": 1787054151763,
+      "queuedAt": 1787054149869,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "high",
+      "promptPreview": "You are a skeptical fact-checker working from D:\\PROJECTS\\autocontentcreator (Windows; write files only into .firecrawl/). Today is August 2026.\n\nA researcher produced this dossier on Writer (writer.com):\n{\n  \"name\": \"Writer (writer.com)\",\n  \"category\": \"enterprise\",\n  \"what_they_built\": \"Writer is a full-stack enterprise AI platform (own Palmyra models, a graph-based knowledge store, no-code and …",
+      "lastProgressAt": 1787054239211,
+      "tokens": 40165,
+      "toolCalls": 7,
+      "durationMs": 87448,
+      "resultPreview": "{\"confidence\":\"high\",\"corrections\":[\"Series C was co-led by Premji Invest, Radical Ventures, and ICONIQ Growth (with Adobe Ventures, B Capital, Citi Ventures, IBM Ventures, Salesforce Ventures, Workday Ventures participating) — not 'Iconiq-led'; even Writer's own press release says co-led, so the dossier misreads its cited source\",\"The ~$369M total-raised figure is an unverified Tracxn number; dis…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 18,
+      "label": "verify:compliance-ai",
+      "phaseIndex": 2,
+      "phaseTitle": "Verify",
+      "agentId": "a1fc26d1b891bac68",
+      "model": "claude-fable-5",
+      "state": "done",
+      "startedAt": 1787054170709,
+      "queuedAt": 1787054168788,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "Primary sources confirm the landscape is real: Intelligence…",
+      "promptPreview": "You are a skeptical fact-checker working from D:\\PROJECTS\\autocontentcreator (Windows; write files only into .firecrawl/). Today is August 2026.\n\nA researcher produced this dossier on Marketing-claims compliance AI landscape:\n{\n  \"name\": \"Marketing-Claims Compliance AI Landscape (beyond Writer)\",\n  \"category\": \"enterprise\",\n  \"what_they_built\": \"This is a landscape, not one company, and the honest…",
+      "lastProgressAt": 1787054299808,
+      "tokens": 38181,
+      "toolCalls": 9,
+      "durationMs": 129099,
+      "resultPreview": "{\"credible\":true,\"evidence\":\"Primary sources confirm the landscape is real: IntelligenceBank's own announcement confirms it acquired Red Marker on July 29, 2024; Y Combinator's company directory confirms Luthor AI is a real, operating YC Fall 2024 startup (~$500K seed); ASCI's own Annual Complaints Report 2024-25 communications confirm the exact stat (98% of 1,015 influencer ads examined required …"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 19,
+      "label": "verify:machina-sports",
+      "phaseIndex": 2,
+      "phaseTitle": "Verify",
+      "agentId": "ab3469e4fb660f846",
+      "model": "claude-fable-5",
+      "state": "done",
+      "startedAt": 1787054177718,
+      "queuedAt": 1787054174553,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "Primary sources verified directly: machina.gg/platform is l…",
+      "promptPreview": "You are a skeptical fact-checker working from D:\\PROJECTS\\autocontentcreator (Windows; write files only into .firecrawl/). Today is August 2026.\n\nA researcher produced this dossier on Machina Sports:\n{\n  \"name\": \"Machina Sports\",\n  \"category\": \"niche\",\n  \"what_they_built\": \"Machina Sports is an AI agent platform for the sports industry: broadcasters, betting operators, and teams use it to run agen…",
+      "lastProgressAt": 1787054264818,
+      "tokens": 44857,
+      "toolCalls": 8,
+      "durationMs": 87099,
+      "resultPreview": "{\"credible\":true,\"evidence\":\"Primary sources verified directly: machina.gg/platform is live (scraped 2026-08-18) and contains verbatim the governance/architecture text the dossier quotes (approval-mode dial, six-stage lifecycle, \\\"does not issue autonomous advice\\\", rollback and freshness limitations); github.com/machina-sports/sports-skills is a real MIT-licensed repo with 298 commits and the nam…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 20,
+      "label": "verify:adobe-genstudio",
+      "phaseIndex": 2,
+      "phaseTitle": "Verify",
+      "agentId": "abb6b604c3b402af5",
+      "model": "claude-fable-5",
+      "state": "done",
+      "startedAt": 1787054263777,
+      "queuedAt": 1787054261205,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "Strongest independent evidence: Adobe Experience League pro…",
+      "promptPreview": "You are a skeptical fact-checker working from D:\\PROJECTS\\autocontentcreator (Windows; write files only into .firecrawl/). Today is August 2026.\n\nA researcher produced this dossier on Adobe GenStudio:\n{\n  \"name\": \"Adobe GenStudio\",\n  \"category\": \"enterprise\",\n  \"what_they_built\": \"Adobe GenStudio is Adobe's flagship \\\"content supply chain\\\" for big brands: one connected system where teams plan cam…",
+      "lastProgressAt": 1787054369923,
+      "tokens": 40487,
+      "toolCalls": 9,
+      "durationMs": 106146,
+      "resultPreview": "{\"credible\":true,\"evidence\":\"Strongest independent evidence: Adobe Experience League product documentation shows shipped, operational features — a 'Create a ChatGPT Ad Experience' user guide describes the exact pipeline the dossier claims (guidelines/assets → generation → brand and channel checks → approval → publish → activation in the same flow as Meta/Google CM360), proving the compliance-gated…"
+    }
+  ],
+  "totalTokens": 1020893,
+  "totalToolCalls": 234
+}

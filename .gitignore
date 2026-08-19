@@ -1,0 +1,37 @@
+# Isolated worktrees (never commit checkout contents)
+.worktrees/
+worktrees/
+
+# Local agent / scraper caches
+.claude/
+.firecrawl/
+.grok/
+
+# Secrets and local env
+.env
+.env.*
+!.env.example
+
+# Dependencies and build
+node_modules/
+.venv/
+venv/
+__pycache__/
+*.pyc
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+coverage/
+htmlcov/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Large / confidential local references
+*.pptx
+docs/research/_session-extract.txt

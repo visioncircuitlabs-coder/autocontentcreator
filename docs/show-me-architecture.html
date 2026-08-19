@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Content Machine — Interactive Architecture</title>
+<style>
+  :root{
+    --bg:#0f1117; --panel:#181b23; --card:#1f2330; --line:#2c3140;
+    --text:#e8eaf0; --muted:#9aa1b2;
+    --code:#3b82f6;   --code-bg:#12203a;
+    --agent:#a855f7;  --agent-bg:#251437;
+    --judge:#f59e0b;  --judge-bg:#2e2410;
+    --store:#64748b;  --store-bg:#1c2129;
+    --human:#22c55e;  --human-bg:#0f2a1a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;padding:32px 16px 80px;line-height:1.45}
+  .wrap{max-width:980px;margin:0 auto}
+  h1{font-size:26px;font-weight:700;margin-bottom:6px}
+  .sub{color:var(--muted);font-size:15px;margin-bottom:10px}
+  .hint{display:inline-block;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:6px 16px;font-size:13px;color:var(--muted);margin-bottom:26px}
+  .hint b{color:var(--text)}
+  .legend{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:36px}
+  .lg{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 14px;font-size:13px}
+  .dot{width:12px;height:12px;border-radius:4px;flex:none}
+  .lg small{color:var(--muted)}
+  .layer{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px}
+  .layer h2{font-size:13px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:4px}
+  .layer .desc{font-size:14px;color:var(--muted);margin-bottom:16px}
+  .row{display:flex;flex-wrap:wrap;gap:12px;align-items:stretch}
+  .card{border-radius:12px;padding:12px 14px;flex:1 1 180px;min-width:170px;border:1px solid;cursor:pointer;transition:transform .12s ease, box-shadow .12s ease;position:relative}
+  .card:hover{transform:translateY(-3px);box-shadow:0 6px 24px rgba(0,0,0,.45)}
+  .card::after{content:"⊕";position:absolute;top:10px;right:12px;color:var(--muted);font-size:14px;opacity:.7}
+  .card .tag{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:1px;display:inline-block;margin-bottom:6px;padding:2px 8px;border-radius:20px}
+  .card h3{font-size:15px;margin-bottom:4px}
+  .card p{font-size:12.5px;color:var(--muted)}
+  .c-code {background:var(--code-bg); border-color:#274672}
+  .c-code .tag{background:var(--code);color:#fff}
+  .c-agent{background:var(--agent-bg);border-color:#5b2d86}
+  .c-agent .tag{background:var(--agent);color:#fff}
+  .c-judge{background:var(--judge-bg);border-color:#7a5c14}
+  .c-judge .tag{background:var(--judge);color:#201500}
+  .c-store{background:var(--store-bg);border-color:#3d4655}
+  .c-store .tag{background:var(--store);color:#fff}
+  .c-human{background:var(--human-bg);border-color:#1d5c36}
+  .c-human .tag{background:var(--human);color:#04160b}
+  .flow{display:flex;flex-direction:column;align-items:center;padding:10px 0}
+  .flow .arrow{font-size:20px;color:var(--muted);line-height:1}
+  .flow .lbl{font-size:12px;color:var(--muted);background:var(--bg);border:1px solid var(--line);border-radius:20px;padding:3px 12px;margin:4px 0}
+  .loopband{display:flex;align-items:center;gap:10px;margin-top:14px;background:var(--bg);border:1px dashed #7a5c14;border-radius:10px;padding:10px 14px;font-size:13px;color:var(--muted);cursor:pointer}
+  .loopband:hover{border-color:var(--judge)}
+  .loopband b{color:var(--judge)}
+  .note{font-size:12.5px;color:var(--muted);margin-top:10px;font-style:italic}
+  footer{margin-top:40px;color:var(--muted);font-size:13px;text-align:center}
+  /* modal */
+  .overlay{position:fixed;inset:0;background:rgba(5,7,12,.72);backdrop-filter:blur(3px);display:none;z-index:50}
+  .overlay.open{display:block}
+  .modal{position:fixed;top:0;right:0;bottom:0;width:min(560px,100%);background:var(--panel);border-left:1px solid var(--line);z-index:60;transform:translateX(105%);transition:transform .22s ease;overflow-y:auto;padding:28px 28px 48px}
+  .modal.open{transform:translateX(0)}
+  .modal .close{position:sticky;top:0;float:right;background:var(--card);border:1px solid var(--line);color:var(--text);border-radius:8px;padding:6px 14px;font-size:14px;cursor:pointer}
+  .modal .mtag{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;display:inline-block;margin-bottom:10px;padding:3px 10px;border-radius:20px}
+  .modal h2{font-size:22px;margin-bottom:6px;letter-spacing:0}
+  .modal .mdesc{color:var(--muted);font-size:14.5px;margin-bottom:22px}
+  .modal h4{font-size:12px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin:22px 0 10px}
+  .steps{list-style:none}
+  .steps li{display:flex;gap:12px;margin-bottom:10px;font-size:14px}
+  .steps .n{flex:none;width:24px;height:24px;border-radius:50%;background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted)}
+  .kv{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:13.5px;margin-bottom:8px}
+  .kv b{display:block;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:3px}
+  .wild{border-radius:10px;padding:12px 14px;font-size:13.5px;margin-bottom:8px;background:var(--card);border:1px solid var(--line)}
+  .wild .who{font-weight:600}
+  .wild .vbadge{font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;border-radius:20px;padding:2px 8px;margin-left:8px;vertical-align:1px}
+  .v-high{background:#123d24;color:#4ade80}
+  .v-med{background:#3a2f10;color:#facc15}
+  .wild p{color:var(--muted);margin-top:3px}
+  .wild a{color:#7ab5ff;text-decoration:none;font-size:12.5px}
+  .wild a:hover{text-decoration:underline}
+  .pending{color:var(--muted);font-style:italic;font-size:13.5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>The Content Machine — interactive architecture</h1>
+  <div class="sub">Rule: <b style="color:var(--code)">code</b> wherever the path is predictable · <b style="color:var(--agent)">agents</b> only where the path can't be known in advance · <b style="color:var(--judge)">AI-in-a-box</b> for judgment without autonomy</div>
+  <div class="hint">👆 <b>Click any box</b> to see how it works inside — and who already runs this for real in the industry</div>
+
+  <div class="legend">
+    <div class="lg"><span class="dot" style="background:var(--code)"></span>⚙️ Deterministic code / loop <small>· cheap, testable, never hallucinates</small></div>
+    <div class="lg"><span class="dot" style="background:var(--agent)"></span>🤖 Agent <small>· creative, decides its own next step</small></div>
+    <div class="lg"><span class="dot" style="background:var(--judge)"></span>🧠 AI-in-a-box <small>· one AI call, fixed job, fixed rubric</small></div>
+    <div class="lg"><span class="dot" style="background:var(--store)"></span>🗄️ Memory <small>· passive storage, everything reads it</small></div>
+    <div class="lg"><span class="dot" style="background:var(--human)"></span>👤 Human <small>· final authority</small></div>
+  </div>
+
+  <div class="layer">
+    <h2>Layer 1 · Trend Radar — runs by itself (the heartbeat)</h2>
+    <div class="desc">A scheduled loop, every few hours. Almost no AI cost — intelligence only where it counts.</div>
+    <div class="row">
+      <div class="card c-code" data-id="fetcher"><span class="tag">code · loop</span><h3>Source Fetcher</h3><p>Pulls Google Trends, Reddit, news RSS, competitor feeds. Pure plumbing.</p></div>
+      <div class="card c-judge" data-id="scorer"><span class="tag">AI-in-a-box</span><h3>Relevance Scorer</h3><p>"Is this trend relevant to skincare + this brand? Score 1–10." Fast, cheap model.</p></div>
+      <div class="card c-agent" data-id="researcher"><span class="tag">agent</span><h3>Deep-Dive Researcher</h3><p>Only fires for hot trends (8+). Searches, reads, follows leads. Capped budget per run.</p></div>
+    </div>
+  </div>
+
+  <div class="flow"><div class="arrow">▼</div><div class="lbl">writes trend reports into memory</div><div class="arrow">▼</div></div>
+
+  <div class="layer">
+    <h2>Layer 2 · Brand Brain — the memory (not a loop, not an agent)</h2>
+    <div class="desc">The single source of truth. Every agent reads from it; nothing creates without it.</div>
+    <div class="row">
+      <div class="card c-store" data-id="brandbook"><span class="tag">memory</span><h3>Brand Book</h3><p>Values, tone of voice, visual identity, do's &amp; don'ts.</p></div>
+      <div class="card c-store" data-id="facts"><span class="tag">memory</span><h3>Product Facts</h3><p>Ingredients, approved claims, forbidden claims ("cures", "heals").</p></div>
+      <div class="card c-store" data-id="trends"><span class="tag">memory</span><h3>Trend Reports</h3><p>What the radar found, scored and summarized.</p></div>
+      <div class="card c-store" data-id="track"><span class="tag">memory</span><h3>Track Record</h3><p>Past content + what got approved, rejected, and why.</p></div>
+    </div>
+  </div>
+
+  <div class="flow"><div class="arrow">▼</div><div class="lbl">you press "create" — the factory pipeline starts</div><div class="arrow">▼</div></div>
+
+  <div class="layer">
+    <h2>Layer 3 · Content Factory — a state machine with agents inside</h2>
+    <div class="desc">The conveyor belt is code. The workers on the belt are agents. Every piece moves left → right.</div>
+    <div class="row">
+      <div class="card c-code" data-id="brief"><span class="tag">code</span><h3>1 · Brief Builder</h3><p>Assembles context: chosen trend + brand rules + past learnings. No AI.</p></div>
+      <div class="card c-agent" data-id="strategist"><span class="tag">agent</span><h3>2 · Strategist</h3><p>Turns the brief into campaign concepts &amp; angles.</p></div>
+      <div class="card c-agent" data-id="copywriter"><span class="tag">agent</span><h3>3 · Copywriter</h3><p>Writes captions, hooks, hashtags in brand voice.</p></div>
+      <div class="card c-agent" data-id="artdirector"><span class="tag">agent</span><h3>4 · Art Director</h3><p>Designs the visual: prompt, layout, image generation.</p></div>
+      <div class="card c-judge" data-id="judge"><span class="tag">AI-in-a-box</span><h3>5 · Compliance Judge</h3><p>Fixed rubric: claims check, regulatory rules, brand safety. Verdict + reasons.</p></div>
+      <div class="card c-code" data-id="hardrules"><span class="tag">code</span><h3>6 · Hard Rules</h3><p>Banned-word list, required disclaimers, format checks. Zero AI — cannot be sweet-talked.</p></div>
+    </div>
+    <div class="loopband" data-id="looper">🔁 <span><b>The improvement loop:</b> if the Judge rejects a draft, it goes back to the Copywriter / Art Director with the reasons — <b>maximum 3 rounds</b>, then it either passes or gets flagged for you. <u>Click to see why this cap matters.</u></span></div>
+  </div>
+
+  <div class="flow"><div class="arrow">▼</div><div class="lbl">only compliant drafts reach you</div><div class="arrow">▼</div></div>
+
+  <div class="layer">
+    <h2>Layer 4 · Command Center — humans in charge</h2>
+    <div class="desc">Your dashboard. The machine proposes; you dispose.</div>
+    <div class="row">
+      <div class="card c-human" data-id="review"><span class="tag">human</span><h3>Review &amp; Approve</h3><p>See drafts with the trend that inspired them and the compliance verdict. Approve, reject, or comment.</p></div>
+      <div class="card c-code" data-id="export"><span class="tag">code</span><h3>Preview &amp; Export</h3><p>Pixel-perfect Instagram/LinkedIn previews. Export packs. (Real publishing: later.)</p></div>
+      <div class="card c-code" data-id="feedback"><span class="tag">code</span><h3>Feedback Writer</h3><p>Your rejections + reasons are written back into the Brand Brain's track record.</p></div>
+    </div>
+    <div class="note">↩ That last box closes the loop: every approval or rejection makes tomorrow's drafts better. That's the "machine that learns" part.</div>
+  </div>
+
+  <div class="layer" style="margin-top:24px;border-color:#3d4655">
+    <h2>The industry verdict — what 10 fact-checked dossiers agree on</h2>
+    <div class="desc">A 20-agent research fleet studied Adobe GenStudio, Writer, Typeface, Jasper, storyarb, Machina Sports, Cerebras, trendFinder, the agent-framework landscape, and compliance AI. Every finding was independently fact-checked (Aug 2026). Four things they ALL agree on:</div>
+    <div class="row">
+      <div class="card c-code" style="cursor:default"><span class="tag">consensus</span><h3>Loops win, agents serve</h3><p>Every shipped system — even the ones branded "agentic" — is a deterministic pipeline with bounded AI steps inside. CrewAI, the autonomy flagship, literally added deterministic Flows and recommends them for production.</p></div>
+      <div class="card c-judge" style="cursor:default"><span class="tag">consensus</span><h3>Compliance IS the product</h3><p>Generation is commoditized. What Coca-Cola-class brands pay for is guardrails: claims libraries, locked disclaimers, brand scores, audit trails. And beauty/health has no dedicated compliance AI yet — a real gap.</p></div>
+      <div class="card c-human" style="cursor:default"><span class="tag">consensus</span><h3>Humans approve. Always.</h3><p>Zero production systems let AI publish regulated brand content autonomously. The state of the art is Machina's "approval dial": item-by-item review until trust is earned, then sampled checks — always logged.</p></div>
+      <div class="card c-store" style="cursor:default"><span class="tag">consensus</span><h3>The moat is memory</h3><p>Adobe's and Typeface's 2026 bets are identical: turn every human approval and rejection into brand knowledge. The machine that remembers YOUR decisions is the one competitors can't copy.</p></div>
+    </div>
+  </div>
+
+  <footer>3 agents · 2 AI-in-a-box · everything else is boring, reliable code — which is exactly why a legal team could trust it.<br>Industry references researched &amp; independently fact-checked Aug 2026 · <span style="color:#4ade80">verified</span> = confirmed by primary/independent sources · <span style="color:#facc15">reported</span> = credible but vendor-reported</footer>
+</div>
+
+<div class="overlay" id="overlay"></div>
+<aside class="modal" id="modal"></aside>
+
+<script>
+const DETAILS = {
+  fetcher: {
+    type:'code', tname:'⚙️ code · scheduled loop', title:'Source Fetcher',
+    desc:'The machine’s alarm clock and newspaper delivery. Every 6 hours it wakes up and collects raw signals from the outside world. No AI involved — just reliable plumbing.',
+    steps:[
+      'A scheduler fires every 6 hours (a "cron job" — the same tech that sends your bank statements on time).',
+      'It pulls from each source: Google Trends for search spikes, Reddit skincare communities, beauty-news RSS feeds, competitor Instagram pages.',
+      'Everything is cleaned into one standard shape: a "signal" — what happened, where, when, and a link.',
+      'Duplicates are removed (the same viral story appears in 5 places — we keep one).',
+      'Fresh signals are handed to the Relevance Scorer.'
+    ],
+    notes:[['Cost','Nearly free — no AI calls. A few rupees a month of server time.'],['If a source breaks','The loop logs it and continues with the others. One dead feed never stops the machine.']]
+  },
+  scorer: {
+    type:'judge', tname:'🧠 AI-in-a-box', title:'Relevance Scorer',
+    desc:'A single AI call with one fixed job: "here are 50 signals — score each 1–10 for how relevant it is to THIS brand." It has intelligence but zero freedom.',
+    steps:[
+      'Signals arrive in batches of ~50.',
+      'A fast, cheap model reads them with a fixed rubric: relevance to the brand’s category, audience fit, momentum, brand-safety risk.',
+      'Each signal gets a score and a one-line reason.',
+      'Below 5: discarded. 5–7: stored as background context. 8+: triggers the Deep-Dive Researcher.',
+      'Every score is logged, so you can audit why the machine cared about something.'
+    ],
+    notes:[['Cost','Paise per signal — this is why the radar can run all day.'],['Why not an agent?','Scoring is a fixed judgment, not an exploration. An agent here would cost 100× more and be less consistent.']]
+  },
+  researcher: {
+    type:'agent', tname:'🤖 agent · triggered & capped', title:'Deep-Dive Researcher',
+    desc:'The only part of the radar with real autonomy. When a trend scores 8+, this agent investigates like a junior strategist would — but inside strict limits.',
+    steps:[
+      'Receives one hot trend and the brand context.',
+      'Searches the web, reads the top sources, and — this is the agent part — decides what to look up next based on what it finds.',
+      'Compiles a Trend Report: what’s happening, why now, who’s driving it, content angles, and risks (is this trend controversial? fading?).',
+      'Hard caps enforced by code: max searches, max spend, max time. Then it MUST file its report.',
+      'Report lands in the Brand Brain’s Trend Reports shelf.'
+    ],
+    notes:[['Cost','₹5–20 per deep-dive. Only runs a few times a day, only on winners.'],['The cage','The agent chooses its path; code chooses its limits. That combination is the whole trick of modern agent design.']]
+  },
+  brandbook: {
+    type:'store', tname:'🗄️ memory', title:'Brand Book',
+    desc:'The brand’s soul, written down in machine-readable form. Every creative agent reads this before writing a single word.',
+    steps:[
+      'Brand values and personality ("clinical but warm", "science-first, never preachy").',
+      'Tone-of-voice rules with examples: 10 on-voice sentences, 10 off-voice sentences — examples teach AI better than adjectives.',
+      'Visual identity: colors, typography, photography style, layout rules.',
+      'Do’s and don’ts: topics to avoid, humor limits, competitor mention policy.',
+      'Stored as structured documents; the relevant slices get injected into every agent’s instructions automatically.'
+    ],
+    notes:[['Who edits it','Humans only. The machine reads it, never writes it.'],['Why it matters','This is the difference between "AI content" and "OUR content." Weak brand book = generic output, always.']]
+  },
+  facts: {
+    type:'store', tname:'🗄️ memory · legally loaded', title:'Product Facts',
+    desc:'The compliance source of truth: what each product IS and what may legally be said about it. The most protected data in the whole machine.',
+    steps:[
+      'Each product: ingredients, benefits, usage instructions.',
+      'The claims matrix — the crown jewel: every marketing claim mapped to its status: ✅ approved ("dermatologist tested"), ⚠️ conditional (needs a disclaimer), ❌ forbidden ("cures acne" — that’s a drug claim).',
+      'Market-specific rules: what’s fine in India (ASCI rules) may be illegal in the US (FDA/FTC) and vice versa.',
+      'The Compliance Judge checks every draft against this matrix, line by line.',
+      'Only humans (ideally with legal sign-off) can edit it. Every change is logged.'
+    ],
+    notes:[['Why this design','Compliance lives in DATA, not in AI vibes. Update the matrix once, and every future draft obeys — no retraining, no hoping.']]
+  },
+  trends: {
+    type:'store', tname:'🗄️ memory', title:'Trend Reports',
+    desc:'The radar’s output shelf — what’s happening in the world, pre-digested for creation.',
+    steps:[
+      'Every deep-dive report is stored with its score, sources, and suggested angles.',
+      'Reports decay: a trend from 3 weeks ago automatically loses priority — freshness is baked into the ranking.',
+      'The dashboard shows this shelf as your "what’s hot" feed.',
+      'When you press "create from this trend", the report becomes the seed of the brief.'
+    ],
+    notes:[['Why decay matters','Nothing is more embarrassing than a brand jumping on a trend two weeks late. The machine forgets on purpose.']]
+  },
+  track: {
+    type:'store', tname:'🗄️ memory · the learning organ', title:'Track Record',
+    desc:'Every draft ever made, every verdict, every human decision WITH its reason. This is how the machine gets better every week without any "retraining."',
+    steps:[
+      'Each draft is stored with: the trend that inspired it, the compliance verdict, your approve/reject, and your comment.',
+      'When building a new brief, the Brief Builder pulls the 3 most relevant PAST WINNERS as examples: "write like these, they got approved."',
+      'It also pulls relevant rejections: "avoid this — it was rejected because X."',
+      'Over months this becomes the moat: a taste-memory no competitor can copy, because it’s made of YOUR decisions.'
+    ],
+    notes:[['The founder insight','The machine doesn’t learn by magic. It learns because rejections carry reasons. One-click rejects teach nothing — the UI will nudge for a reason every time.']]
+  },
+  brief: {
+    type:'code', tname:'⚙️ code', title:'Brief Builder',
+    desc:'The factory’s prep station. Before any agent creates anything, code assembles a complete, consistent briefing pack. Deterministic — same inputs, same brief, every time.',
+    steps:[
+      'You pick a trend (or ask for a campaign on a theme).',
+      'Code gathers: the trend report + brand voice rules + the claims matrix for featured products + 3 past winners + format specs (e.g. "Instagram carousel, 5 slides").',
+      'It assembles one structured brief document — the same shape every time.',
+      'Every agent downstream works from THIS brief only. No agent goes hunting for context on its own.'
+    ],
+    notes:[['Why code, not AI','A predictable brief means reproducible quality and testable behavior. This is where most amateur AI pipelines go wrong — they let agents gather their own context and get chaos.']]
+  },
+  strategist: {
+    type:'agent', tname:'🤖 agent', title:'Strategist',
+    desc:'The idea person. Takes one brief and explores the creative space: what are the different ways this brand could ride this trend?',
+    steps:[
+      'Reads the brief (trend + brand + history).',
+      'Generates 3–5 distinct campaign concepts — not variations of one idea, but genuinely different angles (educational, playful, myth-busting, user-story…).',
+      'For each: the core idea, the hook, why it fits both trend and brand, and suggested formats.',
+      'For campaign-pack requests: also a mini content calendar (post 1, post 2, post 3…).',
+      'Concepts go to you OR straight to the Copywriter, depending on the mode you chose.'
+    ],
+    notes:[['Why an agent','Idea generation is exactly where you WANT exploration and surprise. Constraining this into a fixed script would give you beige content.']]
+  },
+  copywriter: {
+    type:'agent', tname:'🤖 agent', title:'Copywriter',
+    desc:'Turns a chosen concept into actual words — in the brand’s voice, for a specific platform.',
+    steps:[
+      'Takes one concept + the brand voice rules + past approved examples.',
+      'Writes the caption: hook line, body, call-to-action, hashtags — tuned per platform (Instagram ≠ LinkedIn).',
+      'Produces 2–3 variants so there’s always a choice.',
+      'Self-checks against the voice rules before submitting.',
+      'When the Compliance Judge sends a draft back, THIS agent does the rewrite, guided by the judge’s specific reasons.'
+    ],
+    notes:[['Model choice','This is where the premium model earns its cost — voice fidelity is the product. Routine tasks elsewhere use cheaper models.']]
+  },
+  artdirector: {
+    type:'agent', tname:'🤖 agent', title:'Art Director',
+    desc:'Owns the visual. Doesn’t just "generate an image" — designs the post like a human art director would.',
+    steps:[
+      'Reads the concept and the visual identity rules (colors, photo style, layout).',
+      'Decides the composition: hero image? product shot? text overlay? carousel structure?',
+      'Writes precise prompts for the image model and generates candidates.',
+      'Applies brand elements deterministically IN CODE — logo placement, fonts, color overlays are done by a template engine, not by the image AI (AI still can’t reliably render your logo).',
+      'Submits the composed visual with the copy as one draft.'
+    ],
+    notes:[['The pro trick','Generated imagery + coded brand layer. Every serious brand-content system separates these — the AI makes the picture, code makes it ON-BRAND.']]
+  },
+  judge: {
+    type:'judge', tname:'🧠 AI-in-a-box · fixed rubric', title:'Compliance Judge',
+    desc:'The in-house lawyer. One AI call with a locked rubric and zero creative freedom. It cannot be talked out of its checklist — by you or by another AI.',
+    steps:[
+      'Receives the finished draft (copy + visual description).',
+      'Checks every sentence against the Product Facts claims matrix: is each claim approved, conditional, or forbidden?',
+      'Scans for regulatory red flags: drug-like language ("heals", "treats", "cures"), absolute promises ("100% results"), before/after implications.',
+      'Checks brand safety: tone, sensitive topics, trend context (is this trend safe to join?).',
+      'Verdict: PASS, or FAIL with numbered, specific reasons — which is exactly what the Copywriter needs to fix it.',
+      'High-risk drafts get a second, independent judge call — two AIs must agree before a health claim passes.'
+    ],
+    notes:[['Never an agent','An agent "deciding what’s probably fine" is how brands end up in regulatory trouble. Fixed rubric + data-driven rules = auditable, defensible, sellable.'],['The moat','Fast content is a commodity. TRUSTED content is a product.']]
+  },
+  hardrules: {
+    type:'code', tname:'⚙️ code · unbribable', title:'Hard Rules',
+    desc:'The last gate before a human sees anything. Pure code — no AI at all — so it is literally impossible to sweet-talk.',
+    steps:[
+      'Banned-word list: exact-match scan (every forbidden claim word, competitor names, crisis words).',
+      'Required elements: market-specific disclaimers present? ad-disclosure tag where needed?',
+      'Format checks: caption length, hashtag count, image dimensions per platform.',
+      'Accessibility: alt-text present for every visual.',
+      'Any failure = automatic bounce-back with the exact violation. No judgment involved, so no argument possible.'
+    ],
+    notes:[['Why both this AND the Judge','The Judge understands meaning ("this implies a medical cure"). Hard Rules catch the literal ("the word ‘cures’ appears"). Belt and suspenders — auditors love the belt.']]
+  },
+  looper: {
+    type:'judge', tname:'🔁 loop · capped at 3', title:'The Improvement Loop',
+    desc:'Generate → judge → revise, at most 3 times. This little loop is where draft quality actually comes from — and the cap is where cost control comes from.',
+    steps:[
+      'Draft fails the Judge → the specific reasons go back to the Copywriter / Art Director.',
+      'They revise — targeted fixes, not a from-scratch redo.',
+      'The revised draft is re-judged. Repeat.',
+      'After 3 rounds without a pass: STOP. The draft is flagged to you with its history — "here’s what it kept failing on."',
+      'A stubborn failure is usually a signal the CONCEPT is un-compliant, not the wording — exactly the thing a human should decide.'
+    ],
+    notes:[['Why cap at 3','Uncapped AI loops burn money and rarely improve after round 3. Code enforces the stop — the agents don’t get a vote.'],['Industry name','This pattern is called "evaluator–optimizer" — the standard quality loop in modern AI systems.']]
+  },
+  review: {
+    type:'human', tname:'👤 human · final authority', title:'Review & Approve',
+    desc:'Your throne. The machine can draft a hundred posts a day, but nothing exists until a human says yes.',
+    steps:[
+      'The dashboard shows a queue of drafts — each with the trend that inspired it, the concept, and the full compliance verdict.',
+      'You see the post exactly as it would look on the platform.',
+      'Approve → moves to export. Reject → the UI asks for a one-line reason (this feeds the learning loop). Comment → sends it back for revision with your note.',
+      'Batch actions for speed — review a week of content in ten minutes.',
+      'Every decision is recorded: who, when, why.'
+    ],
+    notes:[['For the future SaaS','This is where a brand’s own approval chain plugs in later (marketer → brand manager → legal). The pilot keeps it simple: you.']]
+  },
+  export: {
+    type:'code', tname:'⚙️ code', title:'Preview & Export',
+    desc:'Makes approved content usable. In the pilot, this replaces real publishing — deliberately.',
+    steps:[
+      'Pixel-accurate previews: the post rendered as it would appear on Instagram / LinkedIn / X.',
+      'Export a single post or a whole campaign pack: images + captions + schedule suggestion, as ZIP or shareable page.',
+      'A "campaign deck" view for showing a client: trend → insight → concept → posts, on one page.',
+      'Real platform publishing (via official APIs) is a later slice — the machine’s value doesn’t depend on it.'
+    ],
+    notes:[['Why previews matter','Demo quality lives here. A caption in a gray box is a tool; the same caption inside a perfect Instagram frame is a product.']]
+  },
+  feedback: {
+    type:'code', tname:'⚙️ code · closes the loop', title:'Feedback Writer',
+    desc:'The unglamorous little worker that makes the machine smarter every single day.',
+    steps:[
+      'Every approve/reject/comment is written into the Track Record with its reason.',
+      'A nightly job distills patterns: "posts with question hooks get approved 80% of the time", "clinical-tone posts on trend X keep getting rejected."',
+      'These distilled learnings are injected into future briefs automatically.',
+      'Trend outcomes flow back to the radar: trends that produced approved content get their sources boosted.'
+    ],
+    notes:[['Why this is the moat','Month 1: a good content tool. Month 6: a machine tuned to one brand’s taste by hundreds of real decisions. THAT is what a competitor cannot copy.']]
+  }
+};
+
+// Verified industry references — researched & fact-checked Aug 2026 by a 20-agent research fleet
+const INDUSTRY = {
+  fetcher: [
+    {who:"trendFinder (open-source, by Firecrawl's co-founder)", conf:"high", note:"A 6-file script with 4.1k GitHub stars doing exactly this: scheduled run → fetch 7 sites + X → digest to Slack. We verified the code line-by-line — it ran a real marketing team's daily radar with zero servers (GitHub Actions cron). Unmaintained since Feb 2025, so we build our own, but it's the proven blueprint.", url:"https://github.com/ericciarla/trendFinder", linkTitle:"github.com/ericciarla/trendFinder"},
+    {who:"Firecrawl Monitor", conf:"high", note:"The hosted productization of the same pattern — scheduled watching with an AI judge that ignores cosmetic page changes. Our buy-vs-build fallback if the DIY radar ever outgrows us.", url:"https://www.firecrawl.dev/monitor", linkTitle:"firecrawl.dev/monitor"}
+  ],
+  scorer: [
+    {who:"trendFinder's two-stage filter", conf:"high", note:"They filter cheaply twice: the scraper extracts only today's on-topic stories, then ONE model call ranks the survivors. The model never sees raw pages — that's why the daily loop costs almost nothing. We copy this shape exactly.", url:"https://www.firecrawl.dev/blog/trend-finder-typescript", linkTitle:"architecture walkthrough"},
+    {who:"Cerebras (fast, cheap inference)", conf:"high", note:"Chip company serving open models at ~3,000 tokens/sec for $0.35–0.75 per million tokens — roughly 10× cheaper than frontier models (live pricing verified Aug 2026). Right engine for high-volume scoring; wrong one for final brand copy. And never hard-wired — routed through a gateway so backends stay swappable.", url:"https://www.cerebras.ai/pricing", linkTitle:"cerebras.ai/pricing"}
+  ],
+  researcher: [
+    {who:"Anthropic — 'Building Effective Agents'", conf:"high", note:"The industry's canonical design guide: grant real autonomy only when the number of steps can't be known in advance but progress can be verified. Deep-dive research is exactly that case — which is why this is one of only three agents in our whole machine.", url:"https://www.anthropic.com/engineering/building-effective-agents", linkTitle:"the canonical guide"},
+    {who:"storyarb (Alex Lieberman)", conf:"high", note:"Their only agent-like system (beta, Dec 2025) combs engagement data, enriches leads, drafts outreach — and still routes every draft through a human. Lieberman's public ladder: don't attempt autonomous agents ('Phase 4') until AI works inside single bounded steps first. Our capped researcher is deliberately Phase 2–3.", url:"https://thestandard.storyarb.com/p/alex-lieberman-says-youre-wrong-about-ai", linkTitle:"Lieberman interview (Dec 2025)"}
+  ],
+  brandbook: [
+    {who:"Jasper IQ", conf:"high", note:"Jasper's enterprise moat (Ulta Beauty and Sanofi are customers) is exactly this box: voice, style rules, audiences and approved knowledge in ONE persistent layer every agent reads automatically — explicitly contrasted with pasting brand instructions into each prompt.", url:"https://www.jasper.ai/jasper-iq", linkTitle:"jasper.ai/jasper-iq"},
+    {who:"Typeface Arc Graph", conf:"high", note:"The ex-Adobe-CTO's ~$1B-valued platform stores brand guidelines, voice, visual identity and personas as a dedicated data layer that grounds every generation. Verified live Aug 2026, with P&G, AB InBev and Sally Beauty on the logo bar.", url:"https://www.typeface.ai/", linkTitle:"typeface.ai"}
+  ],
+  facts: [
+    {who:"Writer — Product Claims Checker", conf:"high", note:"A live, shipped product (page checked this week): upload copy plus your approved-claims list, and AI marks which claims are approved and which aren't. The genius: compliance becomes a COMPARISON against a claims library — bounded and reliable — never an open 'is this legal?' question. Skincare brand Curology and E.L.F. Beauty are customers. Our claims matrix is this exact idea.", url:"https://writer.com/agents/product-claims-check/", linkTitle:"writer.com claims checker"},
+    {who:"Adobe GenStudio — approved fragments", conf:"high", note:"Adobe never lets AI generate regulated text: claims and disclaimers are stored word-for-word and inserted after generation as locked blocks. The AI writes around them, never through them. Used by Coca-Cola, Estée Lauder and Pfizer-class brands.", url:"https://business.adobe.com/products/genstudio.html", linkTitle:"Adobe GenStudio"}
+  ],
+  trends: [
+    {who:"Machina Sports — freshness honesty", conf:"high", note:"From their published platform docs: every data source carries a freshness expectation, and 'if a provider is late, the agent is late.' We adopt the same honesty — trends carry timestamps and decay, and the machine never pretends to be more real-time than its sources.", url:"https://machina.gg/platform", linkTitle:"machina.gg/platform"},
+    {who:"trendFinder", conf:"high", note:"The proven shape of a trend shelf: a daily digest a human can act on, not a firehose. Ours adds scoring, decay, and one-click 'create from this trend.'", url:"https://github.com/ericciarla/trendFinder", linkTitle:"the repo"}
+  ],
+  track: [
+    {who:"Adobe Brand Intelligence (Apr 2026)", conf:"med", note:"Adobe's newest bet, announced at Summit 2026 (partly still rolling out): turn every human approval, rejection and annotation into a continuously-updated brand knowledge base that generators and checkers draw from. That is literally this box — the industry's biggest player just declared it the moat.", url:"https://business.adobe.com/products/brand-intelligence.html", linkTitle:"Brand Intelligence"},
+    {who:"Typeface Arc Loop", conf:"med", note:"Announced March 2026 as the next phase of their orchestration engine: a closed loop feeding marketing performance back into how the AI operates. Same thesis, from the other billion-dollar player.", url:"https://www.typeface.ai/blog/introducing-typeface-arc-agents", linkTitle:"Arc launch post"}
+  ],
+  brief: [
+    {who:"Adobe's two-zone templates", conf:"high", note:"Their trend-speed trick: pre-approve the container (locked templates, approved fragments, workflows), so when a trend hits, only the variant inside unlocked zones is new — content in hours because nothing waits on legal. Our brief pack is the same move: pre-assembled, pre-approved context.", url:"https://business.adobe.com/blog/from-campaigns-to-continuous-performance", linkTitle:"Adobe's playbook post"},
+    {who:"Jasper's fixed lifecycle", conf:"high", note:"Every Jasper pipeline runs one fixed shape — Plan → Create → Adapt → Activate → Optimize — with agents slotted into stages. The fixed skeleton is what enterprise buyers actually pay for.", url:"https://www.jasper.ai/platform", linkTitle:"jasper.ai/platform"}
+  ],
+  strategist: [
+    {who:"Typeface Arc Agents", conf:"high", note:"Channel-specific agents (Email, Ads, Web, Video…) each encoding that channel's best practices — rather than one do-everything agent. Validates our specialist trio over an omni-agent.", url:"https://www.typeface.ai/blog/introducing-typeface-arc-agents", linkTitle:"Arc Agents"},
+    {who:"storyarb's derivative cascade", conf:"high", note:"Their whole 7-figure agency runs on one strategic move: an expensive anchor insight atomized into newsletters and social posts. Our Strategist does the same — one trend report fanned into a campaign, not isolated one-off posts.", url:"https://www.storyarb.com/", linkTitle:"storyarb.com"}
+  ],
+  copywriter: [
+    {who:"Writer — guardrails at generation time", conf:"high", note:"Brand rules and approved messaging load once and apply to ALL outputs at drafting time, so copy arrives at review nearly clean. Two cheap gates (while writing + after writing) beat one expensive human review round.", url:"https://writer.com/solutions/retail/", linkTitle:"Writer for retail brands"},
+    {who:"storyarb's anti-slop position", conf:"high", note:"The most AI-forward content agency in the game sells 'content only you could publish' — distinctive voice as THE differentiator in a sea of AI slop. This is why our Copywriter learns from real approved examples, not adjectives.", url:"https://www.storyarb.com/", linkTitle:"storyarb.com"}
+  ],
+  artdirector: [
+    {who:"Adobe — locked brand zones", conf:"high", note:"Creative teams pre-define which visual elements are editable vs locked; AI generates only inside the unlocked zones, so every variant is on-brand by construction — not by hoping the model behaves. Exactly our 'AI makes the picture, code makes it on-brand' split.", url:"https://business.adobe.com/products/genstudio/performance-marketing.html", linkTitle:"GenStudio Performance Marketing"},
+    {who:"Coca-Cola × Adobe 'StyleIDs'", conf:"med", note:"Coca-Cola co-developed a system that translates brand guidelines into automated design systems (Adobe press, so treat details as vendor-reported). The world's most famous brand automates visual identity with rules, not vibes.", url:"https://news.adobe.com/news/2026/04/adobe-introduces-brand-intelligence", linkTitle:"Adobe press (Apr 2026)"}
+  ],
+  judge: [
+    {who:"Writer — claims check as comparison", conf:"high", note:"The pattern that actually ships: match copy against a pre-approved claims library — bounded, auditable, reliable. Never 'AI, is this legal?'. Live free tool plus enterprise tier; every serious compliance vendor we researched follows this same shape: AI flags, human approves.", url:"https://writer.com/agents/product-claims-check/", linkTitle:"the claims checker"},
+    {who:"Saifr — flag AND fix", conf:"med", note:"Fidelity-backed compliance AI whose winning pattern (vendor-described) is proposing compliant alternative wording at the moment of flagging. A red X with no fix kills velocity; a suggested rewrite keeps the machine moving. We copy that.", url:"https://www.luthor.ai/resources/performance-advertising-compliance-tools-rias", linkTitle:"compliance-tools landscape"},
+    {who:"The regulators (why this box exists)", conf:"high", note:"The FTC sent ~670 penalty-offense notices to health-product marketers in one 2023 sweep. India's ASCI found 98% of 1,015 influencer ads examined needed modification (2024–25 annual report). Health & beauty social content is the enforcement hot spot on both sides of the world.", url:"https://www.ascionline.in/reports/", linkTitle:"ASCI reports"}
+  ],
+  hardrules: [
+    {who:"Writer's superlative ban-list", conf:"high", note:"Their published guidance flags 'best', 'only', 'guaranteed', 'completely' as legal landmines, preferring qualified language like 'clinically shown to'. A dumb word-list catches most violations before any AI even runs — the cheapest guardrail in the whole machine.", url:"https://writer.com/blog/generative-ai-regulated-industries/", linkTitle:"Writer on regulated industries"},
+    {who:"ASCI disclosure rules (India)", conf:"high", note:"India's ad self-regulator's own enforcement data: influencer/social content fails mostly on missing disclosure labels and unsubstantiated efficacy claims — exactly what a deterministic required-elements check catches. Also watch: draft ASCI guidelines may require labeling AI-generated ads, so our pipeline keeps that as a toggle.", url:"https://www.ascionline.in/reports/", linkTitle:"ascionline.in/reports"}
+  ],
+  looper: [
+    {who:"Anthropic's evaluator–optimizer pattern", conf:"high", note:"The canonical name for this loop, from the industry's standard playbook on agent design: use the simplest structure that passes evaluation, and let code cap the iteration.", url:"https://www.anthropic.com/engineering/building-effective-agents", linkTitle:"Building Effective Agents"},
+    {who:"CrewAI's confession", conf:"high", note:"The flagship 'autonomous agents' framework (57k GitHub stars, checked live) added deterministic Flows and now recommends wrapping agent crews inside them for production. Even the autonomy vendors concede: reliability beats autonomy.", url:"https://github.com/crewaiinc/crewai", linkTitle:"CrewAI repo"},
+    {who:"LangGraph", conf:"high", note:"Won production adoption (Uber, LinkedIn, Replit case studies — vendor-published) precisely by treating agent pipelines as state machines with checkpoints and pause-for-human-approval built in. Our conveyor belt runs on the same theory.", url:"https://langchain-ai.github.io/langgraph/", linkTitle:"LangGraph docs"}
+  ],
+  review: [
+    {who:"Machina Sports — the approval dial", conf:"high", note:"Verified on their platform docs: every content type gets an approval mode — item-by-item human sign-off while new or risky, sampled spot-checks once it has earned trust — and the active mode is logged next to every published item. The cleanest scaling path for human review; we're adopting it.", url:"https://machina.gg/platform", linkTitle:"machina.gg/platform"},
+    {who:"Everyone. Without exception.", conf:"high", note:"Across every shipped system we researched — Adobe, Writer, Jasper, Typeface, Machina, and every compliance vendor — AI drafts and flags, a human approves. Not one production system lets AI publish regulated brand content autonomously. Not one."}
+  ],
+  export: [
+    {who:"Typeface — distribution as half the product", conf:"high", note:"Their content lands directly inside Braze, Salesforce, CMSs and ad platforms — because content that reaches the customer's existing tools is what turns a demo into a paid workflow. Our export pack is deliberate step one of that path.", url:"https://www.typeface.ai/", linkTitle:"typeface.ai"},
+    {who:"Machina — rollback built in", conf:"high", note:"'Being wrong after the fact is a normal operating condition' — withdrawing or correcting published content is a first-class feature in their platform, not an emergency. We inherit that principle from day one.", url:"https://machina.gg/platform", linkTitle:"their governance page"}
+  ],
+  feedback: [
+    {who:"Adobe Brand Intelligence", conf:"med", note:"The industry giant's 2026 thesis, in their own words: convert human review decisions into machine-usable brand knowledge. Every approval you make trains YOUR machine — which is why we log reasons from day one, even before we use them.", url:"https://business.adobe.com/products/brand-intelligence.html", linkTitle:"Brand Intelligence"},
+    {who:"Adobe performance signals", conf:"high", note:"Fatigue alerts and 'refresh this underperforming creative' loops are what their flagship customer quote celebrates ('35× more content… reacting to trends in real time' — real customer, vendor-published numbers). The full performance loop is our phase-2 slice.", url:"https://business.adobe.com/customer-success-stories/lumen.html", linkTitle:"Lumen case study"}
+  ]
+};
+
+const typeColors = { code:['var(--code)','#fff'], agent:['var(--agent)','#fff'], judge:['var(--judge)','#201500'], store:['var(--store)','#fff'], human:['var(--human)','#04160b'] };
+
+const overlay = document.getElementById('overlay');
+const modal = document.getElementById('modal');
+
+function openModal(id){
+  const d = DETAILS[id]; if(!d) return;
+  const [bg,fg] = typeColors[d.type];
+  const wild = (INDUSTRY[id]||[]);
+  const wildHtml = wild.length
+    ? wild.map(w=>`<div class="wild"><span class="who">${w.who}</span><span class="vbadge ${w.conf==='high'?'v-high':'v-med'}">${w.conf==='high'?'verified':'reported'}</span><p>${w.note}</p>${w.url?`<a href="${w.url}" target="_blank" rel="noopener">${w.linkTitle||w.url} ↗</a>`:''}</div>`).join('')
+    : '<div class="pending">Industry research in progress — this section fills in once verified.</div>';
+  modal.innerHTML = `
+    <button class="close" onclick="closeModal()">✕ close</button>
+    <span class="mtag" style="background:${bg};color:${fg}">${d.tname}</span>
+    <h2>${d.title}</h2>
+    <div class="mdesc">${d.desc}</div>
+    <h4>How it works</h4>
+    <ol class="steps">${d.steps.map((s,i)=>`<li><span class="n">${i+1}</span><span>${s}</span></li>`).join('')}</ol>
+    <h4>Worth knowing</h4>
+    ${d.notes.map(([k,v])=>`<div class="kv"><b>${k}</b>${v}</div>`).join('')}
+    <h4>Who already does this, for real</h4>
+    ${wildHtml}`;
+  overlay.classList.add('open'); modal.classList.add('open');
+  modal.scrollTop = 0;
+}
+function closeModal(){ overlay.classList.remove('open'); modal.classList.remove('open'); }
+overlay.addEventListener('click', closeModal);
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+document.querySelectorAll('[data-id]').forEach(el=>el.addEventListener('click', ()=>openModal(el.dataset.id)));
+</script>
+</body>
+</html>
