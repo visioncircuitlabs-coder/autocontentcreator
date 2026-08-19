@@ -27,6 +27,7 @@ Every box is clickable. Each panel ends with who already ships a version of that
 | `docs/research/raw-dossiers-2026-08-18.json` | Full dossiers with source links |
 | `docs/research/2026-08-19-cerebras-company-brain.md` | What Cerebras *Knowledge* actually is (the company brain) |
 | `private deck notes (not in this repo)` | What we take / reject from the reference pitch deck |
+| `docs/research/sota/2026-08-19-sota-scorecard.md` | Chosen process + tools per box (X + GitHub swarm, Aug 19) |
 
 ## How we will run it (later)
 
