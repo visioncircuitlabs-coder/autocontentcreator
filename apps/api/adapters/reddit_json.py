@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import logging
 
 import httpx
@@ -68,6 +69,18 @@ class RedditJsonSource:
                 post_url = str(data.get("url") or "")
             title = str(data.get("title") or "")
             snippet = str(data.get("selftext") or "")
+            meta: dict[str, object] = {}
+            if post_id:
+                meta["id"] = f"t3_{post_id}"
+            try:
+                meta["num_comments"] = int(data.get("num_comments") or 0)
+            except (TypeError, ValueError):
+                meta["num_comments"] = 0
+            try:
+                meta["score"] = int(data.get("score") or 0)
+            except (TypeError, ValueError):
+                pass
+            raw_ref = json.dumps(meta, separators=(",", ":")) if meta else ""
             signal = build_signal(
                 source="reddit",
                 url=post_url,
@@ -76,7 +89,7 @@ class RedditJsonSource:
                 query_id=query_id,
                 happened_at=parse_unix(data.get("created_utc")),
                 lang="en",
-                raw_ref=f"t3_{post_id}" if post_id else "",
+                raw_ref=raw_ref,
             )
             if signal is not None:
                 signals.append(signal)

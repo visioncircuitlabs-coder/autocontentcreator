@@ -16,6 +16,7 @@ def _signal(
     url: str = "https://example.com/skincare",
     happened_at: datetime | None = None,
     seen_at: datetime | None = None,
+    raw_ref: str = "",
 ) -> Signal:
     now = datetime(2026, 8, 19, 12, 0, tzinfo=timezone.utc)
     return Signal(
@@ -27,7 +28,7 @@ def _signal(
         title=title,
         snippet=snippet,
         query_id="skincare_in",
-        raw_ref="",
+        raw_ref=raw_ref,
     )
 
 
@@ -170,6 +171,32 @@ def test_velocity_recency_and_source_rank() -> None:
     assert 1 <= old_v <= 10
     assert 1 <= fresh_v <= 10
     assert fresh_v > old_v
+
+
+def test_reddit_comment_volume_bumps_velocity() -> None:
+    from boxes.scorer import score_velocity
+
+    now = datetime(2026, 8, 19, 12, 0, tzinfo=timezone.utc)
+    happened = now - timedelta(hours=1)
+    quiet = _signal(
+        signal_id="quiet",
+        source="reddit",
+        happened_at=happened,
+        seen_at=now,
+        raw_ref='{"id":"t3_a","num_comments":0,"score":1}',
+    )
+    loud = _signal(
+        signal_id="loud",
+        source="reddit",
+        happened_at=happened,
+        seen_at=now,
+        raw_ref='{"id":"t3_b","num_comments":150,"score":400}',
+    )
+    quiet_v = score_velocity(quiet, now=now)
+    loud_v = score_velocity(loud, now=now)
+    assert 1 <= quiet_v <= 10
+    assert 1 <= loud_v <= 10
+    assert loud_v > quiet_v
 
 
 def test_run_score_persists_to_scores(tmp_path, monkeypatch) -> None:

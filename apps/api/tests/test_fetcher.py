@@ -44,6 +44,8 @@ REDDIT_PAYLOAD = {
                     "url": "https://www.reddit.com" + REDDIT_PERMALINK,
                     "created_utc": 1755600000,
                     "subreddit": "IndianSkincareAddicts",
+                    "num_comments": 42,
+                    "score": 110,
                 },
             }
         ]
@@ -162,7 +164,8 @@ def test_reddit_json_maps_to_signal() -> None:
     assert signal.title == "Best moisturizer in India"
     assert "ceramide cream" in signal.snippet
     assert signal.url.endswith(REDDIT_PERMALINK)
-    assert signal.raw_ref == "t3_abc123"
+    assert '"id":"t3_abc123"' in signal.raw_ref
+    assert '"num_comments":42' in signal.raw_ref
     assert signal.market == "IN"
 
 

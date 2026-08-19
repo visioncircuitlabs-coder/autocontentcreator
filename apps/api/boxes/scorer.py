@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
@@ -118,8 +119,35 @@ def keyword_brand_fit(signal: Signal) -> BrandFitOut:
     return BrandFitOut(brand_fit=fit, reason=reason)
 
 
+def _reddit_comment_bump(raw_ref: str) -> int:
+    """Bump from num_comments in reddit raw_ref JSON. Missing/invalid → 0."""
+    if not raw_ref or not raw_ref.strip().startswith("{"):
+        return 0
+    try:
+        payload = json.loads(raw_ref)
+    except json.JSONDecodeError:
+        return 0
+    if not isinstance(payload, dict):
+        return 0
+    try:
+        n = int(payload.get("num_comments") or 0)
+    except (TypeError, ValueError):
+        return 0
+    if n >= 100:
+        return 3
+    if n >= 25:
+        return 2
+    if n >= 5:
+        return 1
+    return 0
+
+
 def score_velocity(signal: Signal, *, now: datetime | None = None) -> int:
-    """Recency + source rank → 1–10. Uses happened_at (GDELT seendate / reddit created)."""
+    """Recency + source rank (+ reddit comment volume) → 1–10.
+
+    GDELT uses happened_at from seendate. Reddit also uses created time, then
+    bumps from num_comments in raw_ref JSON when present.
+    """
     stamp = now or datetime.now(timezone.utc)
     when = signal.happened_at or signal.seen_at
     if when.tzinfo is None:
@@ -140,7 +168,8 @@ def score_velocity(signal: Signal, *, now: datetime | None = None) -> int:
         recency = 1
 
     rank = SOURCE_RANK.get(signal.source, 1)
-    return max(1, min(10, recency + rank))
+    bump = _reddit_comment_bump(signal.raw_ref) if signal.source == "reddit" else 0
+    return max(1, min(10, recency + rank + bump))
 
 
 def _brand_fit_via_chat(signal: Signal, chat: ChatModel) -> tuple[BrandFitOut, str, Safety]:
