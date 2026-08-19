@@ -14,7 +14,7 @@ from boxes.loop import run_loop
 from boxes.researcher import run_research
 from boxes.scorer import run_score
 from boxes.strategist import run_strategist
-from db import upsert_draft, upsert_reports
+from db import upsert_concepts, upsert_draft, upsert_reports
 from models import Draft, TrendReport
 from ports import ChatModel, ImageGen, TrendSource
 
@@ -76,6 +76,7 @@ def run_factory(
     """brief → strategist → copywriter → loop (rules+judge) → art_director → queue."""
     brief_id = build_brief(report_id)
     concepts = run_strategist(brief_id, chat=chat)
+    upsert_concepts(concepts)
     queued: list[Draft] = []
     for concept in concepts[:MAX_FACTORY_CONCEPTS]:
         variants = run_copywriter(concept, round=1, chat=chat)

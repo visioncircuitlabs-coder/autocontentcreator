@@ -6,7 +6,7 @@ import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
 
-from models import Brief, Decision, Draft, Score, Signal, TrendReport
+from models import Brief, Concept, Decision, Draft, Score, Signal, TrendReport
 
 DEFAULT_SQLITE_PATH = "data/demo.db"
 
@@ -89,6 +89,12 @@ def init_db() -> None:
             CREATE TABLE IF NOT EXISTS briefs (
                 brief_id TEXT PRIMARY KEY,
                 report_id TEXT NOT NULL,
+                pack TEXT NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS concepts (
+                concept_id TEXT PRIMARY KEY,
+                brief_id TEXT NOT NULL,
                 pack TEXT NOT NULL
             );
 
@@ -369,6 +375,39 @@ def upsert_brief(brief: Brief) -> None:
             (brief.brief_id, brief.report_id, brief.model_dump_json()),
         )
         conn.commit()
+    finally:
+        conn.close()
+
+
+def upsert_concepts(concepts: list[Concept]) -> None:
+    """Persist the strategist grid for a brief. Same concept_id replaces."""
+    if not concepts:
+        return
+    init_db()
+    conn = connect()
+    try:
+        conn.executemany(
+            """
+            INSERT OR REPLACE INTO concepts (concept_id, brief_id, pack)
+            VALUES (?, ?, ?)
+            """,
+            [(item.concept_id, item.brief_id, item.model_dump_json()) for item in concepts],
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def list_concepts(brief_id: str) -> list[Concept]:
+    """Load the concept grid for one brief, or empty if none stored."""
+    init_db()
+    conn = connect()
+    try:
+        rows = conn.execute(
+            "SELECT pack FROM concepts WHERE brief_id = ? ORDER BY concept_id",
+            (brief_id,),
+        ).fetchall()
+        return [Concept.model_validate_json(row["pack"]) for row in rows]
     finally:
         conn.close()
 

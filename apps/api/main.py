@@ -2,6 +2,7 @@ import logging
 import time
 from collections import defaultdict, deque
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Literal
 
 from fastapi import FastAPI, Request
@@ -14,9 +15,11 @@ from boxes.export import export_pack
 from boxes.fetcher import run_fetch
 from boxes.review import decide
 from db import (
+    get_brief,
     get_draft,
     get_report,
     init_db,
+    list_concepts,
     list_drafts,
     list_queue,
     list_reports,
@@ -118,7 +121,13 @@ def radar_run(request: Request):
             content={"error": "Too many fetches. Please wait a minute and try again."},
         )
     try:
-        return run_radar()
+        deep_dives = run_radar()
+        return {
+            "reports": list_reports(),
+            "scores": list_scores(),
+            "signals_seen": list_signals(),
+            "deep_dives": deep_dives,
+        }
     except ValueError as exc:
         return _friendly(exc)
     except Exception:
@@ -202,6 +211,20 @@ def get_one_report(report_id: str):
     return report
 
 
+@app.get("/briefs/{brief_id}")
+def get_one_brief(brief_id: str):
+    brief = get_brief(brief_id)
+    if brief is None:
+        return JSONResponse(
+            status_code=404,
+            content={"error": "That brief is not on the shelf."},
+        )
+    return {
+        **brief.model_dump(mode="json"),
+        "concepts": [item.model_dump(mode="json") for item in list_concepts(brief_id)],
+    }
+
+
 @app.get("/drafts")
 def get_drafts():
     return list_drafts()
@@ -216,6 +239,28 @@ def get_one_draft(draft_id: str):
             content={"error": "That draft is not in the queue."},
         )
     return draft
+
+
+@app.get("/drafts/{draft_id}/image")
+def get_draft_image(draft_id: str):
+    draft = get_draft(draft_id)
+    if draft is None:
+        return JSONResponse(
+            status_code=404,
+            content={"error": "That draft is not in the queue."},
+        )
+    if not draft.image_path:
+        return JSONResponse(
+            status_code=404,
+            content={"error": "No picture on that ticket yet."},
+        )
+    path = Path(draft.image_path)
+    if not path.is_file():
+        return JSONResponse(
+            status_code=404,
+            content={"error": "No picture on that ticket yet."},
+        )
+    return FileResponse(path, media_type="image/png")
 
 
 @app.get("/queue")

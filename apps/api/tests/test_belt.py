@@ -131,7 +131,7 @@ def test_belt_on_fixtures_produces_queued_draft(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     from boxes.belt import run_factory, run_radar
-    from db import get_draft, list_queue
+    from db import get_draft, list_concepts, list_queue
 
     monkeypatch.setenv("IMAGE_GEN_MODE", "stub")
     monkeypatch.setenv("IMAGE_OUT_DIR", str(tmp_path / "images"))
@@ -164,6 +164,9 @@ def test_belt_on_fixtures_produces_queued_draft(
     assert "flag_human" in (loaded.judge or {})
     assert "cures" not in loaded.caption.lower()
     assert "pcos" not in loaded.caption.lower()
+    grid = list_concepts(loaded.brief_id)
+    assert len(grid) >= 3
+    assert grid[0].angle
 
 
 def test_run_factory_unknown_report_fails() -> None:
@@ -222,7 +225,11 @@ def test_http_lists_and_radar_factory(
 
     radar = client.post("/radar/run")
     assert radar.status_code == 200
-    assert radar.json()[0]["report_id"] == "rep_http"
+    envelope = radar.json()
+    assert envelope["deep_dives"][0]["report_id"] == "rep_http"
+    assert "reports" in envelope
+    assert "scores" in envelope
+    assert "signals_seen" in envelope
 
     factory = client.post("/factory/run", json={"report_id": "rep_http"})
     assert factory.status_code == 200
