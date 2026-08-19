@@ -13,11 +13,16 @@ from ports import ChatModel
 Rewriter = Callable[[Draft, list[str]], Draft]
 
 
-def default_rewrite(draft: Draft, reasons: list[str]) -> Draft:
+def default_rewrite(
+    draft: Draft,
+    reasons: list[str],
+    *,
+    chat: ChatModel | None = None,
+) -> Draft:
     """Send numbered fail reasons to the copywriter; keep one cleaned caption."""
     from boxes.copywriter import rewrite_draft
 
-    return rewrite_draft(draft, reasons)
+    return rewrite_draft(draft, reasons, chat=chat)
 
 
 def run_loop(
@@ -30,7 +35,13 @@ def run_loop(
     organic: bool = True,
 ) -> Draft:
     """Evaluate hard rules + judge. On FAIL, rewrite. Stop at max_rounds."""
-    rewrite_fn = rewriter or default_rewrite
+    if rewriter is None:
+
+        def rewrite_fn(draft: Draft, reasons: list[str]) -> Draft:
+            return default_rewrite(draft, reasons, chat=chat)
+
+    else:
+        rewrite_fn = rewriter
     claim_list = claims if claims is not None else load_claim_models()
     current = draft if draft.round >= 1 else draft.model_copy(update={"round": 1})
 

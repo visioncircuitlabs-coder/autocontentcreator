@@ -175,16 +175,58 @@ def test_copywriter_rewrite_uses_numbered_reasons() -> None:
     from boxes.copywriter import run_copywriter
 
     brief_id = _seed_report()
+    seed = (
+        "Monday light. Miracle glow water for humid days. "
+        "Dermatologist tested Hydro Boost."
+    )
     drafts = run_copywriter(
         _concept(brief_id),
         round=2,
-        judge_reasons=['1. forbidden claim "cures acne"'],
-        seed_caption="This gel cures acne overnight.",
+        judge_reasons=['1. drop "Miracle glow water" — unsubstantiated'],
+        seed_caption=seed,
+        chat=None,
     )
     assert 2 <= len(drafts) <= 3
     assert all(item.round == 2 for item in drafts)
     blob = _blob(drafts)
-    assert "cures" not in blob
+    assert "miracle glow water" not in blob
+    assert any("monday light" in item.caption.lower() for item in drafts)
+
+
+def test_loop_threads_chat_to_copywriter() -> None:
+    from boxes.copywriter import CopyOut
+    from boxes.hard_rules import load_disclaimer
+    from boxes.judge import ImpliedClaimOut
+    from boxes.loop import run_loop
+
+    seen: list[str] = []
+    disc = load_disclaimer()
+    clean = "Monday light. Dermatologist tested Hydro Boost.\n\n" + disc
+
+    class FactoryChat:
+        def complete_json(self, system: str, user: str, schema: type) -> BaseModel:
+            seen.append(schema.__name__)
+            if schema is ImpliedClaimOut:
+                return ImpliedClaimOut(implied=False)
+            assert schema is CopyOut
+            assert "<reasons>" in user
+            return CopyOut(captions=[clean, "Humidity commute. Dermatologist tested.\n\n" + disc])
+
+    out = run_loop(
+        Draft(
+            draft_id="d-chat",
+            brief_id="b1",
+            caption="This gel cures acne overnight.",
+            variant=1,
+            image_path=None,
+            judge=None,
+            rules=[],
+            round=1,
+        ),
+        chat=FactoryChat(),
+    )
+    assert "CopyOut" in seen
+    assert "cures" not in out.caption.lower()
 
 
 def test_loop_default_rewrite_uses_copywriter() -> None:

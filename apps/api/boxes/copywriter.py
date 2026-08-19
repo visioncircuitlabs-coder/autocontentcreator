@@ -45,6 +45,67 @@ class CopyOut(BaseModel):
     captions: list[str] = Field(default_factory=list)
 
 
+_REPLACE_RE = re.compile(
+    r'(?i)replace\s+["“”]([^"“”]+)["“”]\s+(?:with|by|→|->)\s+["“”]([^"“”]+)["“”]'
+)
+_QUOTED_RE = re.compile(r'["“”]([^"“”]+)["“”]')
+
+
+def _rewrite_ops(reasons: list[str]) -> tuple[list[tuple[str, str]], list[str]]:
+    """Quoted replace pairs, then other quoted spans to drop."""
+    replacements: list[tuple[str, str]] = []
+    skip: set[str] = set()
+    for reason in reasons:
+        for match in _REPLACE_RE.finditer(reason or ""):
+            old, new = match.group(1).strip(), match.group(2).strip()
+            if not old:
+                continue
+            replacements.append((old, new))
+            skip.add(old.lower())
+            skip.add(new.lower())
+    drops: list[str] = []
+    seen: set[str] = set()
+    for reason in reasons:
+        for match in _QUOTED_RE.finditer(reason or ""):
+            span = match.group(1).strip()
+            if len(span) < 2:
+                continue
+            key = span.lower()
+            if key in skip or key in seen:
+                continue
+            seen.add(key)
+            drops.append(span)
+    return replacements, drops
+
+
+def _sub_span(text: str, span: str, repl: str) -> str:
+    parts = [re.escape(p) for p in re.split(r"\s+", span.strip()) if p]
+    if not parts:
+        return text
+    return re.sub(r"\s+".join(parts), repl, text, flags=re.IGNORECASE)
+
+
+def _tidy_body(text: str) -> str:
+    out = re.sub(r"[ \t]{2,}", " ", text or "")
+    out = re.sub(r"\s+([,.;:!?])", r"\1", out)
+    out = re.sub(r"([,.;:!?]){2,}", r"\1", out)
+    out = re.sub(r"\n{3,}", "\n\n", out)
+    return out.strip(" \t,;:-")
+
+
+def apply_judge_reasons(text: str, reasons: list[str]) -> str:
+    """Apply numbered rewrite hints with no model: replace quoted pairs, drop quoted spans."""
+    if not reasons:
+        return text or ""
+    replacements, drops = _rewrite_ops(reasons)
+    out = text or ""
+    for old, new in replacements:
+        out = _sub_span(out, old, new)
+    for span in drops:
+        out = _sub_span(out, span, "")
+    return _tidy_body(out)
+
+
 def _product_label(sku: str) -> str:
     if "HYDRO" in (sku or "").upper():
         return "Hydro Boost"
@@ -79,11 +140,21 @@ def _replace_forbidden(text: str, approved: str) -> str:
     return out
 
 
-def _finish_caption(text: str, *, approved: str, disc: str) -> str | None:
+def _finish_caption(
+    text: str,
+    *,
+    approved: str,
+    disc: str,
+    reasons: list[str] | None = None,
+) -> str | None:
     body = without_disclaimer(text or "", disc)
+    if reasons:
+        body = apply_judge_reasons(body, reasons)
     body = _replace_forbidden(body, approved)
     body = strip_banned_tokens(body)
-    body = re.sub(r"\n{3,}", "\n\n", body).strip()
+    if reasons:
+        body = apply_judge_reasons(body, reasons)
+    body = _tidy_body(body)
     if not body or contains_disease(body):
         return None
     if has_benefit_line(body) or has_disclaimer(text or "", disc):
@@ -95,7 +166,14 @@ def _finish_caption(text: str, *, approved: str, disc: str) -> str | None:
     return cleaned.strip()
 
 
-def _template_captions(concept: Concept, *, approved: str, disc: str, product: str) -> list[str]:
+def _template_captions(
+    concept: Concept,
+    *,
+    approved: str,
+    disc: str,
+    product: str,
+    reasons: list[str] | None = None,
+) -> list[str]:
     hook = concept.hook or concept.angle
     pain = concept.claim_safe_pain
     angle = concept.angle
@@ -118,7 +196,30 @@ def _template_captions(concept: Concept, *, approved: str, disc: str, product: s
     ]
     out: list[str] = []
     for caption in raw:
-        finished = _finish_caption(caption, approved=approved, disc=disc)
+        finished = _finish_caption(caption, approved=approved, disc=disc, reasons=reasons)
+        if finished:
+            out.append(finished)
+    return out
+
+
+def _seed_variations(
+    revised: str,
+    concept: Concept,
+    *,
+    approved: str,
+    disc: str,
+    reasons: list[str],
+) -> list[str]:
+    body = without_disclaimer(revised, disc).strip()
+    hook = (concept.hook or concept.angle).strip()
+    extras = [revised]
+    if hook and hook.lower() not in body.lower():
+        extras.append(f"{hook}\n\n{body}")
+    if "add to routine" not in body.lower():
+        extras.append(f"{body}\nSoft close: add to routine.")
+    out: list[str] = []
+    for caption in extras:
+        finished = _finish_caption(caption, approved=approved, disc=disc, reasons=reasons)
         if finished:
             out.append(finished)
     return out
@@ -213,10 +314,12 @@ def run_copywriter(
     approved = _approved_phrase(brief)
     disc = load_disclaimer()
     product = _product_label(brief.sku if brief else "DEMO-HYDRO-BOOST")
-    templates = _template_captions(concept, approved=approved, disc=disc, product=product)
+    templates = _template_captions(
+        concept, approved=approved, disc=disc, product=product, reasons=reasons
+    )
 
     raw: list[str] = []
-    if reasons and seed_caption:
+    if seed_caption:
         raw.append(seed_caption)
     if chat is not None:
         raw.extend(
@@ -228,21 +331,32 @@ def run_copywriter(
                 chat=chat,
             )
         )
-    raw.extend(templates)
 
     finished: list[str] = []
     for caption in raw:
-        item = _finish_caption(caption, approved=approved, disc=disc)
+        item = _finish_caption(caption, approved=approved, disc=disc, reasons=reasons)
         if item:
             finished.append(item)
-    finished = _rank(_unique(finished), approved=approved)
-    if len(finished) < MIN_DRAFTS:
-        finished = _unique(finished + templates)
-    captions = finished[:MAX_DRAFTS]
+
+    if reasons and seed_caption:
+        seed_based = _seed_variations(
+            finished[0] if finished else seed_caption,
+            concept,
+            approved=approved,
+            disc=disc,
+            reasons=reasons,
+        )
+        ordered = _unique(seed_based + finished)
+        if len(ordered) < MIN_DRAFTS:
+            ordered = _unique(ordered + templates)
+        captions = ordered[:MAX_DRAFTS]
+    else:
+        ranked = _rank(_unique(finished + templates), approved=approved)
+        captions = ranked[:MAX_DRAFTS]
+
     if len(captions) < MIN_DRAFTS:
         logger.warning("copywriter produced %s captions; padding from templates", len(captions))
-        captions = (captions + templates)[:MAX_DRAFTS]
-        captions = _unique(captions)[:MAX_DRAFTS]
+        captions = _unique(captions + templates)[:MAX_DRAFTS]
     return _to_drafts(captions, concept=concept, round_no=round)
 
 
