@@ -66,7 +66,7 @@ def run_loop(
         flag_human = (not passed) and current.round >= max_rounds
 
         payload = verdict.model_dump()
-        payload["flag_human"] = flag_human
+        payload["flag_human"] = flag_human  # in-memory only; Task 10 persists drafts to SQLite
         current = current.model_copy(
             update={
                 "rules": rules,
