@@ -22,13 +22,13 @@
 | [017-task-8-factory-text.md](017-task-8-factory-text.md) | Brief, strategist, copywriter | filled (re-review clean at 750a86b) |
 | [018-task-9-art-director.md](018-task-9-art-director.md) | Image port + compositor | filled (review clean at 865446a; $5 unspent) |
 | [019-task-10-review-export-belt.md](019-task-10-review-export-belt.md) | Review, feedback, export, belt | filled (review clean at 24e103a; first concept only accepted; $5 unspent) |
-| [020-task-11-command-center.md](020-task-11-command-center.md) | Phone-usable UI story | filled (review clean at 1bb268a after fixture fix; Docker may be stale until Task 12) |
-| [021-task-12-ci-docs.md](021-task-12-ci-docs.md) | CI + demo README | stub — not built |
+| [020-task-11-command-center.md](020-task-11-command-center.md) | Phone-usable UI story | filled (review clean at 1bb268a after fixture fix; compose rebuild claimed in Task 12) |
+| [021-task-12-ci-docs.md](021-task-12-ci-docs.md) | CI + demo README | filled (chore 32b37fa + docs pack 9a2d705; $5 unspent; remote Actions not seen here) |
 
 ## One-line rulings a reviewer must not miss
 
 - The demo is the **same 17 boxes** as production, with cheaper guts. It is not “analyze + one image.”
-- **Free adapters are the default.** About $5 of paid tooling is allowed only if it clearly improves the *show*, after the stub image exists. Not spent as of Task 9 — stub PNG is showable.
+- **Free adapters are the default.** About $5 of paid tooling is allowed only if it clearly improves the *show*, after the stub image exists. Not spent as of Task 12 — stub PNG is showable.
 - **No CrewAI.** Code moves work; models sit inside steps.
 - **Web pages are data, never instructions.**
 - **No autonomous publish.** A named human must approve, with a reason.

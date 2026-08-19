@@ -242,7 +242,7 @@ A stranger can:
 
 If any of those fail, the demo is not done.
 
-As of this writing, that walk is **not complete**. Tasks 9–12 are stubs (`docs/decisions/000-index.md:23-26`). Task 8 (brief/strategist/copywriter) is in fix/review. Radar through rules/judge/loop exists as modules and tests. Command Center story pages, belt, review, export, and the image compositor are still later tasks.
+As of HEAD on this branch (Task 12 filled), that walk **exists**: Art Director stub PNG (`865446a`), review/export/belt (`24e103a`), Command Center (`1bb268a`), CI + demo docs (`32b37fa`) + why-journal pack (`9a2d705`). `$5` still unspent (`IMAGE_GEN_MODE=stub`). Remote GitHub Actions green-from-this-laptop: **not seen** — workflow file is present. See `docs/decisions/000-index.md` and `021-task-12-ci-docs.md`.
 
 ---
 
@@ -403,7 +403,7 @@ The scorecard (`docs/research/sota/2026-08-19-sota-scorecard.md:1-5`) is “the 
 7. **Claims are objects. Compare, don’t ask “is this legal?”** Demo Task 6 fixtures: approved “dermatologist tested”; forbidden “cures acne”, “heals”, “#1 sunscreen.”
 8. **Plain-code belt, Instructor JSON, loop N=3.** Demo belt is still Task 10. Loop max 3 is already in Task 7.
 9. **Grid, not one idea. Indic register. No disease-pain.** Demo Task 8 tests forbid “PCOS.”
-10. **AI paints unlocked zones; code locks logo/disclaimer.** Demo Task 9 (not built). `$5` if spent at all is this slot.
+10. **AI paints unlocked zones; code locks logo/disclaimer.** Demo Task 9 built (`865446a`); stub PNG is the show default. `$5` if spent at all remains this slot — still unspent as of Task 12.
 11. **Library compare + flag-and-fix. Unbribable lists first.** Demo Task 7.
 12. **Humans last yes on irreversible verbs. Reviewer ≠ builder.** Demo has a single user, still requires a reason.
 13. **Do not buy Adobe / Typeface / Veeva / Writer as the product.** Demo plan names Veeva and Writer as forbidden until production — and production still forbids buying them *as the product*.
@@ -440,21 +440,21 @@ There are **two different envelopes**. Mixing them is how a demo accidentally bu
 
 > free adapters are the default. ~$5 optional only if a tool clearly improves the show. Do not buy Firecrawl/Brandwatch/Recraft for the demo. IMAGE_GEN stays a port (stub default). Do not spend the $5 unless image quality is the leftover demo gap after Task 9.
 
-Index (`docs/decisions/000-index.md:31`):
+Index (`docs/decisions/000-index.md`):
 
-> **Free adapters are the default.** About $5 of paid tooling is allowed only if it clearly improves the *show*, after the stub image exists. Not spent as of Task 8.
+> **Free adapters are the default.** About $5 of paid tooling is allowed only if it clearly improves the *show*, after the stub image exists. Not spent as of Task 12 — stub PNG is showable.
 
-Task 9 stub (`docs/decisions/018-task-9-art-director.md:11`):
+Task 9 lock (`docs/decisions/018-task-9-art-director.md`):
 
 > Free default. The optional ~$5 budget is *only* for this box, and only if the stub image is not showable enough. Do not buy Recraft/Firecrawl here unless the controller explicitly opens the budget after seeing the stub.
 
-**As of Task 8 the $5 has not been spent.** Evidence:
+**As of Task 12 the $5 has not been spent.** Evidence:
 
-- Task 8 is factory *text* (brief, strategist, copywriter). It does not call an image API. Report: `.superpowers/sdd/2026-08-19-demo/task-8-report.md:9-10` — “Factory text path only. No Art Director.”
-- Task 9 (the only intended spend slot) is **not built** (`docs/decisions/018-task-9-art-director.md:1-3`; index status “stub — not built”).
-- `apps/api/requirements.txt` has no Firecrawl, Brandwatch, Recraft, Writer, Veeva, Instructor, or LiteLLM packages. It is FastAPI, Uvicorn, Pydantic v2, pytest, httpx, feedparser, PyYAML.
-- `.env.example:16-19` leaves `IMAGE_GEN_URL=`, `IMAGE_GEN_KEY=`, `IMAGE_GEN_MODE=stub`.
-- Fetcher test `apps/api/tests/test_fetcher.py:327-336` asserts default sources include `gdelt`, `news_rss`, `reddit` and **do not** include `brandwatch`, `firecrawl`, or `tiktok`.
+- Task 9 built the Pillow stub + `ImageGen` port (`865446a`); ledger: stub PNG is showable, budget unspent (`progress.md:36`).
+- Tasks 10–12 did not open the envelope (belt/UI/CI+docs only). Task 12 report: “No $5 spent. No paid vendors added as required.”
+- `apps/api/requirements.txt` has no Firecrawl, Brandwatch, Recraft, Writer, Veeva, Instructor, or LiteLLM packages. It is FastAPI, Uvicorn, Pydantic v2, pytest, httpx, feedparser, PyYAML (+ Pillow for the stub compositor).
+- `.env.example` leaves `IMAGE_GEN_URL=`, `IMAGE_GEN_KEY=`, `IMAGE_GEN_MODE=stub`.
+- Fetcher test `apps/api/tests/test_fetcher.py` asserts default sources include `gdelt`, `news_rss`, `reddit` and **do not** include `brandwatch`, `firecrawl`, or `tiktok`.
 
 **What the $5 may be used for, if ever:** the image slot after Task 9’s Pillow stub exists, and only if that stub is not showable enough for the live walk. The intended interface is already specified (`docs/superpowers/plans/2026-08-19-demo.md:347-351`): `POST IMAGE_GEN_URL` with `{prompt, size}` and `Authorization: Bearer IMAGE_GEN_KEY`, switched by `IMAGE_GEN_MODE=http`. That is a port, not a Recraft contract.
 
@@ -515,13 +515,13 @@ Quotes:
 
 **Why:** the Content Machine’s path is known (fetch → score → research → brief → grid → copy → rules → judge → loop → human). Anthropic’s own guidance, cited in the scorecard spine (`scorecard.md:180`): workflow, not agent. CrewAI would buy a second architecture we would have to tear out before a legal review.
 
-`apps/api/requirements.txt` does not include `crewai`. `apps/api/belt/` is specified; the belt module itself is Task 10 (not built). Task 7 already has `apps/api/boxes/loop.py` as the capped evaluator–optimizer.
+`apps/api/requirements.txt` does not include `crewai`. The belt landed in Task 10 (`apps/api/boxes/belt.py`, commit `24e103a`). Task 7 already had `apps/api/boxes/loop.py` as the capped evaluator–optimizer.
 
 ### 5.2 Plain-code belt; agents only inside steps
 
 Map header (`show-me-architecture.html:142-143`): “The conveyor belt is code. The workers on the belt are agents. Every piece moves left → right.”
 
-Demo belt order, when Task 10 lands (`demo.md:371`):
+Demo belt order (Task 10 landed; `demo.md:371`):
 
 > fetch → score → research deep_dives → store reports. Factory: brief → strategist → copywriter → hard_rules → judge → loop → art_director → queue.
 
@@ -785,7 +785,7 @@ This is the same industry finding as “loops win, agents serve,” applied to t
 
 The ledger records: start SHA, budget ruling, per-task implementer ids, commits, review outcomes, deferred minors, parked items (e.g. Task 7 “parked for Task 10 — persist flag_human”, `progress.md:30`).
 
-It is **scratch**. It is gitignored. It can be stale relative to reports. Example as of this writing: `progress.md` ends at Task 7, while `task-8-report.md` already records `991d9cb` + fix `750a86b`, and the index still says Task 8 is “writing (task in fix/review).” A third-party auditor should treat **git log + this `docs/decisions/` folder** as the durable record, and the ledger as contemporaneous notes.
+It is **scratch**. It is gitignored. It can be stale relative to reports. Example as of Task 12 fill: `progress.md` ends at Task 11 (no Task 12 complete line), while `task-12-report.md` already records `32b37fa` + `9a2d705`. A third-party auditor should treat **git log + this `docs/decisions/` folder** as the durable record, and the ledger as contemporaneous notes.
 
 Expected commit prefixes (`000-index.md:41`): `chore: scaffold`, `feat:` per box, `fix:` per review round. Controller start SHA: `a72b33c`.
 
@@ -887,7 +887,7 @@ See §8. Razorpay is the *if we ever charge* lock, not a demo feature.
 
 ## 12. Third-party audit checklist
 
-A stranger should be able to work through these in one sitting. Each item is a concrete open-and-confirm, not a vibe. Mark pass / fail / not-built-yet. “Not-built-yet” is expected for Task 9+ as of 2026-08-20; it is **not** a pass.
+A stranger should be able to work through these in one sitting. Each item is a concrete open-and-confirm, not a vibe. Mark pass / fail / not-built-yet. As of Task 12, boxes through Command Center + CI/docs are built; “not-built-yet” applies to **production adapters**, not to demo Tasks 9–12.
 
 ### Identity and unofficial framing
 
@@ -907,13 +907,13 @@ A stranger should be able to work through these in one sitting. Each item is a c
 8. `rg -i "crewai|firecrawl|brandwatch|recraft|veeva|writer" apps/api/requirements.txt` — those strings must be absent (current file is FastAPI/httpx/feedparser/pydantic/pytest/pyyaml/uvicorn only).
 9. Run or read `apps/api/tests/test_fetcher.py::test_default_sources_are_free_allowlist` — asserts `brandwatch`, `firecrawl`, `tiktok` are **not** default source names.
 10. Open `.env.example` — no Cerebras, Firecrawl, Brandwatch, Recraft, Writer, or Veeva keys; `IMAGE_GEN_MODE=stub`; `GEMINI_API_KEY` and `GROQ_API_KEY` empty.
-11. Open `.superpowers/sdd/2026-08-19-demo/progress.md:4` (if the scratch tree is present) and `docs/decisions/000-index.md:31` — $5 optional, not spent as of Task 8, IMAGE_GEN is the slot, spend only after Task 9 stub if the stub is not showable.
-12. Confirm Task 9 is still a stub (`docs/decisions/018-task-9-art-director.md`) so the $5 *cannot honestly have been spent on image quality yet*.
+11. Open `.superpowers/sdd/2026-08-19-demo/progress.md:4` (if the scratch tree is present) and `docs/decisions/000-index.md` — $5 optional, not spent as of Task 12, IMAGE_GEN is the slot, spend only if the Task 9 stub is not showable (ledger says stub is showable).
+12. Confirm Task 9 is **filled** (`docs/decisions/018-task-9-art-director.md`) with stub PNG default and `$5` still unspent — spending would require an explicit budget open after judging the stub inadequate.
 
 ### Architecture locks in code and specs
 
 13. `rg -i crewai apps/api` — no import, no dependency, no belt implemented on CrewAI.
-14. Open `apps/api/ports.py` — `TrendSource` and `ChatModel.complete_json` exist as protocols. `ImageGen` is specified in `demo.md:167-168` and is **not** in `ports.py` until Task 9; absence today is consistent with the stub, not a silent drop of the idea.
+14. Open `apps/api/ports.py` — `TrendSource`, `ChatModel.complete_json`, and `ImageGen` exist as protocols (ImageGen landed with Task 9).
 15. Open `apps/api/adapters/chat_litellm.py` — it is a stub (`NotImplementedError`). Confirm it does not call Cerebras.
 16. Open `docs/superpowers/specs/2026-08-19-spine.md` — orchestrator is plain-code; gateway LiteLLM Proxy pin ≥1.83.7; injection is OWASP dual-LLM not regex.
 17. Open `apps/api/boxes/loop.py` (Task 7) and tests in `apps/api/tests/test_loop.py` — max rounds 3, then human flag. (Persistence of `flag_human` is parked for Task 10 per `progress.md:30` — do not mark that persistence as done.)
@@ -954,7 +954,7 @@ A stranger should be able to work through these in one sitting. Each item is a c
 
 ### Honest incompleteness (must not be marked “demo done”)
 
-37. Walk `docs/superpowers/plans/2026-08-19-demo.md:414-425`. As of this journal: Command Center story pages, belt, review/export, and Art Director are **not** done. Do not accept a “demo complete” claim until a stranger can actually click that walk.
+37. Walk `docs/superpowers/plans/2026-08-19-demo.md:414-425`. As of Task 12: Art Director, belt, review/export, Command Center, CI, and demo docs are on the branch. Accept “demo walkable” only if a stranger can actually click that walk (or `python scripts/demo_walk.py` PASSes against a rebuilt API). Remote Actions green is a separate check.
 38. LiteLLM is a stub. Empty `GEMINI_API_KEY` must still walk on templates (`demo.md:55`). If someone “fixed” that by requiring a paid key, that is a budget regression.
 39. Production plan money order (`production.md:47-55`) has not been executed. Finding a Brandwatch key in `.env` during the demo is a fail.
 
@@ -968,7 +968,7 @@ A stranger should be able to work through these in one sitting. Each item is a c
 - Live token invoices for Gemini/Groq during this demo: **UNKNOWN** (adapter stub; keys optional).
 - Primary Cerebras Knowledge blog HTML: not re-fetched in `docs/research/2026-08-19-cerebras-company-brain.md` (that note says so). Do not put the 15k/day figure on a client slide without re-opening the post.
 - Kenvue/Neutrogena legal approval of fixture claims: **there is none**. The fixtures say so.
-- Task 8 final review status vs index “in fix/review” vs `progress.md` not yet listing Task 8: treat git + `task-8-report.md` as the working truth; this global file does not close Task 8.
+- Historical note: this file was first written during the Task 8 window; as-of lines about Tasks 9–12 “not built” were patched when Task 12’s journal filled. Prefer `000-index.md` + per-task files + git log over any leftover stale sentence.
 
 ---
 
@@ -978,5 +978,5 @@ A stranger should be able to work through these in one sitting. Each item is a c
 2. Specs: `docs/superpowers/specs/`
 3. Demo plan: `docs/superpowers/plans/2026-08-19-demo.md`
 4. Production (parked): `docs/superpowers/plans/2026-08-19-production.md`
-5. Per-task journals: `docs/decisions/010` through `021` (stubs for 9–12 as of this writing)
+5. Per-task journals: `docs/decisions/010` through `021` (filled through Task 12 as of this patch; see `000-index.md`)
 6. How to read those journals: `docs/decisions/README.md`
