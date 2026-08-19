@@ -1,6 +1,6 @@
 # Box 3 — Deep-Dive Researcher (hardened)
 
-Status: ready for your yes / change. No app code. Fetcher and Scorer are locked.
+Status: **locked** (you said yes). Layer 1 Radar is complete. Next is Brand Book. No app code.
 
 The only radar box that may wander. It fires only when the Scorer says `deep_dive`. It files a cited Trend Report. It does not write ads.
 

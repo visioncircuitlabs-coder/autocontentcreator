@@ -129,7 +129,7 @@
     <h2>Layer 2 · Brand Brain — the memory (not a loop, not an agent)</h2>
     <div class="desc">The single source of truth — built like Cerebras Knowledge, not like a wiki nobody updates. We ingest from the files brand and legal already live in, distill them, and let every agent <em>query</em> them with citations. Nothing creates without it.</div>
     <div class="row">
-      <div class="card c-store" data-id="brandbook"><span class="tag">memory</span><h3>Brand Book</h3><p>Values, tone of voice, visual identity, do's &amp; don'ts.</p></div>
+      <div class="card c-store" data-id="brandbook"><span class="tag">memory</span><h3>Brand Book</h3><p>Query with citations. Humans verify. Not a second wiki. Not the claims library.</p></div>
       <div class="card c-store" data-id="facts"><span class="tag">memory</span><h3>Product Facts</h3><p>Ingredients, approved claims, forbidden claims ("cures", "heals").</p></div>
       <div class="card c-store" data-id="trends"><span class="tag">memory</span><h3>Trend Reports</h3><p>What the radar found, scored and summarized.</p></div>
       <div class="card c-store" data-id="track"><span class="tag">memory</span><h3>Track Record</h3><p>Past content + what got approved, rejected, and why.</p></div>
@@ -222,16 +222,15 @@ const DETAILS = {
   },
   brandbook: {
     type:'store', tname:'🗄️ memory', title:'Brand Book',
-    desc:'The brand’s soul, written down in machine-readable form. Every creative agent reads this before writing a single word.',
+    desc:'How we sound and look — a retrieval layer, not a PDF. Cerebras Knowledge shape. Hardened Aug 19. Claims live in Product Facts, not here.',
     steps:[
-      'Brand values and personality ("clinical but warm", "science-first, never preachy").',
-      'Tone-of-voice rules with examples: 10 on-voice sentences, 10 off-voice sentences — examples teach AI better than adjectives.',
-      'Visual identity: colors, typography, photography style, layout rules.',
-      'Do’s and don’ts: topics to avoid, humor limits, competitor mention policy.',
-      'Ingested from the files brand already maintains (Google Docs, PDFs, DAM) — we do not make them retype a second wiki.',
-      'Stored as structured, cited documents; agents query the relevant slice instead of receiving the whole book pasted into a prompt.'
+      'We ingest where brand already writes (Docs, PDFs, DAM). Nobody retypes a second wiki.',
+      'Distill first: one card = rule + 10 on-voice / 10 off-voice examples + channel overlay. Embed the card. Keep the raw file for exact search.',
+      'Hybrid retrieve (exact phrase + meaning + recency). Scope by brand / market / channel. Neutrogena India cannot pull Listerine US.',
+      'Every slice comes back with a citation and a Guru-style badge: verified / unverified / expired. Unverified is not law.',
+      'Humans are the only editors of canonical rules. A compiled wiki is allowed only on top of immutable sources — never model pages that cite themselves.'
     ],
-    notes:[['Who edits it','Humans only. The machine reads it, never writes the canonical rules.'],['Why it matters','This is the difference between "AI content" and "OUR content." Weak brand book = generic output, always.']]
+    notes:[['Who edits it','Humans only. The machine reads; it may draft a card, a human must verify.'],['Why it matters','Weak book = generic ads. This is OUR voice, not “AI content.”'],['Forbidden','Glean-for-a-pilot. The Curator as production. Pasting the whole book into every prompt. Agent answers filed as sources.']]
   },
   facts: {
     type:'store', tname:'🗄️ memory · legally loaded', title:'Product Facts',
@@ -406,6 +405,7 @@ const INDUSTRY = {
   ],
   brandbook: [
     {who:"Cerebras Knowledge (the company brain)", conf:"high", note:"Not their chips — their internal retrieval layer (write-up ~Jul 2026). They refused to build a new wiki. They ingest Slack/docs/code where knowledge already lives, distill it, and let humans AND agents query one index with citations. That is how this Brand Book is stored and read. 15k queries/day is vendor-published.", url:"https://www.cerebras.ai/blog/how-we-built-our-knowledge-base", linkTitle:"Cerebras Knowledge write-up"},
+    {who:"Guru — verify badge + expiry", conf:"high", note:"Trust is a badge with an expiry, not a vibe. Unverified cards must not ground generators. We steal the states (verified / unverified / expired), not the product.", url:"https://help.getguru.com/docs/what-is-verifcation", linkTitle:"Guru verification"},
     {who:"Jasper IQ", conf:"high", note:"Jasper's enterprise moat (Ulta Beauty and Sanofi are customers) is exactly this box: voice, style rules, audiences and approved knowledge in ONE persistent layer every agent reads automatically — explicitly contrasted with pasting brand instructions into each prompt.", url:"https://www.jasper.ai/jasper-iq", linkTitle:"jasper.ai/jasper-iq"},
     {who:"Typeface Arc Graph", conf:"high", note:"The ex-Adobe-CTO's ~$1B-valued platform stores brand guidelines, voice, visual identity and personas as a dedicated data layer that grounds every generation. Verified live Aug 2026, with P&G, AB InBev and Sally Beauty on the logo bar.", url:"https://www.typeface.ai/", linkTitle:"typeface.ai"}
   ],
