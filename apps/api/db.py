@@ -5,7 +5,7 @@ import os
 import sqlite3
 from pathlib import Path
 
-from models import Score, Signal, TrendReport
+from models import Brief, Score, Signal, TrendReport
 
 DEFAULT_SQLITE_PATH = "data/demo.db"
 
@@ -75,6 +75,12 @@ def init_db() -> None:
                 evidence_ref TEXT NOT NULL,
                 status TEXT NOT NULL,
                 expires_at TEXT
+            );
+
+            CREATE TABLE IF NOT EXISTS briefs (
+                brief_id TEXT PRIMARY KEY,
+                report_id TEXT NOT NULL,
+                pack TEXT NOT NULL
             );
 
             CREATE TABLE IF NOT EXISTS drafts (
@@ -198,5 +204,74 @@ def upsert_reports(reports: list[TrendReport]) -> None:
             ],
         )
         conn.commit()
+    finally:
+        conn.close()
+
+
+def _json_load(value, default):
+    if value is None or value == "":
+        return default
+    if isinstance(value, (list, dict)):
+        return value
+    return json.loads(value)
+
+
+def get_report(report_id: str) -> TrendReport | None:
+    """Load one TrendReport, or None if missing."""
+    init_db()
+    conn = connect()
+    try:
+        row = conn.execute(
+            "SELECT * FROM reports WHERE report_id = ?",
+            (report_id,),
+        ).fetchone()
+        if row is None:
+            return None
+        return TrendReport(
+            report_id=row["report_id"],
+            signal_id=row["signal_id"],
+            what=row["what"],
+            why_now=row["why_now"],
+            who=row["who"],
+            angles=_json_load(row["angles"], []),
+            risks=_json_load(row["risks"], []),
+            sources=_json_load(row["sources"], []),
+            skeptic=row["skeptic"],
+            spent=_json_load(row["spent"], {}),
+            capped_at=row["capped_at"],
+        )
+    finally:
+        conn.close()
+
+
+def upsert_brief(brief: Brief) -> None:
+    """Persist one factory brief pack. Same brief_id replaces."""
+    init_db()
+    conn = connect()
+    try:
+        conn.execute(
+            """
+            INSERT OR REPLACE INTO briefs (brief_id, report_id, pack)
+            VALUES (?, ?, ?)
+            """,
+            (brief.brief_id, brief.report_id, brief.model_dump_json()),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def get_brief(brief_id: str) -> Brief | None:
+    """Load one Brief pack, or None if missing."""
+    init_db()
+    conn = connect()
+    try:
+        row = conn.execute(
+            "SELECT pack FROM briefs WHERE brief_id = ?",
+            (brief_id,),
+        ).fetchone()
+        if row is None:
+            return None
+        return Brief.model_validate_json(row["pack"])
     finally:
         conn.close()

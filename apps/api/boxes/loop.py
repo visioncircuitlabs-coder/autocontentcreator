@@ -2,16 +2,9 @@
 
 from __future__ import annotations
 
-import re
 from collections.abc import Callable
 
-from boxes.hard_rules import (
-    BANNED_TOKENS,
-    has_benefit_line,
-    has_disclaimer,
-    load_disclaimer,
-    run_hard_rules,
-)
+from boxes.hard_rules import run_hard_rules
 from boxes.judge import run_judge
 from boxes.product_facts import load_claim_models
 from models import Claim, Draft
@@ -20,29 +13,11 @@ from ports import ChatModel
 Rewriter = Callable[[Draft, list[str]], Draft]
 
 
-def strip_banned_tokens(text: str) -> str:
-    out = text or ""
-    for token in BANNED_TOKENS:
-        out = re.sub(rf"(?<!\w){re.escape(token)}(?!\w)", "", out, flags=re.IGNORECASE)
-    out = re.sub(r"(?i)#ad\b", "", out)
-    out = re.sub(r"\s+([.,!?])", r"\1", out)
-    out = re.sub(r"\s{2,}", " ", out)
-    return out.strip()
-
-
 def default_rewrite(draft: Draft, reasons: list[str]) -> Draft:
-    """Stub rewriter until Task 8 copywriter. Apply judge.rewrite or strip tokens."""
-    _ = reasons  # Task 8 copywriter will consume numbered reasons
-    suggested = (draft.judge or {}).get("rewrite") if draft.judge else None
-    if isinstance(suggested, str) and suggested.strip():
-        caption = suggested.strip()
-    else:
-        caption = draft.caption or ""
-    caption = strip_banned_tokens(caption)
-    disc = load_disclaimer()
-    if has_benefit_line(caption) and not has_disclaimer(caption, disc):
-        caption = f"{caption}\n\n{disc}"
-    return draft.model_copy(update={"caption": caption})
+    """Send numbered fail reasons to the copywriter; keep one cleaned caption."""
+    from boxes.copywriter import rewrite_draft
+
+    return rewrite_draft(draft, reasons)
 
 
 def run_loop(

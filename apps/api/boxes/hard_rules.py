@@ -14,6 +14,17 @@ DEFAULT_DISCLAIMER_PATH = (
 
 BANNED_TOKENS = ("cures", "heals", "best", "only", "guaranteed")
 
+
+def strip_banned_tokens(text: str) -> str:
+    """Drop gazette tokens and #ad. Used by the copywriter rewrite path."""
+    out = text or ""
+    for token in BANNED_TOKENS:
+        out = re.sub(rf"(?<!\w){re.escape(token)}(?!\w)", "", out, flags=re.IGNORECASE)
+    out = re.sub(r"(?i)#ad\b", "", out)
+    out = re.sub(r"\s+([.,!?])", r"\1", out)
+    out = re.sub(r"\s{2,}", " ", out)
+    return out.strip()
+
 # Product-effect words that count as a benefit line (disclaimer required).
 BENEFIT_MARKERS = (
     "hydrate",

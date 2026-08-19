@@ -53,6 +53,32 @@ class Claim(BaseModel):
     expires_at: datetime | None
 
 
+class Concept(BaseModel):
+    concept_id: str
+    brief_id: str
+    angle: str
+    persona: str
+    claim_safe_pain: str
+    channel: str
+    indic_register: str
+    hook: str = ""
+    idea: str = ""
+
+
+class Brief(BaseModel):
+    brief_id: str
+    report_id: str
+    market: str = "IN"
+    sku: str
+    channel: str = "instagram"
+    format: str = "instagram caption"
+    report: dict
+    brand_slice: dict
+    claims: list[dict]
+    wins: list[dict] = Field(default_factory=list)
+    losses: list[dict] = Field(default_factory=list)
+
+
 class Draft(BaseModel):
     draft_id: str
     brief_id: str
