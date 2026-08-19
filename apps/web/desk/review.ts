@@ -1,6 +1,10 @@
 export const REASON_HINT =
   "A reason is required. Same miss should not survive twice.";
 
+export const FIXTURE_BUTTON = "Open unofficial fixture deep-dive";
+export const FIXTURE_NOTE =
+  "Not this Fetch. Unofficial Neutrogena fixture so the walk can continue.";
+
 export const CLERK_KEY = "cm-clerk";
 
 export const SOURCE_LABELS: Record<string, string> = {
@@ -41,6 +45,23 @@ export function sortSignals<T extends { signal_id: string }>(
     if (ga !== gb) return ga - gb;
     return (sb?.brand_fit ?? 0) - (sa?.brand_fit ?? 0);
   });
+}
+
+export function shouldOfferFixture(
+  didRun: boolean,
+  deepDivesThisPass: number,
+): boolean {
+  return didRun && deepDivesThisPass === 0;
+}
+
+export function sourceFields(
+  row: Record<string, unknown> | null | undefined,
+): { url: string; quote: string; hash: string } {
+  return {
+    url: String(row?.url ?? "").trim(),
+    quote: String(row?.quote ?? "").trim(),
+    hash: String(row?.hash ?? "").trim(),
+  };
 }
 
 export function ticketTone(

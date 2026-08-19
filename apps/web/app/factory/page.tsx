@@ -3,11 +3,25 @@
 import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { friendlyError, loadBrief, loadReports, runFactory } from "../../desk/api";
+import {
+  friendlyError,
+  loadBrief,
+  loadReports,
+  openFixtureDive,
+  runFactory,
+} from "../../desk/api";
 import { DeskShell } from "../../desk/DeskShell";
 import { voiceLine } from "../../desk/format";
+import { FIXTURE_BUTTON, FIXTURE_NOTE } from "../../desk/review";
 import type { BriefPack, Draft, TrendReport } from "../../desk/types";
-import { Alert, EmptyDesk, LoadingDesk, Stamp, Ticket } from "../../desk/ui";
+import {
+  Alert,
+  LoadingDesk,
+  ReportCopy,
+  ReportSources,
+  Stamp,
+  Ticket,
+} from "../../desk/ui";
 
 function FactoryDesk() {
   const params = useSearchParams();
@@ -18,6 +32,8 @@ function FactoryDesk() {
   const [error, setError] = useState<string | null>(null);
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [brief, setBrief] = useState<BriefPack | null>(null);
+  const [pickedId, setPickedId] = useState("");
+  const [fixtureLoading, setFixtureLoading] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -57,9 +73,30 @@ function FactoryDesk() {
     }
   }
 
-  const selected = reports.find((item) => item.report_id === reportId) ?? null;
+  const activeId = pickedId || reportId;
+  const selected = reports.find((item) => item.report_id === activeId) ?? null;
   const claims = brief?.claims ?? [];
   const concepts = brief?.concepts ?? [];
+  const briefSources = Array.isArray(brief?.report?.sources)
+    ? (brief?.report?.sources as Array<Record<string, unknown>>)
+    : [];
+
+  async function openFixture() {
+    setError(null);
+    setFixtureLoading(true);
+    try {
+      const pack = await openFixtureDive();
+      setReports((rows) => {
+        const rest = rows.filter((row) => row.report_id !== pack.report.report_id);
+        return [pack.report, ...rest];
+      });
+      setPickedId(pack.report.report_id);
+    } catch (err) {
+      setError(friendlyError(err));
+    } finally {
+      setFixtureLoading(false);
+    }
+  }
 
   return (
     <DeskShell step="factory">
@@ -69,24 +106,40 @@ function FactoryDesk() {
         <LoadingDesk label="Brief → grid → copy → rules → judge → picture. Stay on this ticket." />
       ) : null}
       {loadingList ? <LoadingDesk label="Reading reports on the shelf." /> : null}
-      {!loadingList && reports.length === 0 ? (
-        <EmptyDesk>
-          No deep-dive report to build from. Fetch trends first, then open a
-          deep_dive.
-        </EmptyDesk>
+      {!loadingList && reports.length === 0 && !drafts.length ? (
+        <Ticket tone="gate">
+          <div className="row-between">
+            <p className="meta">unofficial fixture</p>
+            <Stamp kind="gate">not this Fetch</Stamp>
+          </div>
+          <h2>No live deep-dive</h2>
+          <p>{FIXTURE_NOTE}</p>
+          <button
+            className="btn btn-ink"
+            type="button"
+            disabled={fixtureLoading}
+            onClick={openFixture}
+          >
+            {fixtureLoading ? "Opening fixture…" : FIXTURE_BUTTON}
+          </button>
+        </Ticket>
       ) : null}
-      {!drafts.length && (reportId || reports.length > 0) ? (
+      {!drafts.length && (activeId || reports.length > 0) ? (
         <Ticket tone="gate">
           <h2>Create post</h2>
-          {reportId ? (
+          {activeId ? (
             <>
-              <p className="meta">{reportId}</p>
-              <p>{selected?.what || "Run the belt on this deep-dive."}</p>
+              <p className="meta">{activeId}</p>
+              {selected ? (
+                <ReportCopy report={selected} />
+              ) : (
+                <p>Run the belt on this deep-dive.</p>
+              )}
               <button
                 className="btn btn-ink"
                 type="button"
                 disabled={running}
-                onClick={() => createPost(reportId)}
+                onClick={() => createPost(activeId)}
               >
                 {running ? "Building…" : "Create post"}
               </button>
@@ -140,6 +193,7 @@ function FactoryDesk() {
               ? `${brief.losses.length} on file`
               : "No track-record losses yet."}
           </p>
+          <ReportSources sources={briefSources} />
         </Ticket>
       ) : null}
 

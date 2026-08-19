@@ -2,17 +2,27 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { friendlyError, loadDesk, runRadar } from "../../desk/api";
+import { friendlyError, loadDesk, openFixtureDive, runRadar } from "../../desk/api";
 import { DeskShell } from "../../desk/DeskShell";
 import { kolkata } from "../../desk/format";
 import {
+  FIXTURE_BUTTON,
+  FIXTURE_NOTE,
   emptySourceNote,
   missingSources,
+  shouldOfferFixture,
   sortSignals,
   ticketTone,
 } from "../../desk/review";
 import type { Score, Signal, TrendReport } from "../../desk/types";
-import { Alert, EmptyDesk, LoadingDesk, Stamp, Ticket } from "../../desk/ui";
+import {
+  Alert,
+  EmptyDesk,
+  LoadingDesk,
+  ReportCopy,
+  Stamp,
+  Ticket,
+} from "../../desk/ui";
 
 function scoreFor(scores: Score[], id: string): Score | undefined {
   return scores.find((item) => item.signal_id === id);
@@ -32,6 +42,8 @@ export default function RadarPage() {
   const [divesThisRun, setDivesThisRun] = useState<string[]>([]);
   const [didRun, setDidRun] = useState(false);
   const [openId, setOpenId] = useState<string | null>(null);
+  const [fixtureReport, setFixtureReport] = useState<TrendReport | null>(null);
+  const [fixtureLoading, setFixtureLoading] = useState(false);
 
   async function refresh() {
     const desk = await loadDesk();
@@ -69,6 +81,7 @@ export default function RadarPage() {
       setScores(out.scores);
       setReports(out.reports.length ? out.reports : out.deep_dives);
       setDidRun(true);
+      setFixtureReport(null);
       setDivesThisRun(out.deep_dives.map((item) => item.report_id));
       const firstDive = out.deep_dives[0]?.signal_id;
       if (firstDive) setOpenId(firstDive);
@@ -94,6 +107,20 @@ export default function RadarPage() {
   }, [ordered, scores]);
   const missing = missingSources(signals);
   const unscored = Math.max(0, signals.length - visible.length);
+  const offerFixture = shouldOfferFixture(didRun, divesThisRun.length);
+
+  async function openFixture() {
+    setError(null);
+    setFixtureLoading(true);
+    try {
+      const pack = await openFixtureDive();
+      setFixtureReport(pack.report);
+    } catch (err) {
+      setError(friendlyError(err));
+    } finally {
+      setFixtureLoading(false);
+    }
+  }
 
   return (
     <DeskShell step="radar">
@@ -120,11 +147,35 @@ export default function RadarPage() {
           ))}
         </Ticket>
       ) : null}
-      {didRun && divesThisRun.length === 0 && scores.length > 0 && !running ? (
-        <p className="quiet">
-          Nothing passed the deep-dive gate this pass. Kill tickets stay off the
-          factory belt.
-        </p>
+      {offerFixture && !running ? (
+        <Ticket tone="gate">
+          <div className="row-between">
+            <p className="meta">unofficial fixture</p>
+            <Stamp kind="gate">not this Fetch</Stamp>
+          </div>
+          <h2>No live deep-dive</h2>
+          <p>{FIXTURE_NOTE}</p>
+          {fixtureReport ? (
+            <>
+              <ReportCopy report={fixtureReport} />
+              <Link
+                className="btn btn-ink"
+                href={`/factory?report_id=${encodeURIComponent(fixtureReport.report_id)}`}
+              >
+                Create post from unofficial fixture
+              </Link>
+            </>
+          ) : (
+            <button
+              className="btn btn-ink"
+              type="button"
+              disabled={fixtureLoading}
+              onClick={openFixture}
+            >
+              {fixtureLoading ? "Opening fixture…" : FIXTURE_BUTTON}
+            </button>
+          )}
+        </Ticket>
       ) : null}
       {unscored > 0 ? (
         <p className="quiet">
@@ -189,31 +240,7 @@ export default function RadarPage() {
             ) : null}
             {open && report ? (
               <div className="grid-card">
-                <h3>Report {report.report_id}</h3>
-                <p>
-                  <strong>What. </strong>
-                  {report.what}
-                </p>
-                <p>
-                  <strong>Why now. </strong>
-                  {report.why_now}
-                </p>
-                <p>
-                  <strong>Who. </strong>
-                  {report.who}
-                </p>
-                <p>
-                  <strong>Angles. </strong>
-                  {report.angles.join(" · ") || "None listed."}
-                </p>
-                <p>
-                  <strong>Risks. </strong>
-                  {report.risks.join(" · ") || "None listed."}
-                </p>
-                <p>
-                  <strong>Skeptic. </strong>
-                  {report.skeptic || "Nothing filed."}
-                </p>
+                <ReportCopy report={report} />
                 <Link
                   className="btn btn-ink"
                   href={`/factory?report_id=${encodeURIComponent(report.report_id)}`}

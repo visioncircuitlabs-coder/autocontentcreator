@@ -132,3 +132,37 @@ def test_get_draft_image_png(tmp_path: Path) -> None:
     assert missing.status_code == 404
     assert "error" in missing.json()
     assert "stack" not in str(missing.json()).lower()
+
+
+def test_unofficial_fixture_dive_is_labeled_and_runnable(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from boxes.fixture_dive import FIXTURE_REPORT_ID, SEED_URL
+    from main import app
+
+    monkeypatch.setenv("IMAGE_GEN_MODE", "stub")
+    monkeypatch.setenv("IMAGE_OUT_DIR", str(tmp_path / "images"))
+    client = TestClient(app)
+    res = client.post("/radar/fixture")
+    assert res.status_code == 200
+    body = res.json()
+    assert body["fixture"] is True
+    report = body["report"]
+    assert report["report_id"] == FIXTURE_REPORT_ID
+    assert "UNOFFICIAL" in report["what"].upper()
+    assert "not this fetch" in report["what"].lower()
+    assert report["sources"]
+    assert report["sources"][0]["url"] == SEED_URL
+    assert report["sources"][0]["quote"]
+    assert report["sources"][0]["hash"]
+
+    stored = client.get(f"/reports/{FIXTURE_REPORT_ID}")
+    assert stored.status_code == 200
+    assert stored.json()["sources"][0]["quote"]
+
+    factory = client.post("/factory/run", json={"report_id": FIXTURE_REPORT_ID})
+    assert factory.status_code == 200
+    drafts = factory.json()
+    assert drafts
+    assert drafts[0]["caption"].strip()
+    assert "pcos" not in drafts[0]["caption"].lower()

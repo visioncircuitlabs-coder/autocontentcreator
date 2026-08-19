@@ -11,6 +11,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel, Field
 
 from boxes.belt import run_factory, run_radar
+from boxes.fixture_dive import persist_unofficial_fixture
 from boxes.export import export_pack
 from boxes.fetcher import run_fetch
 from boxes.review import decide
@@ -136,6 +137,25 @@ def radar_run(request: Request):
             status_code=500,
             content={"error": "Trend fetch hit a snag. Please try again."},
         )
+
+
+@app.post("/radar/fixture")
+def radar_fixture():
+    """Unofficial canned deep-dive. Not this Fetch. Lets Create post still run."""
+    try:
+        pack = persist_unofficial_fixture()
+    except Exception:
+        logger.exception("fixture dive failed")
+        return JSONResponse(
+            status_code=500,
+            content={"error": "Could not open the unofficial fixture. Please try again."},
+        )
+    return {
+        "fixture": True,
+        "signal": pack["signal"],
+        "score": pack["score"],
+        "report": pack["report"],
+    }
 
 
 @app.post("/factory/run")

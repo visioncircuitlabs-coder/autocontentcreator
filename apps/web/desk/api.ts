@@ -1,5 +1,12 @@
 import type { BriefPack, Decision, Draft, RadarRun, Signal, Score, TrendReport } from "./types";
 
+export type FixtureDive = {
+  fixture: true;
+  signal: Signal;
+  score: Score;
+  report: TrendReport;
+};
+
 export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 export class DeskError extends Error {
@@ -74,6 +81,10 @@ export async function loadDesk(): Promise<{
 
 export function runRadar() {
   return api<RadarRun>("/radar/run", { method: "POST" });
+}
+
+export function openFixtureDive() {
+  return api<FixtureDive>("/radar/fixture", { method: "POST" });
 }
 
 export function runFactory(reportId: string) {

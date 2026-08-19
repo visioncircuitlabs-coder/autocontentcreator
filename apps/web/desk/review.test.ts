@@ -1,10 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  FIXTURE_BUTTON,
   canSubmitReview,
   emptySourceNote,
   missingSources,
+  shouldOfferFixture,
   sortSignals,
+  sourceFields,
   ticketTone,
 } from "./review.ts";
 
@@ -54,4 +57,23 @@ test("deep_dive tickets sort first", () => {
 test("kill and deep_dive get inspection tones", () => {
   assert.equal(ticketTone("discard", "kill"), "kill");
   assert.equal(ticketTone("deep_dive", "ok"), "gate");
+});
+
+test("fixture offer only after a Fetch with 0 deep_dives", () => {
+  assert.equal(shouldOfferFixture(false, 0), false);
+  assert.equal(shouldOfferFixture(true, 1), false);
+  assert.equal(shouldOfferFixture(true, 0), true);
+  assert.match(FIXTURE_BUTTON, /unofficial fixture/i);
+});
+
+test("source fields expose url, quote, and hash", () => {
+  const row = sourceFields({
+    url: "https://news.example/skincare-spike",
+    quote: "barrier-cream talk",
+    hash: "abc",
+  });
+  assert.equal(row.url, "https://news.example/skincare-spike");
+  assert.equal(row.quote, "barrier-cream talk");
+  assert.equal(row.hash, "abc");
+  assert.equal(sourceFields({}).url, "");
 });
