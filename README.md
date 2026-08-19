@@ -2,17 +2,20 @@
 
 An always-on content system for regulated consumer brands (Kenvue-class: Neutrogena, Listerine, and siblings). It watches culture, drafts on-brand posts, blocks illegal claims, and learns from every human yes/no.
 
-**Status:** demo shell is up. Same 17-box machine as production; boxes land in later tasks. Two plans: a free-tool **demo** and a parked **production** swap-map.
+**Status:** free-tool **demo** is walkable end-to-end (Trend Radar → Brand Brain fixtures → Content Factory belt → Command Center approve/export). Production swap-map is parked.
 
-- Demo: `docs/superpowers/plans/2026-08-19-demo.md`
+- Demo plan: `docs/superpowers/plans/2026-08-19-demo.md`
 - Production (later): `docs/superpowers/plans/2026-08-19-production.md`
+- **Why we built it this way** (third-party review pack): `docs/decisions/`
+
+The demo brand pack is an **unofficial Neutrogena** fixture for show — not a partner build, not medical advice, not a claim that we speak for Kenvue.
 
 ## What it does
 
-- **Trend Radar** — a scheduled loop that pulls the outside world and scores what matters to the brand.
-- **Brand Brain** — the memory: brand book, approved claims, trend reports, and every past approval/rejection.
-- **Content Factory** — a conveyor belt. Code moves work left to right. Agents write. A locked judge and hard rules catch claims.
-- **Command Center** — you approve. The machine never publishes regulated content on its own.
+- **Trend Radar** — Fetch pulls GDELT / Google News RSS / Reddit JSON, scores what matters, deep-dives with sources.
+- **Brand Brain** — unofficial Neutrogena brand book, approved claims, disclaimer, exclusion list, past decisions.
+- **Content Factory** — a conveyor belt. Code moves work left to right. Agents write. Hard rules + a locked judge catch claims. Image is a port (Pillow stub by default; paste `IMAGE_GEN_*` when ready).
+- **Command Center** — you approve with a reason. The machine never publishes regulated content on its own. Export is a ZIP.
 
 ## Look at the architecture
 
@@ -22,30 +25,58 @@ Open this file in a browser (double-click it):
 
 Every box is clickable. Each panel ends with who already ships a version of that idea.
 
-## Research
+## How to run the demo
 
-| File | What it is |
-|---|---|
-| `docs/research/2026-08-18-industry-research.md` | Locked industry findings + design decisions |
-| `docs/research/raw-dossiers-2026-08-18.json` | Full dossiers with source links |
-| `docs/research/2026-08-19-cerebras-company-brain.md` | What Cerebras *Knowledge* actually is (the company brain) |
-| `private deck notes (not in this repo)` | What we take / reject from the reference pitch deck |
-| `docs/research/sota/2026-08-19-sota-scorecard.md` | Chosen process + tools per box (X + GitHub swarm, Aug 19) |
+From the repo root:
 
-## How to run the demo shell
-
-Copy `.env.example` to `.env` (keys can stay empty). Then from the repo root:
+1. Copy env template (keys can stay empty):
 
 ```text
-docker compose up
+copy .env.example .env
 ```
 
-- Command Center shell: http://localhost:3000
+On macOS/Linux: `cp .env.example .env`
+
+2. Start everything:
+
+```text
+docker compose up --build
+```
+
+- Command Center: http://localhost:3000
 - API health: http://localhost:8000/health → `{"ok": true}`
 
-SQLite will live at `./data/demo.db` on this machine. Compose mounts `./data` into the API container as `/data`.
+SQLite lives at `./data/demo.db`. Compose mounts `./data` into the API as `/data`.
 
-Without Docker (PowerShell, from this worktree):
+### Keys (all optional for the walk)
+
+| Variable | What it does |
+|---|---|
+| `GEMINI_API_KEY` | Optional. Empty is fine — copy/judge paths walk on **templates**. Paste a free Gemini key for better live copy. |
+| `GROQ_API_KEY` | Optional alternate chat key (same idea). |
+| `IMAGE_GEN_URL` / `IMAGE_GEN_KEY` | Optional. Leave empty and keep `IMAGE_GEN_MODE=stub` for the Pillow card (logo + disclaimer stamped in code). When you have an HTTP image API, set the URL/key and `IMAGE_GEN_MODE=http`. |
+| `NEXT_PUBLIC_API_URL` | Browser → API (default `http://localhost:8000`). |
+
+Paid trend/research/image vendors are **not** required. Do not put Firecrawl, Brandwatch, Recraft, or similar keys in `.env` for this demo.
+
+### Stranger walk (definition of done)
+
+1. `docker compose up --build`
+2. Open http://localhost:3000 → **Fetch** → real headlines from GDELT/News/Reddit
+3. Open a deep-dive with sources (or use the unofficial fixture if live research caps)
+4. **Create post** → Neutrogena-style draft that used the belt (brief, variants, rules, judge)
+5. See an image (stub or your API) with logo + disclaimer **not** drawn by the model
+6. Approve with a reason → export a ZIP
+
+Optional API smoke (API already running):
+
+```text
+python scripts/demo_walk.py
+```
+
+Skips cleanly if nothing is listening on `:8000`.
+
+### Without Docker (PowerShell, from this worktree)
 
 ```text
 cd apps\api
@@ -60,14 +91,28 @@ uvicorn main:app --reload --port 8000
 cd apps\web
 npm install
 npm test
+npm run build
 npm run dev
 ```
 
-Web talks to the API at `NEXT_PUBLIC_API_URL` (default `http://localhost:8000`).
+## CI
+
+GitHub Actions (`.github/workflows/ci.yml`): `compileall` + `pytest` on Python 3.12 for `apps/api`, and `npm run build` on Node 22 for `apps/web`. No Docker in CI — that gate stays local/`docker compose up --build`.
+
+## Research
+
+| File | What it is |
+|---|---|
+| `docs/decisions/` | Third-party why-journal (constraints, rejected options, review rulings) |
+| `docs/research/2026-08-18-industry-research.md` | Locked industry findings + design decisions |
+| `docs/research/raw-dossiers-2026-08-18.json` | Full dossiers with source links |
+| `docs/research/2026-08-19-cerebras-company-brain.md` | What Cerebras *Knowledge* actually is (the company brain) |
+| `private deck notes (not in this repo)` | What we take / reject from the reference pitch deck |
+| `docs/research/sota/2026-08-19-sota-scorecard.md` | Chosen process + tools per box (X + GitHub swarm) |
 
 ## How we will deploy it (later)
 
-CI on GitHub Actions. App in Docker. Secrets only in `.env` (never in git). Currency INR, timezone Asia/Kolkata, Razorpay if we take payments.
+CI on GitHub Actions (already wired for lint-ish + test + web build). App in Docker. Secrets only in `.env` (never in git). Currency INR, timezone Asia/Kolkata, Razorpay if we take payments.
 
 ## Ground rules already locked
 
