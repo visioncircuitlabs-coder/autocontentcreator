@@ -98,7 +98,7 @@
     <div class="desc">A scheduled loop, every few hours. Almost no AI cost — intelligence only where it counts.</div>
     <div class="row">
       <div class="card c-code" data-id="fetcher"><span class="tag">code · loop</span><h3>Source Fetcher</h3><p>Licensed social + GDELT news + official TikTok + schema extract. One signal shape. No scrape-the-web.</p></div>
-      <div class="card c-judge" data-id="scorer"><span class="tag">AI-in-a-box</span><h3>Relevance Scorer</h3><p>"Is this trend relevant to skincare + this brand? Score 1–10." Fast, cheap model.</p></div>
+      <div class="card c-judge" data-id="scorer"><span class="tag">AI-in-a-box</span><h3>Relevance Scorer</h3><p>Two cheap scores: brand-fit and velocity. Safety can kill a spike. 8+ wakes research.</p></div>
       <div class="card c-agent" data-id="researcher"><span class="tag">agent</span><h3>Deep-Dive Researcher</h3><p>Only fires for hot trends (8+). Searches, reads, follows leads. Capped budget per run.</p></div>
     </div>
   </div>
@@ -178,15 +178,15 @@ const DETAILS = {
   },
   scorer: {
     type:'judge', tname:'🧠 AI-in-a-box', title:'Relevance Scorer',
-    desc:'A single AI call with one fixed job: "here are 50 signals — score each 1–10 for how relevant it is to THIS brand." It has intelligence but zero freedom.',
+    desc:'The bouncer. Two cheap scores (brand-fit + velocity), a safety kill switch, then a gate. No freedom. Hardened Aug 19 against the SOTA scorecard.',
     steps:[
-      'Signals arrive in batches of ~50.',
-      'A fast, cheap model reads them with a fixed rubric: relevance to the brand’s category, audience fit, momentum, brand-safety risk.',
-      'Each signal gets a score and a one-line reason.',
-      'Below 5: discarded. 5–7: stored as background context. 8+: triggers the Deep-Dive Researcher.',
-      'Every score is logged, so you can audit why the machine cared about something.'
+      'Signals arrive in batches of ~50 from the Fetcher. Same row shape every time.',
+      'Homonym / exclusion brief first (we own the text): drop “bank = bench” style false hits before any model.',
+      'Brand-fit 1–10: one cheap LiteLLM call (usually Cerebras) against a versioned rubric. Velocity 1–10: “will this still be loud tomorrow?” — from metadata now, NewsWhip later if we buy it.',
+      'Safety: kill-words in code, then a watch flag. Velocity never overrides a kill. A rising health-claim fad can be fast and still discarded.',
+      'Gates: below 5 or kill → discard. 5–7 → background shelf. 8+ and not kill → Deep-Dive Researcher. Garbage JSON → watch, never a fake 8. Every score is logged with model + rubric version.'
     ],
-    notes:[['Cost','Paise per signal — this is why the radar can run all day.'],['Why not an agent?','Scoring is a fixed judgment, not an exploration. An agent here would cost 100× more and be less consistent.']]
+    notes:[['Cost','Paise per signal — why the radar can run all day.'],['Why not an agent?','Fixed judgment. An agent here would cost 100× more and wander.'],['Forbidden','One embedding as the score. Exploding Topics % as a claims go-ahead. Hard-wired Cerebras.']]
   },
   researcher: {
     type:'agent', tname:'🤖 agent · triggered & capped', title:'Deep-Dive Researcher',
@@ -376,7 +376,7 @@ const INDUSTRY = {
     {who:"GDELT + official TikTok Discovery", conf:"high", note:"GDELT is the cheap news/recall layer. TikTok culture only through their official Creative Center / Discovery API. Meta Content Library is research-only — not a commercial firehose. CrowdTangle is gone.", url:"https://www.gdeltproject.org/", linkTitle:"gdeltproject.org"}
   ],
   scorer: [
-    {who:"trendFinder's two-stage filter", conf:"high", note:"They filter cheaply twice: the scraper extracts only today's on-topic stories, then ONE model call ranks the survivors. The model never sees raw pages — that's why the daily loop costs almost nothing. We copy this shape exactly.", url:"https://www.firecrawl.dev/blog/trend-finder-typescript", linkTitle:"architecture walkthrough"},
+    {who:"NewsWhip velocity + Sprinklr exclusion brief", conf:"high", note:"SOTA splits 'will this still be loud tomorrow?' from 'is this our brand?'. Sprinklr AI Topics: a human-owned inclusion/exclusion brief beats a raw embedding. We copy both ideas. NewsWhip Spike is optional later, not day one.", url:"https://sproutsocial.com/newswhip/", linkTitle:"NewsWhip / Sprout"},
     {who:"Cerebras Inference (the other Cerebras — chips, not the company brain)", conf:"high", note:"Same company, different product. Open models at ~3,000 tokens/sec for $0.35–0.75 per million tokens — roughly 10× cheaper than frontier models (live pricing verified Aug 2026). Right engine for high-volume scoring; wrong one for final brand copy. Never hard-wired — routed through a gateway. Their Knowledge system (the company brain) is cited on the Brand Brain cards, not here.", url:"https://www.cerebras.ai/pricing", linkTitle:"cerebras.ai/pricing"}
   ],
   researcher: [

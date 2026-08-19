@@ -1,6 +1,6 @@
 # Box 1 — Source Fetcher (hardened)
 
-Status: ready for your yes / change. No app code.
+Status: **locked** (you said yes). Next box is Relevance Scorer. No app code.
 
 The alarm clock. Every few hours it collects the outside world into one standard **signal**. It does not decide if a signal is on-brand. That is the Scorer.
 
