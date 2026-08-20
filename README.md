@@ -43,9 +43,10 @@ On macOS/Linux: `cp .env.example .env`
 docker compose up --build
 ```
 
-- Make today’s post: http://localhost:3000
+- Make today’s post: http://localhost:3050
+- API health: http://localhost:8000/health → `{"ok": true}`
 
-If that page says “Units” or “Start unit”, another app stole port 3000. Close it, then `docker compose up` here again.
+Port 3000 is often taken by another project on this PC. This app uses **3050** on purpose.
 - API health: http://localhost:8000/health → `{"ok": true}`
 
 SQLite lives at `./data/demo.db`. Compose mounts `./data` into the API as `/data`.
@@ -64,7 +65,7 @@ Paid trend/research/image vendors are **not** required. Do not put Firecrawl, Br
 ### Stranger walk (definition of done)
 
 1. `docker compose up --build`
-2. Open http://localhost:3000 → **Look for ideas**
+2. Open http://localhost:3050 → **Look for ideas**
 3. Pick a closer-look card (or **Use a sample idea (practice)** if this search is empty)
 4. **Make a post** → pick a version → **Your call** (name + why)
 5. Phone preview → **Download pack** (does not go live)

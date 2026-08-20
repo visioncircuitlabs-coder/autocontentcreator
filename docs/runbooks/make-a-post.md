@@ -2,7 +2,7 @@
 
 For a content person. No training deck. Open the app and do this.
 
-You need the app running (someone already did `docker compose up --build`). Open http://localhost:3000 on your phone or laptop.
+You need the app running (someone already did `docker compose up --build`). Open http://localhost:3050 on your phone or laptop.
 
 This is a practice Neutrogena brand. It is not Kenvue. Nothing you approve here goes onto Instagram.
 
