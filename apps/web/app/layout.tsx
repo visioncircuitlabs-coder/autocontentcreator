@@ -26,7 +26,7 @@ const mono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   title: "Make today’s post",
   description:
-    "Unofficial Neutrogena practice brand. Look for ideas, make a post, say yes or no. Nothing goes live.",
+    "Look for ideas, make a post, say yes or no. Nothing goes live.",
 };
 
 export const viewport: Viewport = {

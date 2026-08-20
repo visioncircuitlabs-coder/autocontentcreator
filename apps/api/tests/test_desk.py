@@ -150,7 +150,7 @@ def test_unofficial_fixture_dive_is_labeled_and_runnable(
     report = body["report"]
     assert report["report_id"] == FIXTURE_REPORT_ID
     assert "hydro boost" in report["what"].lower()
-    assert "unofficial" in report["who"].lower()
+    assert "india" in report["who"].lower()
     assert report["sources"]
     assert report["sources"][0]["url"] == SEED_URL
     assert report["sources"][0]["quote"]

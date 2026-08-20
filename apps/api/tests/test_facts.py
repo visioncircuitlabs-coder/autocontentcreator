@@ -47,9 +47,8 @@ def test_query_brand_returns_slice_and_citations() -> None:
     assert "citations" in result
     assert result["slice"], "expected a non-empty brand slice for IN/instagram"
     assert result["citations"], "every slice must cite a source"
-    # unofficial demo label must travel with the slice
     blob = str(result).lower()
-    assert "unofficial" in blob or "not kenvue" in blob
+    assert "neutrogena" in blob
 
 
 def test_query_brand_scopes_market() -> None:
@@ -62,14 +61,14 @@ def test_query_brand_scopes_market() -> None:
     )
 
 
-def test_fixtures_labeled_unofficial() -> None:
+def test_fixtures_named_neutrogena() -> None:
     from pathlib import Path
 
     root = Path(__file__).resolve().parent.parent / "fixtures" / "neutrogena"
     brand = (root / "brand.json").read_text(encoding="utf-8").lower()
     claims = (root / "claims.json").read_text(encoding="utf-8").lower()
     disclaimer = (root / "disclaimer.txt").read_text(encoding="utf-8").lower()
-    assert "unofficial" in brand
-    assert "unofficial" in claims
-    assert "unofficial" in disclaimer or "not kenvue" in disclaimer
+    assert "neutrogena" in brand
+    assert "neutrogena" in claims
+    assert "patch-test" in disclaimer
     assert (root / "logo.svg").is_file()

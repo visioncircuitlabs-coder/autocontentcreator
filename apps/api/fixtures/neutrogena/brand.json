@@ -1,6 +1,6 @@
 {
-  "disclaimer": "UNOFFICIAL DEMO fixture — not Kenvue-approved. Neutrogena-like voice for Content Machine demos only.",
-  "brand": "Neutrogena (unofficial demo)",
+  "disclaimer": "Always patch-test. Consult a dermatologist for skin concerns.",
+  "brand": "Neutrogena",
   "market_default": "IN",
   "cards": [
     {

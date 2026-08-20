@@ -382,8 +382,8 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
               <div className="ig-top">
                 <span className="ig-avatar" aria-hidden="true" />
                 <div>
-                  <div className="ig-name">Neutrogena (practice)</div>
-                  <div className="ig-handle">not a Kenvue product</div>
+                  <div className="ig-name">Neutrogena</div>
+                  <div className="ig-handle">skincare</div>
                 </div>
               </div>
               <div className="ig-photo">

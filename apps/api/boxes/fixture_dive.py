@@ -52,11 +52,11 @@ def unofficial_fixture_pack() -> dict:
         why_now=(
             "Practice idea. Use this when live news does not give us a closer look."
         ),
-        who="Practice brand (unofficial, not Kenvue)",
+        who="People in India talking about humid-weather skincare",
         angles=["humidity barrier", "monsoon routine fit", "AC-commute tightness"],
         risks=[
             "do not treat humidity talk as a medical claim",
-            "unofficial Neutrogena fixture — not Kenvue-approved",
+            "do not treat this as a live brand approval",
         ],
         sources=[
             {

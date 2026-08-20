@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { BEATS, TAPE } from "../desk/words";
+import { BEATS } from "../desk/words";
 
 export function WalkShell({
   beat,
@@ -22,7 +22,6 @@ export function WalkShell({
         Skip to the walk
       </a>
       <header className="walk-top">
-        <p className="tape">{TAPE}</p>
         <div className="walk-brand">
           <h1>Make today’s post</h1>
         </div>

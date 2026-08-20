@@ -150,7 +150,7 @@ def radar_fixture():
         logger.exception("fixture dive failed")
         return JSONResponse(
             status_code=500,
-            content={"error": "Could not open the unofficial fixture. Please try again."},
+            content={"error": "Could not open that idea. Please try again."},
         )
     return {
         "fixture": True,

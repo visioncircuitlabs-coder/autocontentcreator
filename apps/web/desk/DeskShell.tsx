@@ -20,7 +20,7 @@ export function DeskShell({
       <div className="desk-body">
         <header className="mast">
           <p className="tape">
-            Unofficial Neutrogena fixture · not a Kenvue product
+            Content Machine
           </p>
           <h1>Content Machine</h1>
           <p className="mast-sub">

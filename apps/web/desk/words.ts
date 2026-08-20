@@ -1,5 +1,3 @@
-export const TAPE = "Unofficial Neutrogena practice brand. Not a Kenvue product.";
-
 export const LOOK_BUTTON = "Look for ideas";
 export const LOOKING_STEPS = [
   "Looking at news…",
