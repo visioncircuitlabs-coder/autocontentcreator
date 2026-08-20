@@ -1,23 +1,49 @@
-"""Optional LiteLLM chat adapter. Scorer works with ChatModel=None (keyword fallback)."""
+"""Optional chat. No key → callers pass ChatModel=None and use templates."""
 
 from __future__ import annotations
 
+import json
+import logging
 import os
 
 from pydantic import BaseModel
 
+logger = logging.getLogger(__name__)
+
+
+def build_chat() -> "LiteLLMChat | None":
+    gemini = os.environ.get("GEMINI_API_KEY", "").strip()
+    groq = os.environ.get("GROQ_API_KEY", "").strip()
+    if not gemini and not groq:
+        return None
+    model = os.environ.get("CHAT_MODEL", "").strip()
+    if not model:
+        model = (
+            "groq/llama-3.3-70b-versatile"
+            if groq and not gemini
+            else "gemini/gemini-2.0-flash"
+        )
+    return LiteLLMChat(model=model)
+
 
 class LiteLLMChat:
-    """Thin stub. Requires GEMINI_API_KEY (or LITELLM_API_KEY) at call time."""
-
     def __init__(self, model: str = "gemini/gemini-2.0-flash") -> None:
         self.model = model
 
     def complete_json(self, system: str, user: str, schema: type) -> BaseModel:
-        if not (os.environ.get("GEMINI_API_KEY") or os.environ.get("LITELLM_API_KEY")):
-            raise RuntimeError(
-                "No chat API key set; use ChatModel=None for keyword fallback"
-            )
-        raise NotImplementedError(
-            "LiteLLM wiring is deferred; Scorer keyword fallback covers demos without a key"
+        import litellm
+
+        schema_hint = json.dumps(schema.model_json_schema())
+        response = litellm.completion(
+            model=self.model,
+            messages=[
+                {
+                    "role": "system",
+                    "content": f"{system}\nReturn JSON only. Schema: {schema_hint}",
+                },
+                {"role": "user", "content": user},
+            ],
+            response_format={"type": "json_object"},
         )
+        text = response.choices[0].message.content or "{}"
+        return schema.model_validate_json(text)

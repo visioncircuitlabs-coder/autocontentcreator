@@ -16,7 +16,7 @@ export const MAKING_STEPS = [
 
 export const SAMPLE_BUTTON = "Use a sample idea (practice)";
 export const SAMPLE_NOTE =
-  "This search found nothing worth a closer look. The sample is practice. It is not from this search.";
+  "Today's headlines were not a strong Neutrogena match. Here is a practice idea so you can still make a post.";
 
 export const REASON_HINT = "Say why. The next person will read this.";
 export const NAME_LABEL = "Your name";

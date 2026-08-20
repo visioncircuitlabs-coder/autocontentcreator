@@ -38,7 +38,7 @@ def test_radar_run_envelope_keys(monkeypatch: pytest.MonkeyPatch) -> None:
         spent={"gets": 0},
         capped_at="complete",
     )
-    monkeypatch.setattr("main.run_radar", lambda: [report])
+    monkeypatch.setattr("main.run_radar", lambda **_: [report])
     client = TestClient(app)
     res = client.post("/radar/run")
     assert res.status_code == 200

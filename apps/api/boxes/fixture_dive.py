@@ -49,9 +49,7 @@ def unofficial_fixture_pack() -> dict:
         report_id=FIXTURE_REPORT_ID,
         signal_id=FIXTURE_SIGNAL_ID,
         what="Hydro Boost talk is up this week. Humid weather, tired skin after AC.",
-        why_now=(
-            "Practice idea. Use this when live news does not give us a closer look."
-        ),
+        why_now="Humidity plus AC. A stand-in idea when live headlines are a weak brand match.",
         who="People in India talking about humid-weather skincare",
         angles=["humidity barrier", "monsoon routine fit", "AC-commute tightness"],
         risks=[

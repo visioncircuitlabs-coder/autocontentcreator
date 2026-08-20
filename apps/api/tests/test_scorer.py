@@ -4,6 +4,7 @@ from unittest.mock import MagicMock
 import pytest
 from pydantic import BaseModel
 
+from adapters.chat_litellm import build_chat
 from models import Score, Signal
 
 
@@ -30,6 +31,12 @@ def _signal(
         query_id="skincare_in",
         raw_ref=raw_ref,
     )
+
+
+def test_build_chat_is_off_without_keys(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    monkeypatch.delenv("GROQ_API_KEY", raising=False)
+    assert build_chat() is None
 
 
 def test_kill_word_forces_discard() -> None:

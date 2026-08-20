@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel, Field
 
+from adapters.chat_litellm import build_chat
 from boxes.belt import run_factory, run_radar
 from boxes.fixture_dive import persist_unofficial_fixture
 from boxes.export import export_pack
@@ -124,7 +125,7 @@ def radar_run(request: Request):
             content={"error": "Too many fetches. Please wait a minute and try again."},
         )
     try:
-        deep_dives = run_radar()
+        deep_dives = run_radar(chat=build_chat())
         return {
             "reports": list_reports(),
             "scores": list_scores(),
@@ -163,7 +164,7 @@ def radar_fixture():
 @app.post("/factory/run")
 def factory_run(body: FactoryRunIn):
     try:
-        return run_factory(body.report_id)
+        return run_factory(body.report_id, chat=build_chat())
     except ValueError as exc:
         return _friendly(exc)
     except Exception:

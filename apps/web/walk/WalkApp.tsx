@@ -271,13 +271,13 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
           {picked ? (
             <div className="picked ticket">
               {sample ? (
-                <p className="tag">Practice idea. Live news did not give us a closer look.</p>
+                <p className="tag">Practice idea</p>
               ) : (
-                <p className="tag">Closer look</p>
+                <p className="tag">From today's news</p>
               )}
               <h3>{picked.what}</h3>
-              <p>{picked.why_now}</p>
-              <ReportSources sources={picked.sources} />
+              <p>{sample ? SAMPLE_NOTE : picked.why_now}</p>
+              {sample ? null : <ReportSources sources={picked.sources} />}
               <button className="btn" type="button" disabled={making} onClick={makePost}>
                 {making ? makeText || MAKING_STEPS[0] : MAKE_BUTTON}
               </button>

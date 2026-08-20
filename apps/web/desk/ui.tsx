@@ -76,7 +76,6 @@ export function ReportSources({
               <span>No url on this source.</span>
             )}
             {row.quote ? <p className="caption">{row.quote}</p> : null}
-            {row.hash ? <p className="hash">hash {row.hash}</p> : null}
           </li>
         ))}
       </ul>
