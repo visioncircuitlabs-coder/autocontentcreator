@@ -1,18 +1,4 @@
-export const REASON_HINT =
-  "A reason is required. Same miss should not survive twice.";
-
-export const FIXTURE_BUTTON = "Open unofficial fixture deep-dive";
-export const FIXTURE_NOTE =
-  "Not this Fetch. Unofficial Neutrogena fixture so the walk can continue.";
-
 export const CLERK_KEY = "cm-clerk";
-
-export const SOURCE_LABELS: Record<string, string> = {
-  gdelt: "GDELT",
-  news_rss: "Google News",
-  reddit: "Reddit",
-  rss: "RSS",
-};
 
 export const EXPECTED_SOURCES = ["gdelt", "news_rss", "reddit"] as const;
 
@@ -23,11 +9,6 @@ export function canSubmitReview(user: string, reason: string): boolean {
 export function missingSources(signals: { source: string }[]): string[] {
   const present = new Set(signals.map((item) => item.source));
   return EXPECTED_SOURCES.filter((source) => !present.has(source));
-}
-
-export function emptySourceNote(source: string): string {
-  const label = SOURCE_LABELS[source] ?? source;
-  return `${label} returned nothing. The pipe logged it and the rest of the desk kept moving.`;
 }
 
 export function sortSignals<T extends { signal_id: string }>(

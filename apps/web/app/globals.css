@@ -631,6 +631,267 @@ textarea {
   height: 16px;
 }
 
+.walk-app {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 12px 14px 40px;
+  min-height: 100dvh;
+}
+
+.walk-brand {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.walk-brand h1 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 28px;
+  letter-spacing: -0.03em;
+  margin: 0;
+  line-height: 1.1;
+}
+
+.ghost {
+  background: transparent;
+  border: 1px solid var(--hair);
+  color: var(--ticket);
+  min-height: var(--tap);
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+.beats {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+  margin: 0 0 16px;
+  padding: 0;
+}
+
+.beat {
+  width: 100%;
+  min-height: var(--tap);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border: 1px solid var(--hair);
+  background: transparent;
+  color: var(--mute);
+  padding: 6px 2px;
+}
+
+.beat[data-state="now"] {
+  border-color: var(--gate);
+  color: var(--ticket);
+  background: rgba(201, 162, 39, 0.12);
+}
+
+.beat[data-state="done"] {
+  color: var(--ticket);
+}
+
+.beat-n {
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.beat-l {
+  font-size: 10px;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.panel {
+  background: rgba(244, 239, 228, 0.06);
+  border: 1px solid var(--hair);
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+.panel h2 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 22px;
+  margin: 0 0 8px;
+}
+
+.panel h3 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  margin: 0 0 8px;
+}
+
+.cards {
+  display: grid;
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.card {
+  text-align: left;
+  background: var(--ticket);
+  color: var(--ink);
+  border: 2px solid transparent;
+  padding: 12px;
+  min-height: var(--tap);
+  display: grid;
+  gap: 6px;
+}
+
+.card[data-kind="hot"] {
+  border-color: var(--gate);
+}
+
+.card[data-sel="true"] {
+  box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.35);
+}
+
+.card strong {
+  font-size: 15px;
+}
+
+.snip {
+  font-size: 13px;
+  color: #5c564c;
+}
+
+.tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gate);
+}
+
+.sample,
+.picked {
+  border: 1px dashed var(--gate);
+  padding: 12px;
+  margin: 12px 0;
+}
+
+.versions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.version {
+  min-height: var(--tap);
+  padding: 8px 12px;
+  border: 1px solid var(--hair);
+  background: transparent;
+  color: var(--ticket);
+}
+
+.version[data-sel="true"] {
+  border-color: var(--gate);
+  color: var(--ink);
+  background: var(--gate);
+}
+
+.caption-block {
+  white-space: pre-wrap;
+  background: var(--ticket);
+  color: var(--ink);
+  padding: 12px;
+  margin: 10px 0;
+  font-size: 15px;
+}
+
+.checks {
+  margin: 0 0 12px;
+  padding-left: 18px;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.row .btn {
+  flex: 1;
+  min-width: 140px;
+}
+
+.quiet-list {
+  margin: 0 0 12px;
+  padding-left: 18px;
+  color: var(--mute);
+  font-size: 13px;
+}
+
+.machine {
+  border: 1px solid var(--hair);
+  padding: 12px;
+  margin-bottom: 14px;
+  overflow-x: auto;
+}
+
+.machine-kicker {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mute);
+  margin: 0 0 10px;
+}
+
+.machine-cols {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(110px, 1fr));
+  gap: 8px;
+}
+
+.machine-col p {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--mute);
+  margin: 0 0 6px;
+  text-transform: uppercase;
+}
+
+.node {
+  font-size: 11px;
+  border: 1px solid var(--hair);
+  padding: 6px;
+  margin-bottom: 6px;
+  color: var(--mute);
+}
+
+.node span {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--gate);
+}
+
+.node[data-lit="true"] {
+  color: var(--ticket);
+  border-color: var(--gate);
+  background: rgba(201, 162, 39, 0.1);
+}
+
+.walk-app .field {
+  color: var(--ticket);
+  margin-bottom: 10px;
+}
+
+.walk-app .field input,
+.walk-app .field textarea {
+  font-size: 16px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .pin,
   .stamp {

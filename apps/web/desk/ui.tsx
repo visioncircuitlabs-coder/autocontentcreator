@@ -60,11 +60,11 @@ export function ReportSources({
     ...sourceFields(row),
   }));
   if (!rows.some((row) => row.url || row.quote)) {
-    return <p className="quiet">No sources on this report.</p>;
+    return <p className="quiet">No links on this idea yet.</p>;
   }
   return (
     <>
-      <h3>Sources</h3>
+      <h3>Where we read this</h3>
       <ul className="source-list">
         {rows.map((row) => (
           <li key={row.key}>

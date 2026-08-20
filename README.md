@@ -43,7 +43,7 @@ On macOS/Linux: `cp .env.example .env`
 docker compose up --build
 ```
 
-- Command Center: http://localhost:3000
+- Make today’s post: http://localhost:3000
 - API health: http://localhost:8000/health → `{"ok": true}`
 
 SQLite lives at `./data/demo.db`. Compose mounts `./data` into the API as `/data`.
@@ -62,11 +62,12 @@ Paid trend/research/image vendors are **not** required. Do not put Firecrawl, Br
 ### Stranger walk (definition of done)
 
 1. `docker compose up --build`
-2. Open http://localhost:3000 → **Fetch** → real headlines from GDELT/News/Reddit
-3. Open a deep-dive with sources (or use the unofficial fixture if live research caps)
-4. **Create post** → Neutrogena-style draft that used the belt (brief, variants, rules, judge)
-5. See an image (stub or your API) with logo + disclaimer **not** drawn by the model
-6. Approve with a reason → export a ZIP
+2. Open http://localhost:3000 → **Look for ideas**
+3. Pick a closer-look card (or **Use a sample idea (practice)** if this search is empty)
+4. **Make a post** → pick a version → **Your call** (name + why)
+5. Phone preview → **Download pack** (does not go live)
+
+Train someone with `docs/runbooks/make-a-post.md`. Words we use: `docs/conventions/words-we-use.md`.
 
 Optional API smoke (API already running):
 

@@ -5,7 +5,9 @@ worktrees/
 # Local agent / scraper caches
 .claude/
 .firecrawl/
-.grok/
+.grok/*
+!.grok/skills/
+!.grok/skills/**
 .superpowers/
 .npm-cache/
 .pip-cache/

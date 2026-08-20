@@ -24,6 +24,7 @@
 | [019-task-10-review-export-belt.md](019-task-10-review-export-belt.md) | Review, feedback, export, belt | filled (review clean at 24e103a; first concept only accepted; $5 unspent) |
 | [020-task-11-command-center.md](020-task-11-command-center.md) | Phone-usable UI story | filled (review clean at 1bb268a after fixture fix; compose rebuild claimed in Task 12) |
 | [021-task-12-ci-docs.md](021-task-12-ci-docs.md) | CI + demo README | filled (chore 32b37fa + docs pack 9a2d705; $5 unspent; remote Actions not seen here) |
+| [022-walk-ui.md](022-walk-ui.md) | Five-step App Mode walk | filled |
 
 ## One-line rulings a reviewer must not miss
 

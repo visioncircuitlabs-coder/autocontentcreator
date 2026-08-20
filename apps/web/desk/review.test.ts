@@ -1,15 +1,14 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
-  FIXTURE_BUTTON,
   canSubmitReview,
-  emptySourceNote,
   missingSources,
   shouldOfferFixture,
   sortSignals,
   sourceFields,
   ticketTone,
 } from "./review.ts";
+import { SAMPLE_BUTTON, checkLines, emptySourceNote, gateLabel } from "./words.ts";
 
 test("blank reason cannot submit", () => {
   assert.equal(canSubmitReview("Anand", ""), false);
@@ -33,7 +32,7 @@ test("missing sources are named plainly", () => {
   assert.deepEqual(missingSources([{ source: "news_rss" }]), ["gdelt", "reddit"]);
   assert.equal(
     emptySourceNote("gdelt"),
-    "GDELT returned nothing. The pipe logged it and the rest of the desk kept moving.",
+    "News wire sent nothing back. We kept going.",
   );
 });
 
@@ -59,11 +58,27 @@ test("kill and deep_dive get inspection tones", () => {
   assert.equal(ticketTone("deep_dive", "ok"), "gate");
 });
 
-test("fixture offer only after a Fetch with 0 deep_dives", () => {
+test("sample idea only after a search with nothing to look at", () => {
   assert.equal(shouldOfferFixture(false, 0), false);
   assert.equal(shouldOfferFixture(true, 1), false);
   assert.equal(shouldOfferFixture(true, 0), true);
-  assert.match(FIXTURE_BUTTON, /unofficial fixture/i);
+  assert.match(SAMPLE_BUTTON, /sample idea/i);
+});
+
+test("gates speak English on the card", () => {
+  assert.equal(gateLabel("deep_dive"), "Closer look");
+  assert.equal(gateLabel("background"), "Skip for now");
+  assert.equal(gateLabel("discard"), "Don't use");
+});
+
+test("check lines hide judge jargon", () => {
+  const lines = checkLines({
+    rules: ["banned token: cures"],
+    flag_human: true,
+    judge: { verdict: "FAIL", reasons: ["1. forbidden claim"] },
+  });
+  assert.ok(lines.some((line) => line.includes("We blocked this")));
+  assert.ok(lines.some((line) => line.includes("person still has to decide")));
 });
 
 test("source fields expose url, quote, and hash", () => {

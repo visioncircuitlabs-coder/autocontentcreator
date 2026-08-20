@@ -32,7 +32,7 @@ async function readError(res: Response): Promise<string> {
     /* ignore non-JSON */
   }
   if (res.status === 429) {
-    return "Too many fetches. Please wait a minute and try again.";
+    return "Too many searches. Wait a minute and try again.";
   }
   return "Something went wrong. Please try again.";
 }
@@ -47,7 +47,7 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
     res = await fetch(`${API_URL}${path}`, { ...init, headers });
   } catch {
     throw new DeskError(
-      "Could not reach the machine. Is the API running on port 8000?",
+      "Could not reach the app. Is it running on port 8000?",
       0,
     );
   }
@@ -126,7 +126,7 @@ export async function downloadZip(draftId: string): Promise<void> {
     res = await fetch(`${API_URL}/export/${encodeURIComponent(draftId)}`);
   } catch {
     throw new DeskError(
-      "Could not reach the machine. Is the API running on port 8000?",
+      "Could not reach the app. Is it running on port 8000?",
       0,
     );
   }
