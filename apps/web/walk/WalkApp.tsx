@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   draftImageUrl,
   downloadZip,
@@ -11,7 +11,7 @@ import {
   runRadar,
   decideDraft,
 } from "../desk/api";
-import { CLERK_KEY, canSubmitReview, missingSources, shouldOfferFixture, sortSignals } from "../desk/review";
+import { CLERK_KEY, canSubmitReview, missingSources, shouldOfferFixture } from "../desk/review";
 import type { BriefPack, Decision, Draft, Score, Signal, TrendReport } from "../desk/types";
 import { ReportSources } from "../desk/ui";
 import {
@@ -30,7 +30,6 @@ import {
   YES_BUTTON,
   checkLines,
   emptySourceNote,
-  gateLabel,
 } from "../desk/words";
 import { MachineGraph } from "./MachineGraph";
 import { WalkShell } from "./WalkShell";
@@ -92,12 +91,6 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
     setUser(readName());
   }, []);
 
-  const ordered = useMemo(
-    () => sortSignals(signals, scores).slice(0, 12),
-    [signals, scores],
-  );
-  const scoreOf = (id: string) => scores.find((row) => row.signal_id === id);
-  const reportOf = (id: string) => reports.find((row) => row.signal_id === id);
   const quiet = missingSources(signals);
   const offerSample = shouldOfferFixture(didRun, divesThisRun);
 
@@ -111,16 +104,31 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
     setDecision(null);
     try {
       const out = await runRadar();
-      setSignals(out.signals_seen);
-      setScores(out.scores);
-      setReports(out.deep_dives.length ? out.deep_dives : out.reports);
-      setDivesThisRun(out.deep_dives.length);
+      const dives = out.deep_dives ?? [];
+      const diveIds = new Set(dives.map((row) => row.signal_id));
       setDidRun(true);
-      const first = out.deep_dives[0] ?? null;
-      setPicked(first);
+      setDivesThisRun(dives.length);
+      if (dives[0]) {
+        setSignals((out.signals_seen ?? []).filter((row) => diveIds.has(row.signal_id)));
+        setScores((out.scores ?? []).filter((row) => diveIds.has(row.signal_id)));
+        setReports(dives);
+        setPicked(dives[0]);
+        setSample(false);
+        setBeat(2);
+        return;
+      }
+      const pack = await openFixtureDive();
+      setSignals([pack.signal]);
+      setScores([pack.score]);
+      setReports([pack.report]);
+      setPicked(pack.report);
+      setSample(true);
       setBeat(2);
     } catch (err) {
       setError(friendlyError(err));
+      setDidRun(true);
+      setDivesThisRun(0);
+      setBeat(2);
     } finally {
       setLooking(false);
     }
@@ -229,7 +237,7 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
       {beat === 1 ? (
         <section className="panel">
           <h2>Look for ideas</h2>
-          <p>We read news and pick what fits this practice brand.</p>
+          <p>One tap. We search the news and pick something you can turn into a post.</p>
           <button className="btn" type="button" disabled={looking} onClick={look}>
             {looking ? lookText || LOOKING_STEPS[0] : LOOK_BUTTON}
           </button>
@@ -238,16 +246,16 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
 
       {beat === 2 ? (
         <section className="panel">
-          <h2>Pick one</h2>
+          <h2>{sample ? "Practice idea" : "This idea"}</h2>
           {looking ? <p className="loading">{lookText}</p> : null}
-          {didRun && quiet.length > 0 ? (
+          {didRun && !picked && quiet.length > 0 ? (
             <ul className="quiet-list">
               {quiet.map((source) => (
                 <li key={source}>{emptySourceNote(source)}</li>
               ))}
             </ul>
           ) : null}
-          {offerSample ? (
+          {!picked && offerSample ? (
             <div className="sample ticket">
               <p>{SAMPLE_NOTE}</p>
               <button
@@ -260,36 +268,13 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
               </button>
             </div>
           ) : null}
-          <div className="cards">
-            {ordered.map((item) => {
-              const score = scoreOf(item.signal_id);
-              const report = reportOf(item.signal_id);
-              const closer = score?.gate === "deep_dive";
-              const selected = picked?.signal_id === item.signal_id;
-              return (
-                <button
-                  key={item.signal_id}
-                  type="button"
-                  className="card"
-                  data-sel={selected ? "true" : "false"}
-                  data-kind={closer ? "hot" : "cool"}
-                  onClick={() => {
-                    if (report) {
-                      setPicked(report);
-                      setSample(false);
-                    }
-                  }}
-                >
-                  <span className="tag">{gateLabel(score?.gate)}</span>
-                  <strong>{item.title}</strong>
-                  <span className="snip">{item.snippet.slice(0, 140)}</span>
-                </button>
-              );
-            })}
-          </div>
           {picked ? (
             <div className="picked ticket">
-              {sample ? <p className="tag">Sample idea (practice)</p> : null}
+              {sample ? (
+                <p className="tag">Practice idea. Live news did not give us a closer look.</p>
+              ) : (
+                <p className="tag">Closer look</p>
+              )}
               <h3>{picked.what}</h3>
               <p>{picked.why_now}</p>
               <ReportSources sources={picked.sources} />
@@ -297,8 +282,6 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
                 {making ? makeText || MAKING_STEPS[0] : MAKE_BUTTON}
               </button>
             </div>
-          ) : !offerSample && didRun ? (
-            <p>Tap a closer-look card, or look again.</p>
           ) : null}
         </section>
       ) : null}

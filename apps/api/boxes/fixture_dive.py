@@ -39,10 +39,7 @@ def unofficial_fixture_pack() -> dict:
         brand_fit=8,
         velocity=6,
         safety="ok",
-        reason=(
-            "Unofficial fixture — not this Fetch. Hydro Boost monsoon talk is "
-            "on-brand and not an adverse event."
-        ),
+        reason="Practice idea. Hydro Boost in humid weather, not a medical claim.",
         gate="deep_dive",
         model="fixture",
         prompt_version="unofficial-fixture-1",
@@ -51,15 +48,11 @@ def unofficial_fixture_pack() -> dict:
     report = TrendReport(
         report_id=FIXTURE_REPORT_ID,
         signal_id=FIXTURE_SIGNAL_ID,
-        what=(
-            "UNOFFICIAL FIXTURE (not this Fetch). Neutrogena Hydro Boost "
-            "barrier-cream talk is rising among Indian shoppers."
-        ),
+        what="Hydro Boost talk is up this week. Humid weather, tired skin after AC.",
         why_now=(
-            "Humidity plus AC commute. Canned Task 10 seed so the demo walk "
-            "can continue when live sources stay at background or discard."
+            "Practice idea. Use this when live news does not give us a closer look."
         ),
-        who="Unofficial fixture desk — not Kenvue",
+        who="Practice brand (unofficial, not Kenvue)",
         angles=["humidity barrier", "monsoon routine fit", "AC-commute tightness"],
         risks=[
             "do not treat humidity talk as a medical claim",

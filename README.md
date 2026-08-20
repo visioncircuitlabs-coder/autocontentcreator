@@ -44,6 +44,8 @@ docker compose up --build
 ```
 
 - Make today’s post: http://localhost:3000
+
+If that page says “Units” or “Start unit”, another app stole port 3000. Close it, then `docker compose up` here again.
 - API health: http://localhost:8000/health → `{"ok": true}`
 
 SQLite lives at `./data/demo.db`. Compose mounts `./data` into the API as `/data`.

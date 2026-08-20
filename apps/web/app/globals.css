@@ -698,6 +698,22 @@ textarea {
   color: var(--ticket);
 }
 
+.beat:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.linkish {
+  background: none;
+  border: none;
+  color: var(--mute);
+  text-decoration: underline;
+  padding: 0;
+  min-height: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
 .beat-n {
   font-family: var(--font-mono);
   font-size: 11px;

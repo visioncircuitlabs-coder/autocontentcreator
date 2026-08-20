@@ -9,11 +9,11 @@ This is a practice Neutrogena brand. It is not Kenvue. Nothing you approve here 
 ## The five steps
 
 1. **Look for ideas**  
-   Tap the big button. Wait. You will see “Looking at news…” then scoring, then reading. This can take about a minute.
+   Tap the big button. Wait. You will see “Looking at news…” This can take about a minute.
 
-2. **Pick one**  
-   Gold-edge cards are worth a closer look. Tap one. Read “Where we read this.”  
-   If you see **Use a sample idea (practice)** — this search found nothing strong. The sample is labeled. It is not today’s news. Use it to learn the rest of the steps.
+2. **This idea**  
+   You get one idea, already picked.  
+   If it says **Practice idea**, live news did not give us a closer look. That is normal. Continue.
 
 3. **Make a post**  
    Tap **Make a post**. Wait while it writes and checks claims. Pick Version 1, 2, or 3. Read “We blocked this…” if it appears. Then **Continue to your call**.

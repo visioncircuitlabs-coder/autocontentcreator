@@ -149,8 +149,8 @@ def test_unofficial_fixture_dive_is_labeled_and_runnable(
     assert body["fixture"] is True
     report = body["report"]
     assert report["report_id"] == FIXTURE_REPORT_ID
-    assert "UNOFFICIAL" in report["what"].upper()
-    assert "not this fetch" in report["what"].lower()
+    assert "hydro boost" in report["what"].lower()
+    assert "unofficial" in report["who"].lower()
     assert report["sources"]
     assert report["sources"][0]["url"] == SEED_URL
     assert report["sources"][0]["quote"]

@@ -184,9 +184,8 @@ def _template_captions(
             f"Try it in the PM routine."
         ),
         (
-            f"{angle}, kept claim-safe.\n\n"
-            f"Skin feel: {pain}. {product} is {approved}. "
-            f"Add to the monsoon shelf."
+            f"After a long AC commute, {pain}.\n\n"
+            f"{product} is {approved}. Keep it for humid evenings."
         ),
         (
             f"{hook}\n\n"

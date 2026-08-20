@@ -25,14 +25,6 @@ export function WalkShell({
         <p className="tape">{TAPE}</p>
         <div className="walk-brand">
           <h1>Make today’s post</h1>
-          <button
-            type="button"
-            className="ghost"
-            onClick={onToggleMachine}
-            aria-pressed={showMachine}
-          >
-            {showMachine ? "Hide the machine" : "Show the machine"}
-          </button>
         </div>
         <ol className="beats" aria-label="Steps">
           {BEATS.map((item) => {
@@ -44,7 +36,10 @@ export function WalkShell({
                   type="button"
                   className="beat"
                   data-state={state}
-                  onClick={() => onJump(item.n)}
+                  disabled={item.n > beat}
+                  onClick={() => {
+                    if (item.n <= beat) onJump(item.n);
+                  }}
                 >
                   <span className="beat-n">{item.n}</span>
                   <span className="beat-l">{item.label}</span>
@@ -55,7 +50,13 @@ export function WalkShell({
         </ol>
       </header>
       <main id="walk-main">{children}</main>
-      <p className="footer-note">Vision Circuit Labs · this pack does not go live</p>
+      <p className="footer-note">
+        Vision Circuit Labs · this pack does not go live
+        {" · "}
+        <button type="button" className="linkish" onClick={onToggleMachine}>
+          {showMachine ? "Hide how it is made" : "How it is made"}
+        </button>
+      </p>
     </div>
   );
 }
