@@ -16,6 +16,7 @@ from boxes.scorer import run_score
 from boxes.strategist import run_strategist
 from db import upsert_concepts, upsert_draft, upsert_reports
 from models import Draft, TrendReport
+from obs import emit, emit_error
 from ports import ChatModel, ImageGen, TrendSource
 
 logger = logging.getLogger(__name__)
@@ -34,8 +35,33 @@ def run_radar(
     owns = client is None
     client = client or build_client()
     try:
+        emit("radar_start", chat=getattr(chat, "model", None))
         signals = run_fetch(sources=sources, client=client, persist=persist)
         scores = run_score(signals, chat=chat, persist=persist)
+        gates: dict[str, int] = {}
+        for score in scores:
+            gates[score.gate] = gates.get(score.gate, 0) + 1
+        emit(
+            "radar_scored",
+            n_signals=len(signals),
+            gates=gates,
+            chat=getattr(chat, "model", None),
+            top=[
+                {
+                    "title": next(
+                        (s.title for s in signals if s.signal_id == score.signal_id),
+                        "",
+                    )[:120],
+                    "fit": score.brand_fit,
+                    "gate": score.gate,
+                    "reason": score.reason[:160],
+                    "model": score.model,
+                }
+                for score in sorted(scores, key=lambda item: item.brand_fit, reverse=True)[
+                    :8
+                ]
+            ],
+        )
         by_id = {item.signal_id: item for item in signals}
         reports: list[TrendReport] = []
         for score in scores:
@@ -55,8 +81,12 @@ def run_radar(
             )
         if persist and reports:
             upsert_reports(reports)
+        emit("radar_end", n_reports=len(reports), report_ids=[r.report_id for r in reports])
         logger.info("radar stored %s deep-dive reports", len(reports))
         return reports
+    except Exception as exc:
+        emit_error("radar_fail", exc)
+        raise
     finally:
         if owns:
             client.close()

@@ -119,6 +119,13 @@ def init_db() -> None:
                 PRIMARY KEY (draft_id, decided_at)
             );
 
+            CREATE TABLE IF NOT EXISTS events (
+                id TEXT PRIMARY KEY,
+                ts TEXT NOT NULL,
+                kind TEXT NOT NULL,
+                payload TEXT NOT NULL
+            );
+
             CREATE TABLE IF NOT EXISTS track_record (
                 draft_id TEXT NOT NULL,
                 decided_at TEXT NOT NULL,
@@ -632,6 +639,42 @@ def list_track_record() -> list[dict]:
                     "sku": row["sku"] or "",
                     "market": row["market"] or "",
                     "flag_human": bool(row["flag_human"]),
+                }
+            )
+        return out
+    finally:
+        conn.close()
+
+
+def insert_event(event_id: str, ts: str, kind: str, payload: object) -> None:
+    init_db()
+    conn = connect()
+    try:
+        conn.execute(
+            "INSERT INTO events (id, ts, kind, payload) VALUES (?, ?, ?, ?)",
+            (event_id, ts, kind, json.dumps(payload, default=str)),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def list_events(limit: int = 100) -> list[dict]:
+    init_db()
+    conn = connect()
+    try:
+        rows = conn.execute(
+            "SELECT id, ts, kind, payload FROM events ORDER BY ts DESC LIMIT ?",
+            (max(1, min(limit, 500)),),
+        ).fetchall()
+        out: list[dict] = []
+        for row in rows:
+            out.append(
+                {
+                    "id": row["id"],
+                    "ts": row["ts"],
+                    "kind": row["kind"],
+                    "payload": _json_load(row["payload"], {}),
                 }
             )
         return out

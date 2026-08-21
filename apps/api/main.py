@@ -3,12 +3,15 @@ import time
 from collections import defaultdict, deque
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal
+from uuid import uuid4
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel, Field
+
+from obs import emit, emit_error, setup_logging
 
 from adapters.chat_litellm import build_chat
 from boxes.belt import run_factory, run_radar
@@ -26,6 +29,7 @@ from db import (
     list_queue,
     list_reports,
     list_scores,
+    list_events,
     list_signals,
 )
 from models import Signal
@@ -81,7 +85,9 @@ class ReviewIn(BaseModel):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    setup_logging()
     init_db()
+    emit("api_start", chat=bool(build_chat()))
     yield
 
 
@@ -100,9 +106,60 @@ app.add_middleware(
 )
 
 
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    request_id = uuid4().hex[:10]
+    request.state.request_id = request_id
+    started = time.monotonic()
+    try:
+        response = await call_next(request)
+    except Exception as exc:
+        emit_error(
+            "http_crash",
+            exc,
+            method=request.method,
+            path=request.url.path,
+            request_id=request_id,
+        )
+        raise
+    ms = int((time.monotonic() - started) * 1000)
+    if request.url.path not in ("/health", "/events"):
+        emit(
+            "http",
+            method=request.method,
+            path=request.url.path,
+            status=response.status_code,
+            ms=ms,
+            request_id=request_id,
+            client=_client_host(request),
+        )
+    response.headers["X-Request-Id"] = request_id
+    return response
+
+
 @app.get("/health")
-def health() -> dict[str, bool]:
+def health() -> dict[str, object]:
+    return {"ok": True, "chat": bool(build_chat())}
+
+
+class ClientEventIn(BaseModel):
+    kind: str = Field(min_length=1, max_length=80)
+    payload: dict[str, Any] = Field(default_factory=dict)
+
+
+@app.post("/events")
+def post_event(body: ClientEventIn, request: Request):
+    emit(
+        f"ui.{body.kind}",
+        **body.payload,
+        client=_client_host(request),
+    )
     return {"ok": True}
+
+
+@app.get("/events")
+def get_events(limit: int = 80):
+    return list_events(limit)
 
 
 @app.post("/radar/fetch")

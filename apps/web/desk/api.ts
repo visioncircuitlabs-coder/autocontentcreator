@@ -7,7 +7,7 @@ export type FixtureDive = {
   report: TrendReport;
 };
 
-export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+export const API_URL = process.env.NEXT_PUBLIC_API_URL || "/engine";
 
 export class DeskError extends Error {
   status: number;
@@ -45,9 +45,13 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   let res: Response;
   try {
     res = await fetch(`${API_URL}${path}`, { ...init, headers });
-  } catch {
+  } catch (err) {
+    void logClient("fetch_fail", {
+      path,
+      error: err instanceof Error ? err.message : "network",
+    });
     throw new DeskError(
-      "The news engine is not running. Wait a moment and try Look for ideas again.",
+      "Could not reach the news engine through this page. Refresh and try Look for ideas again.",
       0,
     );
   }
@@ -60,6 +64,21 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
     return (await res.json()) as T;
   }
   return undefined as T;
+}
+
+export async function logClient(
+  kind: string,
+  payload: Record<string, unknown> = {},
+): Promise<void> {
+  try {
+    await fetch(`${API_URL}/events`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ kind, payload }),
+    });
+  } catch {
+    /* never block the walk */
+  }
 }
 
 export function draftImageUrl(draftId: string): string {
@@ -126,7 +145,7 @@ export async function downloadZip(draftId: string): Promise<void> {
     res = await fetch(`${API_URL}/export/${encodeURIComponent(draftId)}`);
   } catch {
     throw new DeskError(
-      "The news engine is not running. Wait a moment and try Look for ideas again.",
+      "Could not download the pack. Refresh and try again.",
       0,
     );
   }

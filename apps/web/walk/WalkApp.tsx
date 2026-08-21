@@ -10,6 +10,7 @@ import {
   runFactory,
   runRadar,
   decideDraft,
+  logClient,
 } from "../desk/api";
 import { CLERK_KEY, canSubmitReview, missingSources, shouldOfferFixture } from "../desk/review";
 import type { BriefPack, Decision, Draft, Score, Signal, TrendReport } from "../desk/types";
@@ -102,6 +103,7 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
     setDrafts([]);
     setChosen(null);
     setDecision(null);
+    void logClient("look_click", {});
     try {
       const out = await runRadar();
       const dives = out.deep_dives ?? [];
@@ -125,7 +127,9 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
       setSample(true);
       setBeat(2);
     } catch (err) {
-      setError(friendlyError(err));
+      const message = friendlyError(err);
+      setError(message);
+      void logClient("look_fail", { error: message });
     } finally {
       setLooking(false);
     }

@@ -9,6 +9,7 @@ from adapters.gdelt import GdeltSource
 from adapters.news_rss import NewsRssSource, extra_rss_sources
 from adapters.reddit_json import RedditJsonSource
 from models import Signal
+from obs import emit
 from ports import TrendSource
 
 logger = logging.getLogger(__name__)
@@ -59,9 +60,12 @@ def run_fetch(
         collected: list[Signal] = []
         for source in srcs:
             try:
-                collected.extend(source.fetch(query_id))
+                batch = source.fetch(query_id)
+                collected.extend(batch)
+                emit("fetch_source", source=source.name, n=len(batch), ok=True)
             except Exception as exc:
                 logger.warning("%s failed: %s", source.name, exc)
+                emit("fetch_source", source=source.name, n=0, ok=False, error=str(exc))
         unique = dedupe_by_url(collected)
         if persist:
             from db import upsert_signals
