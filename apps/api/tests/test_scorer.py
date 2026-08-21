@@ -34,9 +34,20 @@ def _signal(
 
 
 def test_build_chat_is_off_without_keys(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("XAI_API_KEY", raising=False)
     monkeypatch.delenv("GEMINI_API_KEY", raising=False)
     monkeypatch.delenv("GROQ_API_KEY", raising=False)
     assert build_chat() is None
+
+
+def test_build_chat_uses_xai_when_key_set(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    monkeypatch.delenv("GROQ_API_KEY", raising=False)
+    monkeypatch.setenv("XAI_API_KEY", "xai-test")
+    monkeypatch.delenv("CHAT_MODEL", raising=False)
+    chat = build_chat()
+    assert chat is not None
+    assert chat.model.startswith("xai/")
 
 
 def test_kill_word_forces_discard() -> None:

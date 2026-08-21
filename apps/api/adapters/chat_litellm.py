@@ -12,22 +12,24 @@ logger = logging.getLogger(__name__)
 
 
 def build_chat() -> "LiteLLMChat | None":
+    xai = os.environ.get("XAI_API_KEY", "").strip()
     gemini = os.environ.get("GEMINI_API_KEY", "").strip()
     groq = os.environ.get("GROQ_API_KEY", "").strip()
-    if not gemini and not groq:
+    if not xai and not gemini and not groq:
         return None
     model = os.environ.get("CHAT_MODEL", "").strip()
     if not model:
-        model = (
-            "groq/llama-3.3-70b-versatile"
-            if groq and not gemini
-            else "gemini/gemini-2.0-flash"
-        )
+        if xai:
+            model = "xai/grok-3-mini"
+        elif groq and not gemini:
+            model = "groq/llama-3.3-70b-versatile"
+        else:
+            model = "gemini/gemini-2.0-flash"
     return LiteLLMChat(model=model)
 
 
 class LiteLLMChat:
-    def __init__(self, model: str = "gemini/gemini-2.0-flash") -> None:
+    def __init__(self, model: str = "xai/grok-3-mini") -> None:
         self.model = model
 
     def complete_json(self, system: str, user: str, schema: type) -> BaseModel:

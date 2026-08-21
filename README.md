@@ -55,8 +55,9 @@ SQLite lives at `./data/demo.db`. Compose mounts `./data` into the API as `/data
 
 | Variable | What it does |
 |---|---|
-| `GEMINI_API_KEY` | Optional. Empty is fine — copy/judge paths walk on **templates**. Paste a free Gemini key for better live copy. |
-| `GROQ_API_KEY` | Optional alternate chat key (same idea). |
+| `XAI_API_KEY` | Optional Grok key. Empty = word-count ranking and template copy. |
+| `GEMINI_API_KEY` | Optional. Same idea as Grok. |
+| `GROQ_API_KEY` | Optional. Same idea as Grok. |
 | `IMAGE_GEN_URL` / `IMAGE_GEN_KEY` | Optional. Leave empty and keep `IMAGE_GEN_MODE=stub` for the Pillow card (logo + disclaimer stamped in code). When you have an HTTP image API, set the URL/key and `IMAGE_GEN_MODE=http`. |
 | `NEXT_PUBLIC_API_URL` | Browser → API (default `http://localhost:8000`). |
 
