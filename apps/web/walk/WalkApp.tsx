@@ -126,9 +126,6 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
       setBeat(2);
     } catch (err) {
       setError(friendlyError(err));
-      setDidRun(true);
-      setDivesThisRun(0);
-      setBeat(2);
     } finally {
       setLooking(false);
     }

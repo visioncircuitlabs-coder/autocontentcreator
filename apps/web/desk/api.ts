@@ -47,7 +47,7 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
     res = await fetch(`${API_URL}${path}`, { ...init, headers });
   } catch {
     throw new DeskError(
-      "Could not reach the app. Is it running on port 8000?",
+      "The news engine is not running. Wait a moment and try Look for ideas again.",
       0,
     );
   }
@@ -126,7 +126,7 @@ export async function downloadZip(draftId: string): Promise<void> {
     res = await fetch(`${API_URL}/export/${encodeURIComponent(draftId)}`);
   } catch {
     throw new DeskError(
-      "Could not reach the app. Is it running on port 8000?",
+      "The news engine is not running. Wait a moment and try Look for ideas again.",
       0,
     );
   }
