@@ -20,7 +20,7 @@ def build_chat() -> "LiteLLMChat | None":
     model = os.environ.get("CHAT_MODEL", "").strip()
     if not model:
         if xai:
-            model = "xai/grok-3-mini"
+            model = "xai/grok-4.6"
         elif groq and not gemini:
             model = "groq/llama-3.3-70b-versatile"
         else:
@@ -29,7 +29,7 @@ def build_chat() -> "LiteLLMChat | None":
 
 
 class LiteLLMChat:
-    def __init__(self, model: str = "xai/grok-3-mini") -> None:
+    def __init__(self, model: str = "xai/grok-4.6") -> None:
         self.model = model
 
     def complete_json(self, system: str, user: str, schema: type) -> BaseModel:
