@@ -1,0 +1,222 @@
+{
+  "passed": 10,
+  "total": 10,
+  "rate": 1.0,
+  "results": [
+    {
+      "name": "strong-monsoon-confession",
+      "ok": true,
+      "checks": {
+        "verdict": true,
+        "mean": true,
+        "no_cliche": true,
+        "clean": true
+      },
+      "mean": 4.4,
+      "verdict": "PASS",
+      "dimensions": {
+        "hook_strength": 3,
+        "rhythm_economy": 5,
+        "specificity": 4,
+        "emotional_truth": 5,
+        "brand_fit": 5
+      },
+      "cliches": [],
+      "caption": "Ninety percent humidity and my skin still felt tight by 4pm. One gel step change"
+    },
+    {
+      "name": "strong-imperative-compression",
+      "ok": true,
+      "checks": {
+        "verdict": true,
+        "mean": true,
+        "no_cliche": true,
+        "clean": true
+      },
+      "mean": 4.2,
+      "verdict": "PASS",
+      "dimensions": {
+        "hook_strength": 5,
+        "rhythm_economy": 5,
+        "specificity": 3,
+        "emotional_truth": 4,
+        "brand_fit": 4
+      },
+      "cliches": [],
+      "caption": "Cleanse. Then Hydro Boost. Nothing else tonight."
+    },
+    {
+      "name": "strong-specific-number",
+      "ok": true,
+      "checks": {
+        "verdict": true,
+        "mean": true,
+        "no_cliche": true,
+        "clean": true
+      },
+      "mean": 4.2,
+      "verdict": "PASS",
+      "dimensions": {
+        "hook_strength": 5,
+        "rhythm_economy": 5,
+        "specificity": 4,
+        "emotional_truth": 3,
+        "brand_fit": 4
+      },
+      "cliches": [],
+      "caption": "72 hours of hydration, measured after one application."
+    },
+    {
+      "name": "strong-peer-voice",
+      "ok": true,
+      "checks": {
+        "verdict": true,
+        "mean": true,
+        "no_cliche": true,
+        "clean": true
+      },
+      "mean": 4.0,
+      "verdict": "PASS",
+      "dimensions": {
+        "hook_strength": 5,
+        "rhythm_economy": 5,
+        "specificity": 3,
+        "emotional_truth": 3,
+        "brand_fit": 4
+      },
+      "cliches": [],
+      "caption": "skin freak-out season is here. mine too. gel first, panic later."
+    },
+    {
+      "name": "strong-describe-dont-promise",
+      "ok": true,
+      "checks": {
+        "verdict": true,
+        "mean": true,
+        "no_cliche": true,
+        "clean": true
+      },
+      "mean": 4.0,
+      "verdict": "PASS",
+      "dimensions": {
+        "hook_strength": 5,
+        "rhythm_economy": 5,
+        "specificity": 3,
+        "emotional_truth": 3,
+        "brand_fit": 4
+      },
+      "cliches": [],
+      "caption": "A water-gel that disappears in seconds. Matte finish, no residue."
+    },
+    {
+      "name": "strong-contradiction-hook",
+      "ok": true,
+      "checks": {
+        "verdict": true,
+        "mean": true,
+        "no_cliche": true,
+        "clean": true
+      },
+      "mean": 4.0,
+      "verdict": "PASS",
+      "dimensions": {
+        "hook_strength": 5,
+        "rhythm_economy": 5,
+        "specificity": 3,
+        "emotional_truth": 3,
+        "brand_fit": 4
+      },
+      "cliches": [],
+      "caption": "Driest day of the year. We sent our lightest cream."
+    },
+    {
+      "name": "weak-cliche-superlative",
+      "ok": true,
+      "checks": {
+        "verdict": true,
+        "mean": true,
+        "no_cliche": true,
+        "clean": true
+      },
+      "mean": 3.2,
+      "verdict": "REWRITE",
+      "dimensions": {
+        "hook_strength": 5,
+        "rhythm_economy": 4,
+        "specificity": 3,
+        "emotional_truth": 3,
+        "brand_fit": 1
+      },
+      "cliches": [
+        "glow like never before",
+        "revolutionary"
+      ],
+      "caption": "Glow like never before with our revolutionary formula!"
+    },
+    {
+      "name": "weak-brand-first",
+      "ok": true,
+      "checks": {
+        "verdict": true,
+        "mean": true,
+        "no_cliche": true,
+        "clean": true
+      },
+      "mean": 3.2,
+      "verdict": "REWRITE",
+      "dimensions": {
+        "hook_strength": 1,
+        "rhythm_economy": 5,
+        "specificity": 3,
+        "emotional_truth": 3,
+        "brand_fit": 4
+      },
+      "cliches": [],
+      "caption": "Introducing new Hydro Boost, the best moisturizer for your skin."
+    },
+    {
+      "name": "weak-vague-hype",
+      "ok": true,
+      "checks": {
+        "verdict": true,
+        "mean": true,
+        "no_cliche": true,
+        "clean": true
+      },
+      "mean": 2.8,
+      "verdict": "REWRITE",
+      "dimensions": {
+        "hook_strength": 3,
+        "rhythm_economy": 4,
+        "specificity": 3,
+        "emotional_truth": 3,
+        "brand_fit": 1
+      },
+      "cliches": [
+        "elevate your skincare"
+      ],
+      "caption": "Elevate your skincare game with our amazing products today!"
+    },
+    {
+      "name": "weak-empty-adjective",
+      "ok": true,
+      "checks": {
+        "verdict": true,
+        "mean": true,
+        "no_cliche": true,
+        "clean": true
+      },
+      "mean": 3.6,
+      "verdict": "REWRITE",
+      "dimensions": {
+        "hook_strength": 3,
+        "rhythm_economy": 5,
+        "specificity": 3,
+        "emotional_truth": 3,
+        "brand_fit": 4
+      },
+      "cliches": [],
+      "caption": "Our incredible luxurious formula will transform your routine forever."
+    }
+  ]
+}

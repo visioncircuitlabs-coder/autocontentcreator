@@ -1203,3 +1203,91 @@ textarea {
   }
 }
 
+/* Ops strip — quiet desk telemetry, bottom of the walk */
+.ops-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px 22px;
+  margin-top: 28px;
+  padding: 9px 16px;
+  border: 1px solid var(--hair);
+  border-radius: 10px;
+  background: rgba(28, 24, 20, 0.55);
+}
+
+.ops-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+}
+
+.ops-k {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+
+.ops-v {
+  font-size: 12px;
+  font-family: var(--font-mono);
+  color: var(--ticket);
+  font-variant-numeric: tabular-nums;
+}
+
+.ops-spend {
+  display: inline-flex;
+  align-items: center;
+}
+
+.ops-fill {
+  position: relative;
+  display: inline-block;
+  width: 54px;
+  height: 4px;
+  margin-right: 7px;
+  border-radius: 999px;
+  background: var(--hair);
+  overflow: hidden;
+}
+
+.ops-fill > span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  display: block;
+  border-radius: inherit;
+  background: var(--pass);
+  transition: width 0.4s ease;
+}
+
+.ops-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.ops-dot-ok {
+  background: #3ecf8e;
+  box-shadow: 0 0 6px rgba(62, 207, 142, 0.5);
+}
+
+.ops-dot-warn {
+  background: #f5a623;
+  box-shadow: 0 0 6px rgba(245, 166, 35, 0.5);
+}
+
+.ops-dot-down {
+  background: #e5484d;
+  box-shadow: 0 0 6px rgba(229, 72, 77, 0.5);
+}
+
+.ops-runs {
+  color: var(--mute);
+}
+
+

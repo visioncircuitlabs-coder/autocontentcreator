@@ -22,6 +22,7 @@ from boxes.belt import paint_chosen, run_factory, run_radar
 from boxes.fixture_dive import persist_unofficial_fixture
 from boxes.export import export_pack
 from boxes.fetcher import run_fetch
+from boxes.metrics import collect_metrics
 from boxes.review import decide
 from db import (
     get_brief,
@@ -149,7 +150,7 @@ async def log_requests(request: Request, call_next):
         )
         raise
     ms = int((time.monotonic() - started) * 1000)
-    if request.url.path not in ("/health", "/events"):
+    if request.url.path not in ("/health", "/metrics", "/events"):
         emit(
             "http",
             method=request.method,
@@ -216,6 +217,12 @@ def health_deep() -> dict[str, object]:
         "last_factory_run_at": _last_event_ts("factory_end"),
         "counts": counts,
     }
+
+
+@app.get("/metrics")
+def get_metrics() -> dict[str, object]:
+    """Ops strip feed: rates, image spend, breaker state, last-run times."""
+    return collect_metrics()
 
 
 class ClientEventIn(BaseModel):

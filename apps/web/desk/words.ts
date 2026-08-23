@@ -122,3 +122,64 @@ export function checkLines(draft: {
   if (!lines.length) lines.push("No extra checks fired.");
   return lines;
 }
+
+/* --- Ops strip (desk telemetry) ------------------------------------- */
+
+export const OPS_TITLE = "Desk pulse";
+export const OPS_LABEL_APPROVE = "Approve rate";
+export const OPS_LABEL_SPEND = "Image spend";
+export const OPS_LABEL_RUNS = "Last runs";
+export const OPS_RUN_WORD = "Look";
+export const OPS_MAKE_WORD = "Make";
+export const OPS_NEVER_RUN = "not yet";
+
+export function formatPercent(ratio: number | null | undefined): string {
+  if (
+    ratio === null ||
+    ratio === undefined ||
+    typeof ratio !== "number" ||
+    !Number.isFinite(ratio)
+  ) {
+    return "—";
+  }
+  return `${Math.round(ratio * 100)}%`;
+}
+
+export function spendFraction(spent: number, budget: number): number {
+  if (!Number.isFinite(spent) || !Number.isFinite(budget) || budget <= 0) {
+    return 0;
+  }
+  return Math.min(1, Math.max(0, spent / budget));
+}
+
+export function formatMoney(amount: number): string {
+  const value = Number.isFinite(amount) ? amount : 0;
+  return `$${value.toFixed(2)}`;
+}
+
+export type BreakerTone = "ok" | "warn" | "down";
+
+export function breakerTone(state: string | null | undefined): BreakerTone {
+  if (state === "open") return "down";
+  if (state === "half_open") return "warn";
+  return "ok";
+}
+
+export const OPS_BREAKER_LABELS: Record<BreakerTone, string> = {
+  ok: "Models steady",
+  warn: "Trying again",
+  down: "Model calls paused",
+};
+
+export function agoNote(iso: string | null | undefined, nowMs: number): string {
+  if (!iso) return OPS_NEVER_RUN;
+  const then = Date.parse(iso);
+  if (!Number.isFinite(then)) return "—";
+  const seconds = Math.max(0, Math.round((nowMs - then) / 1000));
+  if (seconds < 60) return `${seconds}s ago`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 48) return `${hours}h ago`;
+  return `${Math.floor(hours / 24)}d ago`;
+}

@@ -75,6 +75,7 @@ import {
 } from "../desk/words";
 import { MachineGraph } from "./MachineGraph";
 import { WalkShell } from "./WalkShell";
+import { OpsStrip } from "../desk/ops";
 
 function useRotating(steps: string[], on: boolean): string {
   const [index, setIndex] = useState(0);
@@ -568,6 +569,8 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
           </button>
         </section>
       ) : null}
+
+      <OpsStrip />
     </WalkShell>
   );
 }
