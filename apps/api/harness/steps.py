@@ -3,10 +3,14 @@
 A "step" wraps any callable with: uniform timing, structured events (via
 obs.emit), attempt counting, and an optional run_id so radar → factory →
 paint events can be correlated in the log and audit trail.
+
+run_id is a contextvar: safe under concurrent runs (each request/task
+carries its own), unlike a module global.
 """
 
 from __future__ import annotations
 
+import contextvars
 import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -16,17 +20,18 @@ from obs import emit
 
 T = TypeVar("T")
 
-# Module-level current pipeline run id (set by API handlers; best-effort).
-_run_id: str | None = None
+# Per-context pipeline run id (set by API handlers; best-effort).
+_run_id_var: contextvars.ContextVar[str | None] = contextvars.ContextVar(
+    "harness_run_id", default=None
+)
 
 
 def set_run_id(run_id: str | None) -> None:
-    global _run_id
-    _run_id = run_id
+    _run_id_var.set(run_id)
 
 
 def current_run_id() -> str | None:
-    return _run_id
+    return _run_id_var.get()
 
 
 def new_run_id(prefix: str = "run") -> str:

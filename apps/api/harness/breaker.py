@@ -106,7 +106,8 @@ class CircuitBreaker:
             self._current_cooldown = self.cooldown_s
 
 
-# Shared process-wide breaker for the chat model path. All LLM steps
-# (scorer, strategist, copywriter, judge, craft) route through this so a
-# dead upstream fails fast everywhere instead of per-step retry pain.
+# Shared process-wide breakers. All LLM steps route through CHAT_BREAKER;
+# image generation routes through IMAGE_BREAKER — a dead upstream fails
+# fast everywhere instead of per-step retry pain.
 CHAT_BREAKER = CircuitBreaker(threshold=3, cooldown_s=60.0)
+IMAGE_BREAKER = CircuitBreaker(threshold=3, cooldown_s=120.0)

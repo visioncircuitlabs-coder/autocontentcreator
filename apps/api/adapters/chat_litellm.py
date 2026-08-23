@@ -55,5 +55,8 @@ class LiteLLMChat:
             )
 
         response = retry_call(lambda: CHAT_BREAKER.call(_call))
+        from harness import chat_wallet
+
+        chat_wallet.record(self.model, getattr(response, "usage", None))
         text = response.choices[0].message.content or "{}"
         return schema.model_validate_json(text)

@@ -10,6 +10,7 @@ from pathlib import Path
 import httpx
 
 from adapters.resilience import retry_call
+from harness.breaker import IMAGE_BREAKER
 
 logger = logging.getLogger(__name__)
 
@@ -59,7 +60,7 @@ class ImagineImageGen:
                 response.raise_for_status()
                 return response.json()
 
-            body = retry_call(_attempt)
+            body = retry_call(lambda: IMAGE_BREAKER.call(_attempt))
             blob = _image_bytes(client, body)
             if not blob:
                 raise RuntimeError("Imagine returned no picture bytes.")

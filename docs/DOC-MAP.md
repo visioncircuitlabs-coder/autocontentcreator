@@ -34,6 +34,7 @@ What to open. Do not read everything.
 | `research/` | Industry dossiers, Cerebras Knowledge, Kenvue deck read, SOTA scorecard |
 | `architecture/command-center.md` | Owns / must not own for the walk |
 | `designs/research-and-copy.md` | Demo-fence research + copy method (approved) |
+| `bar/copy-bar.md` | Highest craft bar for skincare social copy (global + India): 10-point standard, exemplars, anti-patterns, scorer v2 proposal |
 
 ## Do not treat as the product spec
 
