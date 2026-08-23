@@ -6,7 +6,7 @@ import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
 
-from models import Brief, Concept, Decision, Draft, Score, Signal, TrendReport
+from models import Brief, Concept, Decision, Draft, RegistryClaim, Score, Signal, TrendReport
 
 DEFAULT_SQLITE_PATH = "data/demo.db"
 
@@ -126,6 +126,13 @@ def init_db() -> None:
                 payload TEXT NOT NULL
             );
 
+            CREATE TABLE IF NOT EXISTS api_keys (
+                key_hash TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                role TEXT NOT NULL,
+                created_at TEXT NOT NULL
+            );
+
             CREATE TABLE IF NOT EXISTS track_record (
                 draft_id TEXT NOT NULL,
                 decided_at TEXT NOT NULL,
@@ -139,6 +146,19 @@ def init_db() -> None:
                 market TEXT,
                 flag_human INTEGER NOT NULL DEFAULT 0,
                 PRIMARY KEY (draft_id, decided_at)
+            );
+
+            CREATE TABLE IF NOT EXISTS claims_registry (
+                claim_id TEXT PRIMARY KEY,
+                text TEXT NOT NULL,
+                sku TEXT NOT NULL DEFAULT '*',
+                market TEXT NOT NULL DEFAULT 'IN',
+                source_url TEXT NOT NULL,
+                evidence_ref TEXT NOT NULL DEFAULT '',
+                status TEXT NOT NULL,
+                review_by TEXT,
+                notes TEXT NOT NULL DEFAULT '',
+                seeded_at TEXT
             );
             """
         )
@@ -680,3 +700,92 @@ def list_events(limit: int = 100) -> list[dict]:
         return out
     finally:
         conn.close()
+
+
+def upsert_registry_claims(claims: list[RegistryClaim]) -> None:
+    """Persist claims-registry rows. Same claim_id replaces (seed is source of truth)."""
+    if not claims:
+        return
+    init_db()
+    conn = connect()
+    try:
+        now = datetime.now(timezone.utc).isoformat()
+        conn.executemany(
+            """
+            INSERT OR REPLACE INTO claims_registry (
+                claim_id, text, sku, market, source_url, evidence_ref,
+                status, review_by, notes, seeded_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            [
+                (
+                    c.claim_id,
+                    c.text,
+                    c.sku,
+                    c.market,
+                    c.source_url,
+                    c.evidence_ref,
+                    c.status,
+                    c.review_by.isoformat() if c.review_by else None,
+                    c.notes,
+                    now,
+                )
+                for c in claims
+            ],
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def list_registry_claims() -> list[RegistryClaim]:
+    """Load the claims registry from SQLite. Empty list if never seeded."""
+    init_db()
+    conn = connect()
+    try:
+        rows = conn.execute(
+            "SELECT * FROM claims_registry ORDER BY claim_id"
+        ).fetchall()
+        out: list[RegistryClaim] = []
+        for row in rows:
+            review = row["review_by"]
+            parsed = None
+            if review:
+                try:
+                    parsed = _parse_dt(review)
+                except ValueError:
+                    parsed = None
+            out.append(
+                RegistryClaim(
+                    claim_id=row["claim_id"],
+                    text=row["text"],
+                    sku=row["sku"] or "*",
+                    market=row["market"] or "IN",
+                    source_url=row["source_url"],
+                    evidence_ref=row["evidence_ref"] or "",
+                    status=row["status"],
+                    review_by=parsed,
+                    notes=row["notes"] or "",
+                )
+            )
+        return out
+    finally:
+        conn.close()
+
+
+_INIT_DONE = ""
+
+
+def get_conn() -> sqlite3.Connection:
+    """Open a connection with row access by name.
+
+    Minimal shared helper: same settings as connect(). Ensures the schema
+    exists first so early callers cannot hit a missing table. Callers own
+    commit/close.
+    """
+    global _INIT_DONE
+    path = get_sqlite_path()
+    if _INIT_DONE != path:
+        init_db()
+        _INIT_DONE = path
+    return connect()

@@ -12,20 +12,20 @@ from PIL import Image, ImageDraw
 from adapters.image_http import HttpImageGen
 from adapters.image_imagine import ImagineImageGen
 from adapters.image_stub import StubImageGen, _font, _wrap
+from boxes.brand_pack import load_brand_pack
 from boxes.hard_rules import load_disclaimer
 from models import Draft
 from ports import ImageGen
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_LOGO_PATH = (
-    Path(__file__).resolve().parent.parent / "fixtures" / "neutrogena" / "logo.svg"
-)
+_PACK = load_brand_pack()
+DEFAULT_LOGO_PATH = _PACK["logo_path"]
 DEFAULT_SIZE_TOKEN = "1080x1350"
 FEED_SIZE = (1080, 1350)  # Instagram 4:5
 LOGO_NAVY = (11, 61, 145, 255)
 LOGO_WHITE = (255, 255, 255, 255)
-WORDMARK = "NEUTROGENA"
+WORDMARK = _PACK["wordmark"]
 
 
 def rasterize_logo(svg_path: Path | None = None) -> Image.Image:

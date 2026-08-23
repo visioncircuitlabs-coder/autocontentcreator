@@ -9,6 +9,8 @@ from pathlib import Path
 
 import httpx
 
+from adapters.resilience import retry_call
+
 logger = logging.getLogger(__name__)
 
 IMAGINE_URL = "https://api.x.ai/v1/images/generations"
@@ -29,9 +31,12 @@ class ImagineImageGen:
         self.model = (model or os.environ.get("IMAGE_GEN_MODEL") or DEFAULT_MODEL).strip()
 
     def generate(self, prompt: str, out_path: Path) -> Path:
+        from boxes.image_budget import BudgetExceeded, record_spend, spend_gate
+
         key = (self.key or "").strip()
         if not key:
             raise RuntimeError("XAI_API_KEY is empty. Imagine cannot run.")
+        spend_gate()  # hard $ cap — Grok is images-only budget
         dest = Path(out_path)
         dest.parent.mkdir(parents=True, exist_ok=True)
         headers = {
@@ -48,13 +53,18 @@ class ImagineImageGen:
         owns = self.client is None
         client = self.client or httpx.Client(timeout=TIMEOUT_S, follow_redirects=True)
         try:
-            response = client.post(IMAGINE_URL, json=payload, headers=headers)
-            response.raise_for_status()
-            body = response.json()
+
+            def _attempt():
+                response = client.post(IMAGINE_URL, json=payload, headers=headers)
+                response.raise_for_status()
+                return response.json()
+
+            body = retry_call(_attempt)
             blob = _image_bytes(client, body)
             if not blob:
                 raise RuntimeError("Imagine returned no picture bytes.")
             dest.write_bytes(blob)
+            record_spend(0.02)  # only successful images cost
             return dest
         except httpx.HTTPStatusError as exc:
             logger.warning("Imagine HTTP failed: %s", exc)

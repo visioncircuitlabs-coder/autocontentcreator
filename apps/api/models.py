@@ -53,6 +53,24 @@ class Claim(BaseModel):
     expires_at: datetime | None
 
 
+class RegistryClaim(BaseModel):
+    """One row of the claims registry: every benefit claim usable in copy.
+
+    A claim may only be used if status == 'approved', its review_by date has
+    not passed, and it carries a human-checkable source citation.
+    """
+
+    claim_id: str
+    text: str
+    sku: str = "*"
+    market: str = "IN"
+    source_url: str = ""
+    evidence_ref: str = ""
+    status: Literal["approved", "restricted", "forbidden"]
+    review_by: datetime | None = None
+    notes: str = ""
+
+
 class Concept(BaseModel):
     concept_id: str
     brief_id: str

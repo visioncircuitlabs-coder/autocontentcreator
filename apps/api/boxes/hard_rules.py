@@ -5,12 +5,12 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from boxes.product_facts import compare_claims
+from boxes.product_facts import _pattern_for, compare_claims
+from boxes.brand_pack import load_brand_pack
+from boxes.claims_registry import list_registry, usable
 from models import Draft
 
-DEFAULT_DISCLAIMER_PATH = (
-    Path(__file__).resolve().parent.parent / "fixtures" / "neutrogena" / "disclaimer.txt"
-)
+DEFAULT_DISCLAIMER_PATH = load_brand_pack()["disclaimer_path"]
 
 BANNED_TOKENS = ("cures", "heals", "best", "only", "guaranteed")
 
@@ -124,5 +124,73 @@ def run_hard_rules(
 
     if has_benefit_line(body) and not has_disclaimer(caption, disc):
         reasons.append("benefit line requires market disclaimer")
+
+    return reasons
+
+
+def check_registry(text: str, *, today=None) -> list[str]:
+    """Check draft copy against the claims registry. No LLM.
+
+    Violations:
+      - a registry phrase appears with status != approved, no source citation,
+        or a review date in the past;
+      - a benefit word appears that is not covered by any approved, unexpired
+        registry phrase (unregistered benefit claim).
+    Empty list = every benefit phrase is registered and approved.
+    """
+    from boxes.claims_registry import registry_phrases
+
+    body = without_disclaimer(text or "", load_disclaimer())
+    if not body.strip():
+        return []
+
+    rows = list_registry()
+    phrases = registry_phrases()
+
+    candidates: list[tuple[int, int, str, object]] = []
+    for claim in rows:
+        for phrase in phrases.get(claim.claim_id, [claim.text]):
+            pat = _pattern_for(phrase)
+            for m in pat.finditer(body):
+                candidates.append((m.start(), m.end(), m.group(0), claim))
+
+    # Longer span wins; then earlier start.
+    candidates.sort(key=lambda c: (-(c[1] - c[0]), c[0]))
+    used: list[tuple[int, int]] = []
+    hits: list[tuple[int, int, str, object]] = []
+    for start, end, span, claim in candidates:
+        if any(start < y and end > x for x, y in used):
+            continue
+        used.append((start, end))
+        hits.append((start, end, span, claim))
+
+    reasons: list[str] = []
+    covered: list[tuple[int, int]] = []
+    seen: set[str] = set()
+    for start, end, span, claim in sorted(hits, key=lambda h: h[0]):
+        cid = claim.claim_id
+        if usable(claim, today=today):
+            covered.append((start, end))
+            continue
+        detail = f"status={claim.status}"
+        if claim.status == "approved" and not claim.source_url.strip():
+            detail = "missing source_url"
+        elif claim.status == "approved":
+            detail += f", review_by={claim.review_by.date().isoformat()}"
+        key = f"{cid}:{detail}"
+        if key not in seen:
+            seen.add(key)
+            reasons.append(f"claim not usable in registry: '{span}' ({detail})")
+
+    for marker in BENEFIT_MARKERS:
+        flagged = False
+        for m in re.finditer(
+            rf"(?<!\w){re.escape(marker)}(?!\w)", body, flags=re.IGNORECASE
+        ):
+            if any(m.start() < y and m.end() > x for x, y in covered):
+                continue
+            if not flagged:
+                flagged = True
+                reasons.append(f"unregistered benefit claim: '{marker}'")
 
     return reasons

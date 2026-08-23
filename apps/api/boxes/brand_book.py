@@ -10,11 +10,11 @@ import logging
 from pathlib import Path
 from typing import Any
 
+from boxes.brand_pack import load_brand_pack
+
 logger = logging.getLogger(__name__)
 
-DEFAULT_BRAND_PATH = (
-    Path(__file__).resolve().parent.parent / "fixtures" / "neutrogena" / "brand.json"
-)
+DEFAULT_BRAND_PATH = load_brand_pack()["book_path"]
 
 
 def load_brand(path: Path | None = None) -> dict[str, Any]:

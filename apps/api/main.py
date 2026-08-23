@@ -1,4 +1,5 @@
 import logging
+import os
 import time
 from collections import defaultdict, deque
 from contextlib import asynccontextmanager
@@ -6,14 +7,17 @@ from pathlib import Path
 from typing import Any, Literal
 from uuid import uuid4
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel, Field
 
 from obs import emit, emit_error, setup_logging
 
+import idempotency
 from adapters.chat_litellm import build_chat
+from boxes.audit import build_audit, render_audit_html
+from boxes.auth import create_key
 from boxes.belt import paint_chosen, run_factory, run_radar
 from boxes.fixture_dive import persist_unofficial_fixture
 from boxes.export import export_pack
@@ -21,6 +25,7 @@ from boxes.fetcher import run_fetch
 from boxes.review import decide
 from db import (
     get_brief,
+    get_conn,
     get_draft,
     get_report,
     init_db,
@@ -111,6 +116,23 @@ app.add_middleware(
 
 
 @app.middleware("http")
+async def auth_gate(request: Request, call_next):
+    """API-key gate. Open mode while no keys exist; enforced otherwise."""
+    from boxes.auth import authenticate, authorize
+
+    identity = None
+    count_conn = get_conn()
+    has_keys = count_conn.execute("SELECT COUNT(*) FROM api_keys").fetchone()[0] > 0
+    if has_keys and request.method != "GET":
+        identity = authenticate(request.headers.get("x-api-key"))
+        ok, why = authorize(request.url.path, identity)
+        if not ok:
+            return JSONResponse(status_code=401, content={"error": why})
+    request.state.identity = identity
+    return await call_next(request)
+
+
+@app.middleware("http")
 async def log_requests(request: Request, call_next):
     request_id = uuid4().hex[:10]
     request.state.request_id = request_id
@@ -144,6 +166,56 @@ async def log_requests(request: Request, call_next):
 @app.get("/health")
 def health() -> dict[str, object]:
     return {"ok": True, "chat": bool(build_chat())}
+
+
+def _last_event_ts(kind: str) -> str | None:
+    import db as _db
+
+    conn = _db.connect()
+    try:
+        conn.execute(
+            "CREATE TABLE IF NOT EXISTS events ("
+            " id TEXT PRIMARY KEY, ts TEXT NOT NULL, kind TEXT NOT NULL,"
+            " payload TEXT NOT NULL)"
+        )
+        row = conn.execute(
+            "SELECT ts FROM events WHERE kind = ? ORDER BY ts DESC LIMIT 1", (kind,)
+        ).fetchone()
+        return row["ts"] if row else None
+    finally:
+        conn.close()
+
+
+@app.get("/health/deep")
+def health_deep() -> dict[str, object]:
+    """Deep health: adapter config reachability, db size, last-run timestamps."""
+    import db as _db
+
+    chat_ok = build_chat() is not None
+    image_mode = (os.environ.get("IMAGE_GEN_MODE", "").strip().lower()
+                  or ("stub" if not os.environ.get("XAI_API_KEY", "").strip() else "imagine"))
+    path = Path(_db.get_sqlite_path())
+    size = path.stat().st_size if path.is_file() else 0
+    counts = {"signals": 0, "drafts": 0, "decisions": 0}
+    if size:
+        conn = _db.connect()
+        try:
+            for name in counts:
+                try:
+                    counts[name] = conn.execute(f"SELECT COUNT(*) FROM {name}").fetchone()[0]
+                except Exception:
+                    pass
+        finally:
+            conn.close()
+    return {
+        "ok": True,
+        "chat_configured": chat_ok,
+        "image_mode": image_mode,
+        "db_path_bytes": size,
+        "last_radar_run_at": _last_event_ts("radar_end"),
+        "last_factory_run_at": _last_event_ts("factory_end"),
+        "counts": counts,
+    }
 
 
 class ClientEventIn(BaseModel):
@@ -185,14 +257,21 @@ def radar_run(request: Request):
             status_code=429,
             content={"error": "Too many fetches. Please wait a minute and try again."},
         )
+    key = (request.headers.get("Idempotency-Key") or "").strip()
+    cached, hit = idempotency.get_cached(key, "radar_run")
+    if hit:
+        return cached
     try:
         pack = run_radar(chat=build_chat())
-        return {
+        payload = {
             "reports": pack.reports,
             "scores": pack.scores,
             "signals_seen": pack.signals,
             "deep_dives": pack.reports,
         }
+        emit("radar_end", n_reports=len(pack.reports))
+        idempotency.store(key, "radar_run", payload)
+        return payload
     except ValueError as exc:
         return _friendly(exc)
     except Exception:
@@ -223,9 +302,16 @@ def radar_fixture():
 
 
 @app.post("/factory/run")
-def factory_run(body: FactoryRunIn):
+def factory_run(body: FactoryRunIn, request: Request):
+    key = (request.headers.get("Idempotency-Key") or "").strip()
+    cached, hit = idempotency.get_cached(key, "factory_run")
+    if hit:
+        return cached
     try:
-        return run_factory(body.report_id, chat=build_chat())
+        result = run_factory(body.report_id, chat=build_chat())
+        emit("factory_end", report_id=body.report_id)
+        idempotency.store(key, "factory_run", result)
+        return result
     except ValueError as exc:
         return _friendly(exc)
     except Exception:
@@ -280,6 +366,40 @@ def export_draft(draft_id: str):
         path,
         media_type="application/zip",
         filename=path.name,
+    )
+
+
+@app.get("/audit/{draft_id}")
+def get_audit(draft_id: str):
+    try:
+        return build_audit(draft_id)
+    except ValueError as exc:
+        return _friendly(exc)
+    except Exception:
+        logger.exception("audit failed")
+        return JSONResponse(
+            status_code=500,
+            content={"error": "Could not build that audit trail. Please try again."},
+        )
+
+
+@app.get("/audit/{draft_id}/html")
+def get_audit_html(draft_id: str):
+    try:
+        audit = build_audit(draft_id)
+        html_text = render_audit_html(audit)
+    except ValueError as exc:
+        return _friendly(exc)
+    except Exception:
+        logger.exception("audit html failed")
+        return JSONResponse(
+            status_code=500,
+            content={"error": "Could not build that audit page. Please try again."},
+        )
+    return Response(
+        content=html_text,
+        media_type="text/html",
+        headers={"Content-Disposition": f'inline; filename="{draft_id}_audit.html"'},
     )
 
 
@@ -364,3 +484,27 @@ def get_draft_image(draft_id: str):
 @app.get("/queue")
 def get_queue():
     return list_queue()
+
+
+class KeyIn(BaseModel):
+    name: str = Field(min_length=1)
+    role: Literal["viewer", "approver", "admin"]
+
+
+@app.post("/admin/keys")
+def admin_create_key(body: KeyIn, request: Request):
+    from boxes.auth import authenticate, ensure_bootstrap
+
+    ensure_bootstrap()
+    identity = authenticate(request.headers.get("x-api-key"))
+    if identity is None or identity["role"] != "admin":
+        return JSONResponse(
+            status_code=401,
+            content={"error": "Only an admin can create keys."},
+        )
+    try:
+        raw = create_key(body.name, body.role)
+    except ValueError as exc:
+        return _friendly(exc)
+    emit("auth_key_created", name=body.name, role=body.role)
+    return {"key": raw, "role": body.role, "name": body.name}

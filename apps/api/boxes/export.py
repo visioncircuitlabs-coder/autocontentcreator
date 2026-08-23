@@ -10,6 +10,7 @@ from html import escape
 from pathlib import Path
 
 from boxes.art_director import compose
+from boxes.audit import build_audit, render_audit_html
 from boxes.visual import visual_prompt
 from db import get_draft, upsert_draft
 from models import Draft
@@ -83,6 +84,9 @@ def export_pack(draft_id: str) -> Path:
         zf.writestr("caption.txt", (draft.caption or "") + "\n")
         zf.writestr("meta.json", json.dumps(meta, indent=2))
         zf.writestr("preview.html", _preview_html(draft, image_name))
+        audit = build_audit(draft.draft_id)
+        zf.writestr("audit.json", json.dumps(audit, indent=2, default=str))
+        zf.writestr("audit.html", render_audit_html(audit))
         if draft.image_path and Path(draft.image_path).is_file():
             zf.write(str(draft.image_path), arcname=image_name)
     return dest

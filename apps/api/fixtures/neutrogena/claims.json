@@ -60,5 +60,65 @@
         "#1 sun screen"
       ]
     }
+  ],
+  "registry": [
+    {
+      "claim_id": "reg-derm-tested",
+      "text": "dermatologist tested",
+      "sku": "DEMO-HYDRO-BOOST",
+      "market": "IN",
+      "source_url": "https://www.neutrogena.com/products/hydro-boost-water-gel",
+      "evidence_ref": "fixtures/neutrogena/claims.json#reg-derm-tested",
+      "status": "approved",
+      "review_by": "2027-03-31",
+      "notes": "Unofficial demo seed. Re-verify against brand pack each quarter.",
+      "lookalikes": ["dermatologist-tested", "derm tested"]
+    },
+    {
+      "claim_id": "reg-ha-hydrates",
+      "text": "hyaluronic acid hydrates",
+      "sku": "DEMO-HYDRO-BOOST",
+      "market": "IN",
+      "source_url": "https://www.neutrogena.com/products/hydro-boost-water-gel",
+      "evidence_ref": "fixtures/neutrogena/claims.json#reg-ha-hydrates",
+      "status": "approved",
+      "review_by": "2027-03-31",
+      "notes": "Hydration benefit tied to Hydro Boost ingredient story.",
+      "lookalikes": ["hydrates skin", "hyaluronic acid hydration"]
+    },
+    {
+      "claim_id": "reg-spf-protects",
+      "text": "spf protects",
+      "sku": "DEMO-SUNSCREEN",
+      "market": "IN",
+      "source_url": "https://www.neutrogena.com/sun/how-spF-works",
+      "evidence_ref": "fixtures/neutrogena/claims.json#reg-spf-protects",
+      "status": "approved",
+      "review_by": "2026-12-31",
+      "notes": "Sun-protection phrasing; review before next summer campaign.",
+      "lookalikes": ["spf 50 protects", "broad spectrum spf protects"]
+    },
+    {
+      "claim_id": "reg-brightens-spots",
+      "text": "brightens dark spots",
+      "sku": "*",
+      "market": "IN",
+      "source_url": "",
+      "evidence_ref": "fixtures/neutrogena/claims.json#reg-brightens-spots",
+      "status": "restricted",
+      "review_by": null,
+      "notes": "Restricted: needs a human-approved substantiation source before use."
+    },
+    {
+      "claim_id": "reg-forbidden-cures-acne",
+      "text": "cures acne",
+      "sku": "*",
+      "market": "IN",
+      "source_url": "",
+      "evidence_ref": "fixtures/neutrogena/claims.json#reg-forbidden-cures-acne",
+      "status": "forbidden",
+      "review_by": null,
+      "notes": "Drug claim. Never usable in copy."
+    }
   ]
 }

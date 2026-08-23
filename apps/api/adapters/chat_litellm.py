@@ -8,6 +8,8 @@ import os
 
 from pydantic import BaseModel
 
+from adapters.resilience import retry_call
+
 logger = logging.getLogger(__name__)
 
 
@@ -36,17 +38,21 @@ class LiteLLMChat:
         import litellm
 
         schema_hint = json.dumps(schema.model_json_schema())
-        response = litellm.completion(
-            model=self.model,
-            messages=[
-                {
-                    "role": "system",
-                    "content": f"{system}\nReturn JSON only. Schema: {schema_hint}",
-                },
-                {"role": "user", "content": user},
-            ],
-            response_format={"type": "json_object"},
-            timeout=20,
-        )
+
+        def _call():
+            return litellm.completion(
+                model=self.model,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": f"{system}\nReturn JSON only. Schema: {schema_hint}",
+                    },
+                    {"role": "user", "content": user},
+                ],
+                response_format={"type": "json_object"},
+                timeout=20,
+            )
+
+        response = retry_call(_call)
         text = response.choices[0].message.content or "{}"
         return schema.model_validate_json(text)

@@ -11,13 +11,12 @@ import re
 from pathlib import Path
 from typing import Any, Literal
 
+from boxes.brand_pack import load_brand_pack
 from models import Claim
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_CLAIMS_PATH = (
-    Path(__file__).resolve().parent.parent / "fixtures" / "neutrogena" / "claims.json"
-)
+DEFAULT_CLAIMS_PATH = load_brand_pack()["claims_path"]
 
 ClaimStatus = Literal["approved", "conditional", "forbidden"]
 

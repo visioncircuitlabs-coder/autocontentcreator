@@ -9,6 +9,7 @@ from pathlib import Path
 import httpx
 
 from adapters.common import REQUEST_TIMEOUT, request_headers
+from adapters.resilience import retry_call
 
 logger = logging.getLogger(__name__)
 
@@ -43,19 +44,26 @@ class HttpImageGen:
         headers = {**request_headers(accept="image/*,application/octet-stream"), "Authorization": f"Bearer {self.key}"}
         payload = {"prompt": prompt, "size": self.size}
 
-        if self.client is not None:
-            response = self.client.post(url, json=payload, headers=headers, timeout=REQUEST_TIMEOUT)
-        else:
-            with httpx.Client(timeout=REQUEST_TIMEOUT, headers=request_headers()) as client:
-                response = client.post(url, json=payload, headers=headers)
-
+        owns = self.client is None
+        client = self.client or httpx.Client(
+            timeout=REQUEST_TIMEOUT, headers=request_headers()
+        )
         try:
-            response.raise_for_status()
+
+            def _attempt():
+                response = client.post(url, json=payload, headers=headers)
+                response.raise_for_status()
+                return response
+
+            response = retry_call(_attempt)
         except httpx.HTTPStatusError as exc:
             logger.warning("image HTTP failed: %s", exc)
             raise RuntimeError(
                 "The image service did not return a picture. Stay on stub mode or check the API."
             ) from exc
+        finally:
+            if owns:
+                client.close()
 
         if not response.content:
             raise RuntimeError("The image service returned an empty picture.")
