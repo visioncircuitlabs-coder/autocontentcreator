@@ -125,6 +125,8 @@ def run_hard_rules(
     if has_benefit_line(body) and not has_disclaimer(caption, disc):
         reasons.append("benefit line requires market disclaimer")
 
+    reasons.extend(check_registry(body))
+
     return reasons
 
 
