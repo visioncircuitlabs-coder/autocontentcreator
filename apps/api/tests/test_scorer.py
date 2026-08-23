@@ -260,3 +260,61 @@ def test_kill_overrides_high_brand_fit_from_chat() -> None:
     scores = run_score([signal], chat=FakeChat(), persist=False)
     assert scores[0].safety == "kill"
     assert scores[0].gate == "discard"
+
+
+def test_run_score_caps_chat_to_top_on_brand_headlines() -> None:
+    from boxes.scorer import BrandFitOut, MAX_CHAT_SCORES, run_score
+
+    calls: list[str] = []
+
+    class CountingChat:
+        def complete_json(self, system: str, user: str, schema: type) -> BaseModel:
+            calls.append(user)
+            return BrandFitOut(brand_fit=9, reason="on-brand skincare talk")
+
+    on_brand = [
+        _signal(
+            signal_id=f"hot{i}",
+            title="Neutrogena Hydro Boost hyaluronic serum",
+            snippet="Skincare moisturizer with ceramides for dry skin.",
+        )
+        for i in range(8)
+    ]
+    off_topic = [
+        _signal(
+            signal_id=f"cold{i}",
+            title="Local cricket match postponed",
+            snippet="Rain delays play in Kochi stadium.",
+            url="https://example.com/cricket",
+        )
+        for i in range(8)
+    ]
+    scores = run_score(on_brand + off_topic, chat=CountingChat(), persist=False)
+    assert len(calls) == MAX_CHAT_SCORES
+    chat_ids = {row.signal_id for row in scores if row.model == "chat"}
+    assert len(chat_ids) == MAX_CHAT_SCORES
+    assert all(item.startswith("hot") for item in chat_ids)
+    cold = {row.signal_id: row for row in scores if row.signal_id.startswith("cold")}
+    assert all(row.model == "keyword-fallback" for row in cold.values())
+
+
+def test_run_score_skips_chat_when_nothing_fits() -> None:
+    from boxes.scorer import run_score
+
+    class BoomChat:
+        def complete_json(self, system: str, user: str, schema: type) -> BaseModel:
+            raise AssertionError("off-topic headlines must not call chat")
+
+    scores = run_score(
+        [
+            _signal(
+                signal_id="sport",
+                title="Local cricket match postponed",
+                snippet="Rain delays play in Kochi stadium.",
+                url="https://example.com/cricket",
+            )
+        ],
+        chat=BoomChat(),
+        persist=False,
+    )
+    assert scores[0].model == "keyword-fallback"

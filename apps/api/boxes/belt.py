@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from typing import NamedTuple
 
 import httpx
 
@@ -14,14 +15,24 @@ from boxes.loop import run_loop
 from boxes.researcher import run_research
 from boxes.scorer import run_score
 from boxes.strategist import run_strategist
-from db import upsert_concepts, upsert_draft, upsert_reports
-from models import Draft, TrendReport
+from boxes.visual import visual_prompt
+from db import get_draft, upsert_concepts, upsert_draft, upsert_reports
+from models import Draft, Score, Signal, TrendReport
 from obs import emit, emit_error
 from ports import ChatModel, ImageGen, TrendSource
 
 logger = logging.getLogger(__name__)
 
 MAX_FACTORY_CONCEPTS = 1
+MAX_DEEP_DIVES = 1
+RADAR_RESEARCH_GETS = 3
+RADAR_RESEARCH_SECONDS = 35.0
+
+
+class RadarPack(NamedTuple):
+    reports: list[TrendReport]
+    signals: list[Signal]
+    scores: list[Score]
 
 
 def run_radar(
@@ -30,7 +41,7 @@ def run_radar(
     client: httpx.Client | None = None,
     chat: ChatModel | None = None,
     persist: bool = True,
-) -> list[TrendReport]:
+) -> RadarPack:
     """fetch → score → research deep_dives → store reports."""
     owns = client is None
     client = client or build_client()
@@ -64,9 +75,12 @@ def run_radar(
         )
         by_id = {item.signal_id: item for item in signals}
         reports: list[TrendReport] = []
-        for score in scores:
-            if score.gate != "deep_dive":
-                continue
+        dives = sorted(
+            (score for score in scores if score.gate == "deep_dive"),
+            key=lambda item: (item.brand_fit, item.velocity),
+            reverse=True,
+        )
+        for score in dives[:MAX_DEEP_DIVES]:
             signal = by_id.get(score.signal_id)
             if signal is None:
                 continue
@@ -74,16 +88,18 @@ def run_radar(
                 run_research(
                     signal,
                     score,
-                    chat=chat,
+                    chat=None,
                     client=client,
                     persist=persist,
+                    max_gets=RADAR_RESEARCH_GETS,
+                    max_seconds=RADAR_RESEARCH_SECONDS,
                 )
             )
         if persist and reports:
             upsert_reports(reports)
         emit("radar_end", n_reports=len(reports), report_ids=[r.report_id for r in reports])
         logger.info("radar stored %s deep-dive reports", len(reports))
-        return reports
+        return RadarPack(reports=reports, signals=signals, scores=scores)
     except Exception as exc:
         emit_error("radar_fail", exc)
         raise
@@ -92,18 +108,14 @@ def run_radar(
             client.close()
 
 
-def _visual_prompt(draft: Draft) -> str:
-    line = (draft.caption or "").split("\n")[0].strip()[:120]
-    return f"Skincare still life, no text, no logo, no claims. Mood: {line}"
-
-
 def run_factory(
     report_id: str,
     *,
     chat: ChatModel | None = None,
     image_gen: ImageGen | None = None,
 ) -> list[Draft]:
-    """brief → strategist → copywriter → loop (rules+judge) → art_director → queue."""
+    """brief → strategist → copywriter → loop. Picture waits until a version is picked."""
+    _ = image_gen
     brief_id = build_brief(report_id)
     concepts = run_strategist(brief_id, chat=chat)
     upsert_concepts(concepts)
@@ -111,14 +123,28 @@ def run_factory(
     for concept in concepts[:MAX_FACTORY_CONCEPTS]:
         variants = run_copywriter(concept, round=1, chat=chat)
         for draft in variants:
-            # Loop already runs hard_rules then judge each round.
             looped = run_loop(draft, chat=chat)
-            composed = compose(looped, _visual_prompt(looped), image_gen=image_gen)
-            upsert_draft(composed)
-            queued.append(composed)
+            upsert_draft(looped)
+            queued.append(looped)
         if queued:
             break
     if not queued:
         raise ValueError("The factory could not produce a draft from that report.")
     logger.info("factory queued %s drafts from %s", len(queued), report_id)
     return queued
+
+
+def paint_chosen(
+    draft_id: str,
+    *,
+    image_gen: ImageGen | None = None,
+) -> Draft:
+    """One picture, after a person picks a caption version."""
+    draft = get_draft(draft_id)
+    if draft is None:
+        raise ValueError("That draft is not in the queue.")
+    emit("paint_start", draft_id=draft_id)
+    composed = compose(draft, visual_prompt(draft), image_gen=image_gen)
+    upsert_draft(composed)
+    emit("paint_end", draft_id=draft_id, image=bool(composed.image_path))
+    return composed

@@ -120,17 +120,19 @@ def test_skeptic_drops_claim_with_no_url() -> None:
     assert "no url" in note.lower()
 
 
-def test_cap_stops_after_6_gets() -> None:
+def test_cap_stops_after_max_gets() -> None:
     from boxes.researcher import run_research
 
     client = _client_for(_many_page_mapping())
     signal = _signal()
-    report = run_research(signal, _score(signal), client=client, persist=False)
+    report = run_research(
+        signal, _score(signal), client=client, persist=False, max_gets=2
+    )
 
     assert isinstance(report, TrendReport)
-    assert len(client.captured) == 6  # type: ignore[attr-defined]
+    assert len(client.captured) == 2  # type: ignore[attr-defined]
     assert report.capped_at == "gets"
-    assert report.spent["gets"] == 6
+    assert report.spent["gets"] == 2
     assert OFF_HOST not in client.captured  # type: ignore[attr-defined]
 
 
@@ -209,6 +211,93 @@ def test_planner_splits_three_angles_without_llm() -> None:
     joined = " ".join(angles).lower()
     assert "caption" not in joined
     assert "#1" not in joined
+    assert "scorer" not in joined
+    assert "deep-dive" not in joined
+    assert "gate" not in joined
+
+
+def test_google_news_opens_publisher_not_script() -> None:
+    from boxes.researcher import run_research
+
+    google = "https://news.google.com/rss/articles/ABC"
+    vogue = "https://www.vogue.in/beauty/double-cleanse"
+    analytics = "https://www.google-analytics.com/g/collect"
+    google_html = (
+        "<html><body>window.WIZ_global_data={'AfY8Hf':true}"
+        f'<a href="{analytics}">ga</a>'
+        f'<a href="{vogue}">story</a></body></html>'
+    )
+    vogue_html = (
+        "<html><p>Double cleansing at night is getting a closer look "
+        "in Indian skincare routines.</p></html>"
+    )
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        url = str(request.url)
+        if "news.google.com" in url:
+            return httpx.Response(200, text=google_html)
+        if "vogue.in" in url:
+            return httpx.Response(200, text=vogue_html)
+        return httpx.Response(404, text="missing")
+
+    signal = _signal(
+        url=google,
+        title="How double cleansing can make your nighttime skincare routine more effective - Vogue India",
+        snippet="Night routine talk.",
+    )
+    report = run_research(
+        signal,
+        _score(signal),
+        client=httpx.Client(transport=httpx.MockTransport(handler)),
+        persist=False,
+    )
+    urls = [str(src.get("url") or "") for src in report.sources]
+    quotes = " ".join(str(src.get("quote") or "") for src in report.sources)
+    assert any("vogue.in" in item for item in urls)
+    assert all("google-analytics" not in item for item in urls)
+    assert "WIZ_global" not in quotes
+    assert "scorer" not in report.why_now.lower()
+    assert "gate" not in report.why_now.lower()
+
+
+def test_page_quote_drops_script_and_keeps_prose() -> None:
+    from boxes.researcher import page_quote
+
+    junk = (
+        "window.WIZ_global_data = {'AfY8Hf':true,'Dftppe':'%.@.'};"
+        " /_/SubscribewithgoogleClientUi/"
+    )
+    assert page_quote(junk) == ""
+    png = "\x89PNG\r\n\x1a\nIHDR" + "IDAT" * 20
+    assert page_quote(png) == ""
+    prose = "Double cleansing at night is getting a closer look in Indian skincare."
+    assert "double cleansing" in page_quote(prose).lower()
+
+
+def test_publisher_links_skip_google_image_cdn() -> None:
+    from boxes.researcher import is_junk_url, publisher_links
+
+    html = (
+        '<a href="https://www.google-analytics.com/g/collect">ga</a>'
+        '<a href="https://lh3.googleusercontent.com/a/photo=s400">img</a>'
+        '<a href="https://www.vogue.in/beauty/double-cleanse">story</a>'
+    )
+    found = publisher_links(html, "https://news.google.com/rss/articles/ABC")
+    assert found == ["https://www.vogue.in/beauty/double-cleanse"]
+    assert is_junk_url("https://www.google-analytics.com/g/collect") is True
+    assert is_junk_url("https://www.vogue.in/beauty/double-cleanse") is False
+
+
+def test_empty_research_why_now_is_plain_english() -> None:
+    from boxes.researcher import run_research
+
+    client = _client_for({})
+    signal = _signal()
+    report = run_research(signal, _score(signal), client=client, persist=False)
+    assert "scorer" not in report.why_now.lower()
+    assert "gate" not in report.why_now.lower()
+    assert "deep-dive" not in report.why_now.lower()
+    assert "deep_dive" not in report.why_now.lower()
 
 
 def test_wraps_body_as_source_data_not_instructions() -> None:

@@ -49,6 +49,14 @@ def test_query_brand_returns_slice_and_citations() -> None:
     assert result["citations"], "every slice must cite a source"
     blob = str(result).lower()
     assert "neutrogena" in blob
+    examples = [
+        str(item)
+        for card in result["slice"]
+        if isinstance(card, dict)
+        for item in (card.get("examples") or [])
+    ]
+    assert len(examples) >= 3
+    assert any("hydro boost" in row.lower() for row in examples)
 
 
 def test_query_brand_scopes_market() -> None:

@@ -12,7 +12,7 @@ from adapters.common import REQUEST_TIMEOUT, request_headers
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_SIZE = "1080x1080"
+DEFAULT_SIZE = "1080x1350"
 
 
 class HttpImageGen:

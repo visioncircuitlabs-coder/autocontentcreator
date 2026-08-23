@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Literal
@@ -16,6 +17,8 @@ logger = logging.getLogger(__name__)
 PROMPT_VERSION = "v1"
 FALLBACK_MODEL = "keyword-fallback"
 DEFAULT_CHAT_MODEL_LABEL = "chat"
+MAX_CHAT_SCORES = 5
+MIN_KEYWORD_FIT_FOR_CHAT = 4
 
 DEFAULT_EXCLUSION_PATH = (
     Path(__file__).resolve().parent.parent / "fixtures" / "neutrogena" / "exclusion.txt"
@@ -50,6 +53,7 @@ POSITIVE_KEYWORDS = (
 SOURCE_RANK = {
     "reddit": 3,
     "gdelt": 2,
+    "grok_web": 2,
     "news_rss": 1,
     "rss": 1,
 }
@@ -247,11 +251,40 @@ def run_score(
     persist: bool = True,
     now: datetime | None = None,
 ) -> list[Score]:
-    """Score a batch of signals. ChatModel is optional (keyword fallback)."""
+    """Score a batch of signals. ChatModel is optional (keyword fallback).
+
+    Chat is only asked about the top on-brand headlines. A full news batch
+    must not wait on one model call per story — the walk times out.
+    """
     rules = load_exclusion_rules(exclusion_path)
-    scores = [
-        score_one(signal, chat=chat, rules=rules, now=now) for signal in signals
-    ]
+    if chat is None:
+        scores = [
+            score_one(signal, chat=None, rules=rules, now=now) for signal in signals
+        ]
+    else:
+        scores = [
+            score_one(signal, chat=None, rules=rules, now=now) for signal in signals
+        ]
+        ranked = sorted(
+            (
+                (index, row)
+                for index, row in enumerate(scores)
+                if row.model != "exclusion" and row.brand_fit >= MIN_KEYWORD_FIT_FOR_CHAT
+            ),
+            key=lambda item: (-item[1].brand_fit, -item[1].velocity, item[0]),
+        )
+        picked = ranked[:MAX_CHAT_SCORES]
+
+        def _chat_one(index: int) -> tuple[int, Score]:
+            return index, score_one(signals[index], chat=chat, rules=rules, now=now)
+
+        if picked:
+            workers = min(MAX_CHAT_SCORES, len(picked))
+            with ThreadPoolExecutor(max_workers=workers) as pool:
+                jobs = [pool.submit(_chat_one, index) for index, _row in picked]
+                for job in as_completed(jobs):
+                    index, scored = job.result()
+                    scores[index] = scored
     if persist and scores:
         from db import upsert_scores
 

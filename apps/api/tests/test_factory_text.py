@@ -169,6 +169,42 @@ def test_copywriter_returns_two_to_three_drafts() -> None:
     blob = _blob(drafts)
     assert "pcos" not in blob
     assert "cures" not in blob
+    assert "soft close" not in blob
+    assert "no miracle talk" not in blob
+    assert "is try it" not in blob
+
+
+def test_copywriter_keeps_model_lines_and_drops_stage_notes() -> None:
+    from boxes.copywriter import CopyOut, run_copywriter
+    from boxes.hard_rules import load_disclaimer
+
+    disc = load_disclaimer()
+
+    class WriterChat:
+        def complete_json(self, system: str, user: str, schema: type) -> BaseModel:
+            assert schema is CopyOut
+            assert "<examples>" in user
+            assert "Hydro Boost after" in user or "hydro boost after" in user.lower()
+            return CopyOut(
+                captions=[
+                    "Double cleanse at night. Hydro Boost after — dermatologist tested.",
+                    "Humid commute, then a short PM routine. Hydro Boost is dermatologist tested.",
+                    "Soft close: add to routine. No miracle talk.",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "Explore Hydro Boost — no miracle talk.",
+                ]
+            )
+
+    brief_id = _seed_report()
+    drafts = run_copywriter(_concept(brief_id), round=1, chat=WriterChat())
+    blob = _blob(drafts)
+    assert "soft close" not in blob
+    assert "no miracle talk" not in blob
+    assert "double cleanse" in blob
+    assert disc.split(".")[0].lower() in blob
 
 
 def test_copywriter_rewrite_uses_numbered_reasons() -> None:
@@ -208,6 +244,10 @@ def test_loop_threads_chat_to_copywriter() -> None:
             seen.append(schema.__name__)
             if schema is ImpliedClaimOut:
                 return ImpliedClaimOut(implied=False)
+            if schema.__name__ == "CraftOut":
+                from boxes.craft import CraftOut
+
+                return CraftOut(verdict="PASS", reasons=[])
             assert schema is CopyOut
             assert "<reasons>" in user
             return CopyOut(captions=[clean, "Humidity commute. Dermatologist tested.\n\n" + disc])

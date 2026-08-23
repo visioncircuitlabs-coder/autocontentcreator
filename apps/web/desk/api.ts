@@ -24,17 +24,32 @@ export function friendlyError(err: unknown): string {
   return "Something went wrong. Please try again.";
 }
 
-async function readError(res: Response): Promise<string> {
-  try {
-    const body = (await res.json()) as { error?: string; detail?: unknown };
-    if (body?.error) return String(body.error);
-  } catch {
-    /* ignore non-JSON */
+export function messageForHttpError(status: number, rawBody: string): string {
+  const trimmed = rawBody.trim();
+  if (trimmed) {
+    try {
+      const body = JSON.parse(trimmed) as { error?: unknown; detail?: unknown };
+      if (body?.error) return String(body.error);
+      if (typeof body?.detail === "string" && body.detail) return body.detail;
+    } catch {
+      /* HTML from a proxy, not the engine */
+    }
   }
-  if (res.status === 429) {
+  if (status === 429) {
     return "Too many searches. Wait a minute and try again.";
   }
+  if (status === 504) {
+    return "That took too long. Try again.";
+  }
+  if (status === 502 || status === 503) {
+    return "The news engine is not running. Start it, then try Look for ideas again.";
+  }
   return "Something went wrong. Please try again.";
+}
+
+async function readError(res: Response): Promise<string> {
+  const raw = await res.text();
+  return messageForHttpError(res.status, raw);
 }
 
 export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
@@ -113,6 +128,13 @@ export function runFactory(reportId: string) {
   });
 }
 
+export function paintDraft(draftId: string) {
+  return api<Draft>("/factory/image", {
+    method: "POST",
+    body: JSON.stringify({ draft_id: draftId }),
+  });
+}
+
 export function loadBrief(briefId: string) {
   return api<BriefPack>(`/briefs/${encodeURIComponent(briefId)}`);
 }
@@ -127,6 +149,17 @@ export function loadDraft(draftId: string) {
 
 export function loadReports() {
   return api<TrendReport[]>("/reports");
+}
+
+export type MachineEvent = {
+  id: string;
+  ts: string;
+  kind: string;
+  payload: Record<string, unknown>;
+};
+
+export function loadEvents(limit = 50) {
+  return api<MachineEvent[]>(`/events?limit=${limit}`);
 }
 
 export function decideDraft(

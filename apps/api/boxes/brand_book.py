@@ -57,6 +57,11 @@ def query_brand(
             "card_id": card.get("card_id"),
             "title": card.get("title"),
             "voice": card.get("voice"),
+            "examples": [
+                str(item).strip()
+                for item in (card.get("examples") or [])
+                if str(item).strip()
+            ],
             "do": list(card.get("do") or []),
             "dont": list(card.get("dont") or []),
             "verify_state": card.get("verify_state", "unverified"),

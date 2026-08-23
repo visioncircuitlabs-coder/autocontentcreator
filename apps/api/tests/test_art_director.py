@@ -6,6 +6,7 @@ import json
 from io import BytesIO
 from pathlib import Path
 
+from PIL import Image
 import httpx
 import pytest
 from models import Draft
@@ -125,6 +126,34 @@ def test_default_mode_is_stub_without_env(
     assert Path(result.image_path).read_bytes()[:8] == PNG_MAGIC
 
 
+def test_imagine_adapter_saves_png_from_url(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from adapters.image_imagine import IMAGINE_URL, ImagineImageGen
+
+    monkeypatch.setenv("XAI_API_KEY", "xai-test")
+    payload = _png_bytes((40, 80, 120), size=(64, 64))
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if str(request.url) == IMAGINE_URL:
+            body = json.loads(request.content)
+            assert body["model"] == "grok-imagine-image"
+            assert body.get("aspect_ratio") == "4:5"
+            return httpx.Response(
+                200, json={"data": [{"url": "https://imgen.example/out.png"}]}
+            )
+        if "imgen.example" in str(request.url):
+            return httpx.Response(200, content=payload)
+        return httpx.Response(404, text="missing")
+
+    client = httpx.Client(transport=httpx.MockTransport(handler))
+    dest = tmp_path / "imagine.png"
+    ImagineImageGen(client=client, key="xai-test").generate(
+        "Photoreal still life, no text, no logo", dest
+    )
+    assert dest.read_bytes()[:8] == PNG_MAGIC
+
+
 def test_http_adapter_posts_prompt_size_and_bearer(tmp_path: Path) -> None:
     from adapters.image_http import HttpImageGen
 
@@ -182,12 +211,14 @@ def test_http_compose_overlays_logo_and_never_sends_it(
     result = compose(_draft(), prompt, image_gen=gen, out_path=tmp_path / "http-card.png")
     path = Path(result.image_path)
     assert path.read_bytes()[:8] == PNG_MAGIC
-    assert bodies == [{"prompt": prompt, "size": "1080x1080"}]
+    assert bodies == [{"prompt": prompt, "size": "1080x1350"}]
     assert not any("<svg" in (row.get("prompt") or "") for row in bodies)
     assert not any(LOGO_SVG in json.dumps(row) for row in bodies)
-    assert _has_color(path, LOGO_NAVY, y0=0.0, y1=0.35)
+    assert _has_color(path, LOGO_NAVY, y0=0.0, y1=0.22)
+    assert _has_color(path, (255, 255, 255), y0=0.0, y1=0.22, tol=40)
     assert _has_color(path, (200, 16, 16), y0=0.35, y1=0.75, tol=30)
-    assert _has_color(path, (220, 220, 230), y0=0.82, y1=1.0, tol=40)
+    assert _has_color(path, (220, 220, 230), y0=0.88, y1=1.0, tol=40)
+    assert Image.open(path).size == (1080, 1350)
 
 
 def test_stub_overlay_pastes_logo_and_disclaimer(tmp_path: Path) -> None:
@@ -197,8 +228,10 @@ def test_stub_overlay_pastes_logo_and_disclaimer(tmp_path: Path) -> None:
     result = compose(_draft(), prompt, out_path=tmp_path / "stub-card.png")
     path = Path(result.image_path)
     assert path.read_bytes()[:8] == PNG_MAGIC
-    assert _has_color(path, LOGO_NAVY, y0=0.0, y1=0.35)
-    assert _has_color(path, (220, 220, 230), y0=0.82, y1=1.0, tol=40)
+    assert _has_color(path, LOGO_NAVY, y0=0.0, y1=0.22)
+    assert _has_color(path, (255, 255, 255), y0=0.0, y1=0.22, tol=40)
+    assert _has_color(path, (220, 220, 230), y0=0.88, y1=1.0, tol=40)
+    assert Image.open(path).size == (1080, 1350)
     assert result.caption == _draft().caption
     assert result.draft_id == "dft_art_1"
 

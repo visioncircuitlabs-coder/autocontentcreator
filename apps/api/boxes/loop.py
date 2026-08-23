@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 
+from boxes.craft import review_craft
 from boxes.hard_rules import run_hard_rules
 from boxes.judge import run_judge
 from boxes.product_facts import load_claim_models
@@ -34,7 +35,7 @@ def run_loop(
     chat: ChatModel | None = None,
     organic: bool = True,
 ) -> Draft:
-    """Evaluate hard rules + judge. On FAIL, rewrite. Stop at max_rounds."""
+    """Hard rules + claims judge + AI craft review. Rewrite. Max rounds, then a person."""
     if rewriter is None:
 
         def rewrite_fn(draft: Draft, reasons: list[str]) -> Draft:
@@ -48,11 +49,18 @@ def run_loop(
     while True:
         rules = run_hard_rules(current, organic=organic)
         verdict = run_judge(current, claim_list, chat=chat)
-        passed = (not rules) and verdict.verdict == "PASS"
+        craft = review_craft(current, chat=chat)
+        passed = (
+            (not rules)
+            and verdict.verdict == "PASS"
+            and craft.verdict == "PASS"
+        )
         flag_human = (not passed) and current.round >= max_rounds
 
         payload = verdict.model_dump()
-        payload["flag_human"] = flag_human  # also a drafts.flag_human column on persist
+        payload["flag_human"] = flag_human
+        payload["craft"] = craft.verdict
+        payload["craft_reasons"] = list(craft.reasons)
         current = current.model_copy(
             update={
                 "rules": rules,
@@ -64,6 +72,6 @@ def run_loop(
         if passed or flag_human:
             return current
 
-        reasons = list(rules) + list(verdict.reasons)
+        reasons = list(rules) + list(verdict.reasons) + list(craft.reasons)
         rewritten = rewrite_fn(current, reasons)
         current = rewritten.model_copy(update={"round": current.round + 1})

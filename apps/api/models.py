@@ -8,7 +8,7 @@ class Signal(BaseModel):
     signal_id: str
     seen_at: datetime
     happened_at: datetime | None
-    source: Literal["gdelt", "news_rss", "reddit", "rss"]
+    source: Literal["gdelt", "news_rss", "reddit", "rss", "grok_web"]
     url: str
     title: str
     snippet: str

@@ -4,18 +4,27 @@ CEO/product owner is not a developer. Explain what changed and why, not the plum
 
 ## Where we are
 
-Demo is walkable: FastAPI belt + Next.js Command Center (Radar / Factory / Queue / Preview). Unofficial Neutrogena fixture. Empty `GEMINI_API_KEY` still walks on templates; `IMAGE_GEN_MODE=stub` until an HTTP image API is pasted. Why-journal: `docs/decisions/`.
+**Walkable demo** on this worktree (`feat/foolproof-design`). FastAPI belt + Next.js five-step walk. Unofficial Neutrogena fixture.
 
-Architecture map: `docs/show-me-architecture.html`. Specs: `docs/superpowers/specs/`. Plans: `docs/superpowers/plans/`.
+- Empty chat keys still walk on templates.
+- Pictures: `IMAGE_GEN_MODE=imagine` (Grok Imagine) with Pillow overlay. `.env` may still say `stub` — the **process** wins. See `docs/agents/runtime.md`.
+- **Make a post** writes captions only. **Make the picture** runs after a version pick.
+
+**Agents:** read `AGENTS.md` then `docs/agents/README.md` before any product change. Do not re-implement `docs/superpowers/plans/2026-08-19-demo.md`.
+
+Architecture map: `docs/show-me-architecture.html`. Doc index: `docs/DOC-MAP.md`. Specs (intent): `docs/superpowers/specs/`. Why-journal: `docs/decisions/`.
 
 ## Commands
 
-From the repo root:
+From **this worktree** root:
 
 ```text
 copy .env.example .env
 docker compose up --build
 ```
+
+Walk: http://localhost:3050  
+Health: http://localhost:8000/health
 
 Optional API smoke (API already on `:8000`; skips if down):
 
@@ -27,7 +36,7 @@ API (from `apps/api`):
 
 ```text
 pytest
-uvicorn main:app --reload --port 8000
+uvicorn main:app --host 127.0.0.1 --port 8000
 ```
 
 Web (from `apps/web`):
@@ -35,12 +44,14 @@ Web (from `apps/web`):
 ```text
 npm test
 npm run build
-npm run dev
+npx next dev --hostname 127.0.0.1 --port 3050
 ```
+
+Set `NEXT_PUBLIC_API_URL=/engine` and `ENGINE_URL=http://127.0.0.1:8000` for the local Next proxy (300s).
 
 CI: `.github/workflows/ci.yml` — Python 3.12 `compileall` + `pytest`, Node 22 `npm run build`. No Docker in CI.
 
-Keep everything on `D:\PROJECTS\autocontentcreator` (C: is full). Isolated work goes in `.worktrees/`.
+Keep everything on `D:\PROJECTS\autocontentcreator` (C: is full). Isolated work goes in `.worktrees/`. Caches on D: under `.cache/`.
 
 ## Conventions
 
@@ -50,8 +61,9 @@ Keep everything on `D:\PROJECTS\autocontentcreator` (C: is full). Isolated work 
 - Tests alongside features, not after.
 - Currency INR, timezone Asia/Kolkata unless targeting international.
 - Payments = Razorpay if needed.
-- No CrewAI. Plain-code state machine (or LangGraph-shaped) as the belt; agents only inside steps.
-- Paid vendors are not required for the demo. Do not spend the ~$5 optional envelope unless image quality is the leftover gap.
+- No CrewAI. Plain-code belt in `apps/api/boxes/belt.py`; agents only inside steps.
+- Paid vendors are not required for the demo. Do not add Brandwatch / Firecrawl / Recraft.
+- On-screen words: `docs/conventions/words-we-use.md` and `apps/web/desk/words.ts`.
 
 ## Pre-done checklist (this project)
 
@@ -62,6 +74,8 @@ Keep everything on `D:\PROJECTS\autocontentcreator` (C: is full). Isolated work 
 - [ ] If you changed the architecture map, does every new box still have a "who already does this" reference or an explicit "ours, no industry twin" note?
 - [ ] If you added a computed value (score, ETA, brand score), is it shown, logged, or tested?
 - [ ] Did you leave production swap work to the production plan (adapters only)?
+- [ ] Did you read `docs/agents/invariants.md` before changing the belt or walk?
+- [ ] Did you keep picture generation off `POST /factory/run`?
 
 ## Gotchas
 
@@ -71,6 +85,9 @@ Keep everything on `D:\PROJECTS\autocontentcreator` (C: is full). Isolated work 
 - gstack is the *build* foundation (how we plan/review/ship). It is not the product architecture.
 - SOTA hunts treat **X and GitHub as first-class**. A landing page without a repo or a named customer cannot beat readable code. X threads are `operator` until confirmed.
 - Demo brand = **unofficial Neutrogena** fixture. Not a partner engagement.
+- `google-analytics.com` is junk and does not contain the substring `google.com`. Denylist both.
+- Next `/engine` timeout is 5 minutes. Factory and Imagine share it with Look.
+- Full trap list: `docs/agents/gotchas.md`.
 
 ## Skill routing
 
@@ -90,3 +107,5 @@ Key routing rules:
 - Save progress → invoke /context-save
 - Resume context → invoke /context-restore
 - Author a backlog-ready spec/issue → invoke /spec
+- Load this repo before UI/API changes → `.grok/skills/repo-context`
+- On-screen copy → `.grok/skills/plain-english`

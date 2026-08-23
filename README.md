@@ -2,20 +2,16 @@
 
 An always-on content system for regulated consumer brands (Kenvue-class: Neutrogena, Listerine, and siblings). It watches culture, drafts on-brand posts, blocks illegal claims, and learns from every human yes/no.
 
-**Status:** free-tool **demo** is walkable end-to-end (Trend Radar → Brand Brain fixtures → Content Factory belt → Command Center approve/export). Production swap-map is parked.
-
-- Demo plan: `docs/superpowers/plans/2026-08-19-demo.md`
-- Production (later): `docs/superpowers/plans/2026-08-19-production.md`
-- **Why we built it this way** (third-party review pack): `docs/decisions/`
+**Status:** free-tool **demo is walkable** on this branch (`feat/foolproof-design`). Production swap-map is parked.
 
 The demo brand pack is an **unofficial Neutrogena** fixture for show — not a partner build, not medical advice, not a claim that we speak for Kenvue.
 
 ## What it does
 
-- **Trend Radar** — Fetch pulls GDELT / Google News RSS / Reddit JSON, scores what matters, deep-dives with sources.
+- **Trend Radar** — Look for ideas pulls GDELT / Google News RSS / Reddit JSON (and optional Grok search), scores what fits, deep-dives one closer look.
 - **Brand Brain** — unofficial Neutrogena brand book, approved claims, disclaimer, exclusion list, past decisions.
-- **Content Factory** — a conveyor belt. Code moves work left to right. Agents write. Hard rules + a locked judge catch claims. Image is a port (Pillow stub by default; paste `IMAGE_GEN_*` when ready).
-- **Command Center** — you approve with a reason. The machine never publishes regulated content on its own. Export is a ZIP.
+- **Content Factory** — a conveyor belt. Code moves work. Agents write captions. Hard rules + a locked judge catch claims. After you pick a version, **Grok Imagine** makes a 4:5 photo; code stamps the wordmark and disclaimer.
+- **Command Center** — you approve with a reason. The machine never publishes. Export is a paused ZIP.
 
 ## Look at the architecture
 
@@ -25,9 +21,14 @@ Open this file in a browser (double-click it):
 
 Every box is clickable. Each panel ends with who already ships a version of that idea.
 
+**Docs map:** [docs/DOC-MAP.md](docs/DOC-MAP.md)  
+**Coding agents:** [AGENTS.md](AGENTS.md) → [docs/agents/README.md](docs/agents/README.md)
+
 ## How to run the demo
 
-From the repo root:
+Short version below. Full how-to: [docs/howto-run-the-demo.md](docs/howto-run-the-demo.md).
+
+From **this worktree** (`D:\PROJECTS\autocontentcreator\.worktrees\feat-foolproof-design`):
 
 1. Copy env template (keys can stay empty):
 
@@ -44,10 +45,9 @@ docker compose up --build
 ```
 
 - Make today’s post: http://localhost:3050
-- API health: http://localhost:8000/health → `{"ok": true}`
+- API health: http://localhost:8000/health → `{"ok": true, "chat": …}`
 
-Port 3000 is often taken by another project on this PC. This app uses **3050** on purpose.
-- API health: http://localhost:8000/health → `{"ok": true}`
+Port 3000 is often taken on this PC. This app uses **3050** on purpose.
 
 SQLite lives at `./data/demo.db`. Compose mounts `./data` into the API as `/data`.
 
@@ -55,23 +55,26 @@ SQLite lives at `./data/demo.db`. Compose mounts `./data` into the API as `/data
 
 | Variable | What it does |
 |---|---|
-| `XAI_API_KEY` | Optional Grok key. Empty = word-count ranking and template copy. |
-| `GEMINI_API_KEY` | Optional. Same idea as Grok. |
-| `GROQ_API_KEY` | Optional. Same idea as Grok. |
-| `IMAGE_GEN_URL` / `IMAGE_GEN_KEY` | Optional. Leave empty and keep `IMAGE_GEN_MODE=stub` for the Pillow card (logo + disclaimer stamped in code). When you have an HTTP image API, set the URL/key and `IMAGE_GEN_MODE=http`. |
-| `NEXT_PUBLIC_API_URL` | Browser → API (default `http://localhost:8000`). |
+| `XAI_API_KEY` | Grok chat, optional Grok web headlines, and Grok Imagine. Empty = word-count ranking, template copy, Pillow card. |
+| `CHAT_MODEL` | Default `xai/grok-4.6`. |
+| `GEMINI_API_KEY` / `GROQ_API_KEY` | Alternate chat. |
+| `IMAGE_GEN_MODE` | `imagine` (Grok Imagine), `stub` (Pillow card), or `http` (paste `IMAGE_GEN_URL`). Example file defaults to `imagine`. |
+| `IMAGE_GEN_MODEL` | `grok-imagine-image` when mode is imagine. |
+| `NEXT_PUBLIC_API_URL` | Browser → API. Walk uses `/engine` (Next proxy, 5 minutes). |
 
 Paid trend/research/image vendors are **not** required. Do not put Firecrawl, Brandwatch, Recraft, or similar keys in `.env` for this demo.
+
+If `.env` still says `IMAGE_GEN_MODE=stub`, a restart will draw the dark card even if you used Imagine earlier. Set the file, or export `imagine` on the API process. See [docs/agents/runtime.md](docs/agents/runtime.md).
 
 ### Stranger walk (definition of done)
 
 1. `docker compose up --build`
 2. Open http://localhost:3050 → **Look for ideas**
 3. Pick a closer-look card (or **Use a sample idea (practice)** if this search is empty)
-4. **Make a post** → pick a version → **Your call** (name + why)
-5. Phone preview → **Download pack** (does not go live)
+4. **Make a post** → pick Version 1, 2, or 3 → **Make the picture**
+5. **Your call** (name + why) → phone preview → **Download pack** (does not go live)
 
-Train someone with `docs/runbooks/make-a-post.md`. Words we use: `docs/conventions/words-we-use.md`.
+Train someone with [docs/runbooks/make-a-post.md](docs/runbooks/make-a-post.md). Words we use: [docs/conventions/words-we-use.md](docs/conventions/words-we-use.md). Picture-first explainer: `docs/eli5-make-a-post/eli5-make-a-post.html`.
 
 Optional API smoke (API already running):
 
@@ -89,22 +92,25 @@ python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 pytest
-uvicorn main:app --reload --port 8000
+uvicorn main:app --host 127.0.0.1 --port 8000
 ```
 
 ```text
 cd apps\web
 npm install
 npm test
-npm run build
-npm run dev
+$env:NEXT_PUBLIC_API_URL = "/engine"
+$env:ENGINE_URL = "http://127.0.0.1:8000"
+npx next dev --hostname 127.0.0.1 --port 3050
 ```
 
 ## CI
 
 GitHub Actions (`.github/workflows/ci.yml`): `compileall` + `pytest` on Python 3.12 for `apps/api`, and `npm run build` on Node 22 for `apps/web`. No Docker in CI — that gate stays local/`docker compose up --build`.
 
-## Research
+API docs: [docs/reference-api.md](docs/reference-api.md).
+
+## Research and why
 
 | File | What it is |
 |---|---|
@@ -114,6 +120,10 @@ GitHub Actions (`.github/workflows/ci.yml`): `compileall` + `pytest` on Python 3
 | `docs/research/2026-08-19-cerebras-company-brain.md` | What Cerebras *Knowledge* actually is (the company brain) |
 | `private deck notes (not in this repo)` | What we take / reject from the reference pitch deck |
 | `docs/research/sota/2026-08-19-sota-scorecard.md` | Chosen process + tools per box (X + GitHub swarm) |
+| `docs/designs/research-and-copy.md` | Demo-fence method for research and captions |
+
+Demo plan (historical, **already built**): `docs/superpowers/plans/2026-08-19-demo.md`  
+Production (later): `docs/superpowers/plans/2026-08-19-production.md`
 
 ## How we will deploy it (later)
 

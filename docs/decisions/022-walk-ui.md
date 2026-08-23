@@ -8,7 +8,7 @@ The old desk was a map of the machine. A new hire had to know “deep_dive” an
 
 ## What we picked
 
-Default: Look → Pick → Make → Your call → Preview. One page. Optional **Show the machine**.
+Default: Look → Pick → Make (captions) → Make the picture → Your call → Preview. One page. Optional **Show the machine**.
 
 Rejected: embedding ComfyUI (wrong product). Rejected: keeping the 17-box rail as chrome.
 
@@ -16,10 +16,10 @@ Rejected: embedding ComfyUI (wrong product). Rejected: keeping the 17-box rail a
 
 `docs/conventions/words-we-use.md`. Skills: `.grok/skills/plain-english`, `.grok/skills/repo-context`.
 
-## Train
-
-`docs/runbooks/make-a-post.md`
-
 ## $5
 
-Still unspent.
+Still unspent (no Recraft / Firecrawl). Picture later moved off **Make a post** onto **Make the picture** (`POST /factory/image`). Imagine uses the Grok key, not that envelope.
+
+## Train
+
+`docs/runbooks/make-a-post.md`. Agent UI map: `docs/agents/ui.md`.

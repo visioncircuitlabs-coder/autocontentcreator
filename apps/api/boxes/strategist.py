@@ -106,7 +106,7 @@ def _hook(angle: str, pain: str, register: str) -> str:
     if register == "hindi":
         return "नमी हो, त्वचा हल्की रहे।"
     if register == "hinglish":
-        return f"{pain}? Humidity ho, barrier calm rahe."
+        return f"{pain} after AC. Night is enough."
     return f"{angle}: {pain} after the commute — keep the barrier quiet."
 
 

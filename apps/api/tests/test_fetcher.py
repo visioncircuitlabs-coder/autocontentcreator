@@ -309,7 +309,8 @@ def test_radar_fetch_rate_limit(monkeypatch) -> None:
     assert "trace" not in body.get("error", "").lower()
     health = client.get("/health")
     assert health.status_code == 200
-    assert health.json() == {"ok": True}
+    assert health.json()["ok"] is True
+    assert "chat" in health.json()
 
 
 def test_allow_radar_fetch_window() -> None:
@@ -324,9 +325,10 @@ def test_allow_radar_fetch_window() -> None:
     assert allow_radar_fetch("1.1.1.1", now=t0 + 61) is True
 
 
-def test_default_sources_are_free_allowlist() -> None:
+def test_default_sources_are_free_allowlist(monkeypatch) -> None:
     from boxes.fetcher import default_sources
 
+    monkeypatch.delenv("XAI_API_KEY", raising=False)
     names = [s.name for s in default_sources(client=MagicMock())]
     assert "gdelt" in names
     assert "news_rss" in names
@@ -334,3 +336,4 @@ def test_default_sources_are_free_allowlist() -> None:
     assert "brandwatch" not in names
     assert "firecrawl" not in names
     assert "tiktok" not in names
+    assert "grok_web" not in names

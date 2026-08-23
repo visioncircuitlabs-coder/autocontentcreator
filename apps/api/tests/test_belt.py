@@ -112,7 +112,7 @@ def test_run_radar_fetch_score_research_store() -> None:
         client=_research_client(),
         chat=None,
         persist=True,
-    )
+    ).reports
     assert len(reports) == 1
     assert reports[0].signal_id == "sig_fixture_dive"
     assert reports[0].what
@@ -125,6 +125,22 @@ def test_run_radar_fetch_score_research_store() -> None:
     assert gates["sig_fixture_kill"] == "discard"
     assert len(stored) == 1
     assert stored[0].report_id == reports[0].report_id
+
+
+def test_run_radar_reads_only_one_closer_look() -> None:
+    from boxes.belt import run_radar
+
+    second = _dive_signal().model_copy(
+        update={"signal_id": "sig_fixture_dive_2", "url": SEED_URL + "/two"}
+    )
+    pack = run_radar(
+        sources=[FixtureSource([_dive_signal(), second])],
+        client=_research_client(),
+        chat=None,
+        persist=True,
+    )
+    assert len(pack.reports) == 1
+    assert len(pack.signals) == 2
 
 
 def test_belt_on_fixtures_produces_queued_draft(
@@ -141,11 +157,12 @@ def test_belt_on_fixtures_produces_queued_draft(
         client=_research_client(),
         chat=None,
         persist=True,
-    )
+    ).reports
     assert reports
-    drafts = run_factory(reports[0].report_id, chat=None, image_gen=_tiny_gen())
+    drafts = run_factory(reports[0].report_id, chat=None)
     assert drafts
     assert all(isinstance(item, Draft) for item in drafts)
+    assert all(not item.image_path for item in drafts)
     queued = list_queue()
     assert queued, "factory must park at least one draft on the review queue"
     assert {item.draft_id for item in queued} == {item.draft_id for item in drafts}
@@ -156,7 +173,14 @@ def test_belt_on_fixtures_produces_queued_draft(
     assert loaded.caption.strip()
     assert loaded.judge is not None
     assert loaded.round >= 1
-    assert loaded.image_path
+    assert not loaded.image_path
+
+    from boxes.belt import paint_chosen
+
+    painted = paint_chosen(sample.draft_id, image_gen=_tiny_gen())
+    loaded = get_draft(sample.draft_id)
+    assert loaded is not None
+    assert loaded.image_path == painted.image_path
     image = Path(loaded.image_path)
     assert image.is_file()
     assert image.read_bytes()[:8] == PNG_MAGIC
@@ -213,8 +237,10 @@ def test_http_lists_and_radar_factory(
         reason="ok for demo",
         decided_at=_now(),
     )
-    monkeypatch.setattr("main.run_radar", lambda: [report])
-    monkeypatch.setattr("main.run_factory", lambda report_id: [draft])
+    from boxes.belt import RadarPack
+
+    monkeypatch.setattr("main.run_radar", lambda **_: RadarPack([report], [], []))
+    monkeypatch.setattr("main.run_factory", lambda report_id, **_: [draft])
     monkeypatch.setattr("main.decide", lambda **kwargs: decision)
 
     client = TestClient(app)

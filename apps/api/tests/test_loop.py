@@ -58,6 +58,53 @@ def test_loop_default_rewrite_can_pass() -> None:
     assert "cures" not in out.caption.lower()
 
 
+def test_craft_review_rejects_unpasteable_without_chat() -> None:
+    from boxes.craft import review_craft
+    from boxes.hard_rules import load_disclaimer
+
+    disc = load_disclaimer()
+    out = review_craft(
+        _draft(f"Hydro Boost is Try it in the PM routine.\n\n{disc}"),
+        chat=None,
+    )
+    assert out.verdict == "FAIL"
+    assert out.reasons
+
+
+def test_loop_craft_fail_triggers_ai_rewrite() -> None:
+    from boxes.craft import CraftOut
+    from boxes.copywriter import CopyOut
+    from boxes.hard_rules import load_disclaimer
+    from boxes.judge import ImpliedClaimOut
+    from boxes.loop import run_loop
+    from pydantic import BaseModel
+
+    disc = load_disclaimer()
+    clean = f"Night: double cleanse, then Hydro Boost. Dermatologist tested.\n\n{disc}"
+    weak = f"Hydro Boost is dermatologist tested.\n\n{disc}"
+    calls = {"craft": 0}
+
+    class Chat:
+        def complete_json(self, system: str, user: str, schema: type) -> BaseModel:
+            if schema is ImpliedClaimOut:
+                return ImpliedClaimOut(implied=False)
+            if schema is CraftOut:
+                calls["craft"] += 1
+                if "double cleanse" in user.lower():
+                    return CraftOut(verdict="PASS", reasons=[])
+                return CraftOut(verdict="FAIL", reasons=["1. Name the night routine."])
+            raise AssertionError(schema)
+
+    def rewrite(draft: Draft, reasons: list[str]) -> Draft:
+        assert reasons
+        return draft.model_copy(update={"caption": clean})
+
+    out = run_loop(_draft(weak), chat=Chat(), rewriter=rewrite)
+    assert calls["craft"] >= 1
+    assert (out.judge or {}).get("craft") == "PASS"
+    assert "double cleanse" in out.caption.lower()
+
+
 def test_loop_sends_reasons_to_rewriter() -> None:
     from boxes.loop import run_loop
     from boxes.hard_rules import load_disclaimer

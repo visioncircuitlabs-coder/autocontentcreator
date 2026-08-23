@@ -11,16 +11,20 @@ On-screen language for the Content Machine. Agents: if a reviewer cannot fail a 
 | Gate `deep_dive` | Closer look |
 | Gate `background` | Skip for now |
 | Gate `discard` / safety kill | Don't use |
-| Factory / belt | Make a post |
+| Factory / belt (text) | Make a post |
+| Image gen / compose | Make the picture |
 | Queue / clerk | Your call / your name |
 | Preview / export | Phone preview / download pack |
 | Fixture | Sample idea (practice) |
+| Citation list | Sources (optional fold) |
 | Hard rules hit | We blocked this word |
 | Judge PASS | Allowed claims only |
 | flag_human | A person still has to decide |
 | Paused / no publish | This does not go live |
 
 Keep internal names in code. Never put them on buttons.
+
+The optional **How it is made** view may show box names (Source Fetcher). The story next to a box still uses this map: headline, closer look, skip for now, don't use.
 
 ## Forbidden AI patterns (Hassid)
 

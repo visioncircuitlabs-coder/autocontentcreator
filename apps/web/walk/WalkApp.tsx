@@ -7,29 +7,41 @@ import {
   friendlyError,
   loadBrief,
   openFixtureDive,
+  paintDraft,
   runFactory,
   runRadar,
   decideDraft,
   logClient,
 } from "../desk/api";
-import { CLERK_KEY, canSubmitReview, missingSources, shouldOfferFixture } from "../desk/review";
-import type { BriefPack, Decision, Draft, Score, Signal, TrendReport } from "../desk/types";
-import { ReportSources } from "../desk/ui";
 import {
+  CLERK_KEY,
+  canSubmitReview,
+  missingSources,
+  alsoTodayHeadlines,
+  shouldOfferFixture,
+} from "../desk/review";
+import type { BriefPack, Decision, Draft, Score, Signal, TrendReport } from "../desk/types";
+import { SourcesFold } from "../desk/ui";
+import {
+  ALSO_TODAY,
   DOWNLOAD_BUTTON,
   LOOK_BUTTON,
   LOOKING_STEPS,
   MAKE_BUTTON,
   MAKING_STEPS,
+  PICTURE_BUTTON,
+  PICTURE_WAIT,
   NAME_LABEL,
   NO_BUTTON,
   PAUSED_NOTE,
   REASON_HINT,
   SAMPLE_BUTTON,
   SAMPLE_NOTE,
+  TODAY_HEADLINES,
   WHY_LABEL,
   YES_BUTTON,
   checkLines,
+  gateLabel,
   emptySourceNote,
 } from "../desk/words";
 import { MachineGraph } from "./MachineGraph";
@@ -65,6 +77,7 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
 
   const [looking, setLooking] = useState(false);
   const [making, setMaking] = useState(false);
+  const [painting, setPainting] = useState(false);
   const [sampleBusy, setSampleBusy] = useState(false);
   const lookText = useRotating(LOOKING_STEPS, looking);
   const makeText = useRotating(MAKING_STEPS, making);
@@ -94,12 +107,11 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
 
   const quiet = missingSources(signals);
   const offerSample = shouldOfferFixture(didRun, divesThisRun);
+  const alsoToday = alsoTodayHeadlines(signals, scores, picked?.signal_id);
 
   async function look() {
     setError(null);
     setLooking(true);
-    setSample(false);
-    setPicked(null);
     setDrafts([]);
     setChosen(null);
     setDecision(null);
@@ -107,12 +119,11 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
     try {
       const out = await runRadar();
       const dives = out.deep_dives ?? [];
-      const diveIds = new Set(dives.map((row) => row.signal_id));
       setDidRun(true);
       setDivesThisRun(dives.length);
+      setSignals(out.signals_seen ?? []);
+      setScores(out.scores ?? []);
       if (dives[0]) {
-        setSignals((out.signals_seen ?? []).filter((row) => diveIds.has(row.signal_id)));
-        setScores((out.scores ?? []).filter((row) => diveIds.has(row.signal_id)));
         setReports(dives);
         setPicked(dives[0]);
         setSample(false);
@@ -120,8 +131,6 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
         return;
       }
       const pack = await openFixtureDive();
-      setSignals([pack.signal]);
-      setScores([pack.score]);
       setReports([pack.report]);
       setPicked(pack.report);
       setSample(true);
@@ -178,6 +187,25 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
     }
   }
 
+  async function makePicture() {
+    if (!chosen) return;
+    setError(null);
+    setPainting(true);
+    setImgBroken(false);
+    try {
+      const painted = await paintDraft(chosen.draft_id);
+      setChosen(painted);
+      setDrafts((rows) =>
+        rows.map((row) => (row.draft_id === painted.draft_id ? painted : row)),
+      );
+      setBeat(4);
+    } catch (err) {
+      setError(friendlyError(err));
+    } finally {
+      setPainting(false);
+    }
+  }
+
   function saveName(value: string) {
     setUser(value);
     try {
@@ -228,7 +256,9 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
       onToggleMachine={() => setShowMachine((v) => !v)}
       onJump={(n) => setBeat(n)}
     >
-      {showMachine ? <MachineGraph beat={beat} /> : null}
+      {showMachine ? (
+        <MachineGraph beat={beat} watching={looking || making || painting} />
+      ) : null}
       {error ? (
         <p className="alert" role="alert">
           {error}
@@ -269,7 +299,7 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
               </button>
             </div>
           ) : null}
-          {picked ? (
+          {!looking && picked ? (
             <div className="picked ticket">
               {sample ? (
                 <p className="tag">Practice idea</p>
@@ -278,10 +308,25 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
               )}
               <h3>{picked.what}</h3>
               <p>{sample ? SAMPLE_NOTE : picked.why_now}</p>
-              {sample ? null : <ReportSources sources={picked.sources} />}
+              {sample ? null : <SourcesFold sources={picked.sources} />}
               <button className="btn" type="button" disabled={making} onClick={makePost}>
                 {making ? makeText || MAKING_STEPS[0] : MAKE_BUTTON}
               </button>
+            </div>
+          ) : null}
+          {!looking && alsoToday.length > 0 ? (
+            <div className="also-today">
+              <h3>{sample ? TODAY_HEADLINES : ALSO_TODAY}</h3>
+              <ul>
+                {alsoToday.map((row) => (
+                  <li key={row.signal_id}>
+                    <span className="tag">
+                      {gateLabel(scores.find((item) => item.signal_id === row.signal_id)?.gate)}
+                    </span>{" "}
+                    {row.title}
+                  </li>
+                ))}
+              </ul>
             </div>
           ) : null}
         </section>
@@ -291,6 +336,7 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
         <section className="panel">
           <h2>Make a post</h2>
           {making ? <p className="loading">{makeText}</p> : null}
+          {painting ? <p className="loading">{PICTURE_WAIT}</p> : null}
           {brief?.concepts?.length ? (
             <p className="quiet">
               Angle: {brief.concepts[0].angle}. Voice: {brief.concepts[0].persona}.
@@ -303,6 +349,7 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
                 type="button"
                 className="version"
                 data-sel={chosen?.draft_id === draft.draft_id ? "true" : "false"}
+                disabled={painting}
                 onClick={() => setChosen(draft)}
               >
                 Version {draft.variant}
@@ -317,8 +364,13 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
                   <li key={line}>{line}</li>
                 ))}
               </ul>
-              <button className="btn" type="button" onClick={() => setBeat(4)}>
-                Continue to your call
+              <button
+                className="btn"
+                type="button"
+                disabled={painting}
+                onClick={() => void makePicture()}
+              >
+                {painting ? PICTURE_WAIT : PICTURE_BUTTON}
               </button>
             </>
           ) : !making ? (

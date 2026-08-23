@@ -8,8 +8,8 @@ It records *why* each piece was built the way it was — not just what the code 
 
 1. Start with [000-index.md](000-index.md) — the map and the global rulings.
 2. Then [001-global-rulings.md](001-global-rulings.md) — budget, architecture locks, what we refused to buy.
-3. Then one file per demo plan task, in order (`010`–`021`).
-4. Box-level specs (what the machine *must* do) still live in `docs/superpowers/specs/`. Plans live in `docs/superpowers/plans/`. This folder explains the *implementation* choices on top of those locks.
+3. Then one file per demo plan task, in order (`010`–`023`).
+4. Box-level specs (what the machine *must* do) still live in `docs/superpowers/specs/`. Plans live in `docs/superpowers/plans/`. Live file map for agents: `docs/agents/`. This folder explains the *implementation* choices on top of those locks.
 
 ## File contract (every task file)
 

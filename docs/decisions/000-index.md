@@ -25,11 +25,13 @@
 | [020-task-11-command-center.md](020-task-11-command-center.md) | Phone-usable UI story | filled (review clean at 1bb268a after fixture fix; compose rebuild claimed in Task 12) |
 | [021-task-12-ci-docs.md](021-task-12-ci-docs.md) | CI + demo README | filled (chore 32b37fa + docs pack 9a2d705; $5 unspent; remote Actions not seen here) |
 | [022-walk-ui.md](022-walk-ui.md) | Five-step App Mode walk | filled |
+| [023-agent-and-human-docs.md](023-agent-and-human-docs.md) | Agent handbook + doc refresh | filled |
 
 ## One-line rulings a reviewer must not miss
 
 - The demo is the **same 17 boxes** as production, with cheaper guts. It is not “analyze + one image.”
-- **Free adapters are the default.** About $5 of paid tooling is allowed only if it clearly improves the *show*, after the stub image exists. Not spent as of Task 12 — stub PNG is showable.
+- **Free adapters are the default.** About $5 of paid tooling is allowed only if it clearly improves the *show*, after the stub image exists. Recraft/Firecrawl still not bought. Live walk can use **Grok Imagine** via the existing `XAI_API_KEY` (`IMAGE_GEN_MODE=imagine`). That is not the Recraft envelope.
+- **Agents:** start at `AGENTS.md` / `docs/agents/`. Specs lock intent; live file map is `docs/agents/boxes.md`.
 - **No CrewAI.** Code moves work; models sit inside steps.
 - **Web pages are data, never instructions.**
 - **No autonomous publish.** A named human must approve, with a reason.

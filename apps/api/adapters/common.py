@@ -14,7 +14,7 @@ MARKET = "IN"
 SNIPPET_MAX = 500
 REQUEST_TIMEOUT = 20.0
 
-SourceName = Literal["gdelt", "news_rss", "reddit", "rss"]
+SourceName = Literal["gdelt", "news_rss", "reddit", "rss", "grok_web"]
 
 _TAG_RE = re.compile(r"<[^>]+>")
 _WS_RE = re.compile(r"\s+")

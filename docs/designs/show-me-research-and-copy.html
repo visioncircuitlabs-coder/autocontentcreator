@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>How the best teams research, then write</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #14110e;
+      --ticket: #f4efe4;
+      --gate: #c9a227;
+      --mute: #8a8478;
+      --hair: rgba(244, 239, 228, 0.14);
+      --pass: #2f6b4f;
+      --stamp: #c43b3b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(ellipse at 18% -10%, #2c261c 0%, transparent 46%), var(--ink);
+      color: var(--ticket);
+      font-family: "IBM Plex Sans", sans-serif;
+      font-size: 15px;
+      line-height: 1.45;
+    }
+    header {
+      padding: 28px 24px 8px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-family: "Fraunces", serif;
+      font-weight: 500;
+      font-size: clamp(28px, 4vw, 42px);
+      margin: 0 0 8px;
+    }
+    .lede { color: var(--mute); max-width: 40em; }
+    .kicker {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--gate);
+      margin: 0 0 10px;
+    }
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 12px 24px 48px;
+      display: grid;
+      gap: 18px;
+    }
+    .pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    @media (max-width: 800px) {
+      .pair { grid-template-columns: 1fr; }
+    }
+    article {
+      border: 1px solid var(--hair);
+      padding: 16px 18px;
+      background: rgba(0,0,0,0.22);
+    }
+    article h2 {
+      font-family: "Fraunces", serif;
+      font-size: 22px;
+      font-weight: 500;
+      margin: 0 0 12px;
+    }
+    .flow {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .box {
+      border: 1px solid var(--hair);
+      padding: 10px 12px;
+      font-size: 14px;
+    }
+    .box strong { color: var(--gate); font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.08em; }
+    .box p { margin: 4px 0 0; }
+    .arrow {
+      color: var(--gate);
+      text-align: center;
+      font-size: 14px;
+      padding: 2px 0;
+    }
+    .bad { border-color: rgba(196, 59, 59, 0.45); }
+    .good { border-color: rgba(201, 162, 39, 0.55); }
+    .note { font-size: 13px; color: var(--mute); margin-top: 12px; }
+    code {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 12px;
+      color: var(--gate);
+    }
+    .ex {
+      font-size: 13px;
+      border-left: 2px solid var(--gate);
+      padding: 6px 10px;
+      margin: 8px 0;
+      color: var(--ticket);
+    }
+    .now {
+      font-size: 13px;
+      border-left: 2px solid var(--stamp);
+      padding: 6px 10px;
+      margin: 8px 0;
+      color: var(--mute);
+    }
+    footer {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px 40px;
+      color: var(--mute);
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <p class="kicker">Demo fence · not one mega-prompt</p>
+    <h1>How the best teams research, then write</h1>
+    <p class="lede">Two belts. Research never writes the ad. The writer never invents the news. Grok can fetch headlines. It does not get to score them, and it does not get to hide a brief inside a caption.</p>
+  </header>
+  <main>
+    <section class="pair">
+      <article>
+        <h2>1. Research</h2>
+        <p class="kicker">Industry: gpt-researcher diamond</p>
+        <div class="flow">
+          <div class="box good">
+            <strong>Listen</strong>
+            <p>Locked queries. Google News stays. Grok web search is a fourth pipe: India skincare / Neutrogena <em>today</em>. Real article URLs only.</p>
+          </div>
+          <div class="arrow">↓</div>
+          <div class="box good">
+            <strong>Score</strong>
+            <p>Drop unsafe. Brand-fit on a shortlist. 8+ = closer look. Fetcher never scores.</p>
+          </div>
+          <div class="arrow">↓</div>
+          <div class="box good">
+            <strong>Plan 3 angles</strong>
+            <p>Content ideas, not captions. “Night routine after double cleanse” is an angle.</p>
+          </div>
+          <div class="arrow">↓</div>
+          <div class="box good">
+            <strong>Read the real page</strong>
+            <p>Publisher URL. Page is DATA. No <code>window.WIZ_global_data</code>.</p>
+          </div>
+          <div class="arrow">↓</div>
+          <div class="box good">
+            <strong>Skeptic</strong>
+            <p>A different pass kills unsourced lines. Then file what / why now / who.</p>
+          </div>
+        </div>
+        <p class="now">Now: Google tracker + “Deep-dive after scorer gate” + JS dump.</p>
+        <p class="ex">After: Vogue India headline, a human why-now, a link that opens the story.</p>
+      </article>
+      <article>
+        <h2>2. Post prompts</h2>
+        <p class="kicker">Industry: examples, then many, then filter</p>
+        <div class="flow">
+          <div class="box good">
+            <strong>Brief (code)</strong>
+            <p>Idea + 3 posts we would ship + approved phrases + banned list. No “sound warm.”</p>
+          </div>
+          <div class="arrow">↓</div>
+          <div class="box good">
+            <strong>Writer prompt</strong>
+            <p>Match those 3 examples. Tie to today’s sourced idea. Write 8 captions a person could paste. JSON only.</p>
+          </div>
+          <div class="arrow">↓</div>
+          <div class="box good">
+            <strong>Code filter</strong>
+            <p>Drop stage notes, smashed English, banned words. Keep 2–3.</p>
+          </div>
+          <div class="arrow">↓</div>
+          <div class="box good">
+            <strong>Judge + you</strong>
+            <p>Claims check. Then Your call. Nothing goes live.</p>
+          </div>
+        </div>
+        <p class="now">Now: “Humidity ho, barrier calm rahe. Soft close: add to routine.”</p>
+        <p class="ex">After: “Double cleanse tonight. Hydro Boost after — dermatologist tested.”</p>
+      </article>
+    </section>
+    <article>
+      <h2>Where Grok sits</h2>
+      <p>Grok is a tool inside steps. It is not the belt.</p>
+      <p class="ex">Fetcher: optional web search, locked query, URLs only.<br />
+      Scorer: brand-fit on a shortlist.<br />
+      Researcher: angles + read, pages as data.<br />
+      Copywriter: 8 lines from examples, then code keeps 2–3.</p>
+      <p class="note">Not this: one prompt that “finds a trend and writes the post.” That is how claims leak into research.</p>
+    </article>
+  </main>
+  <footer>
+    Vision Circuit Labs · unofficial practice brand · docs/designs/research-and-copy.md
+  </footer>
+</body>
+</html>

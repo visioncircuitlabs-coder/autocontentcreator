@@ -440,6 +440,29 @@ textarea {
   font-size: 16px;
 }
 
+.sources-fold {
+  margin: 4px 0 12px;
+}
+
+.sources-fold summary {
+  cursor: pointer;
+  color: #5c564c;
+  text-decoration: underline;
+  min-height: var(--tap);
+  display: flex;
+  align-items: center;
+  list-style: none;
+}
+
+.sources-fold summary::-webkit-details-marker {
+  display: none;
+}
+
+.sources-fold[open] summary {
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
 .source-list {
   list-style: none;
   margin: 0 0 10px;
@@ -563,14 +586,14 @@ textarea {
 }
 
 .ig-photo {
-  aspect-ratio: 1;
+  aspect-ratio: 4 / 5;
   background: #1a1714;
 }
 
 .ig-photo img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .ig-photo .missing {
@@ -847,11 +870,36 @@ textarea {
   font-size: 13px;
 }
 
+.also-today {
+  margin-top: 16px;
+}
+
+.also-today h3 {
+  font-size: 14px;
+  margin: 0 0 8px;
+}
+
+.also-today ul {
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+}
+
+.also-today li {
+  font-size: 13px;
+  color: var(--ticket);
+  margin: 0 0 8px;
+  line-height: 1.35;
+}
+
+.also-today .tag {
+  margin-right: 6px;
+}
+
 .machine {
   border: 1px solid var(--hair);
   padding: 12px;
   margin-bottom: 14px;
-  overflow-x: auto;
 }
 
 .machine-kicker {
@@ -863,26 +911,57 @@ textarea {
   margin: 0 0 10px;
 }
 
+.machine-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(220px, 0.85fr);
+  gap: 14px;
+  align-items: start;
+}
+
 .machine-cols {
   display: grid;
   grid-template-columns: repeat(4, minmax(110px, 1fr));
   gap: 8px;
 }
 
-.machine-col p {
+.machine-col > p {
   font-family: var(--font-mono);
   font-size: 10px;
   color: var(--mute);
-  margin: 0 0 6px;
+  margin: 0 0 4px;
   text-transform: uppercase;
 }
 
+.machine-blurb {
+  display: block;
+  font-size: 11px;
+  color: var(--mute);
+  margin: 0 0 8px;
+  line-height: 1.35;
+}
+
+.machine-step {
+  margin-bottom: 2px;
+}
+
+.machine-then {
+  margin: 0 0 2px;
+  text-align: center;
+  color: var(--gate);
+  font-size: 11px;
+  line-height: 1;
+}
+
 .node {
+  display: block;
+  width: 100%;
+  text-align: left;
   font-size: 11px;
   border: 1px solid var(--hair);
   padding: 6px;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   color: var(--mute);
+  background: transparent;
 }
 
 .node span {
@@ -896,6 +975,60 @@ textarea {
   color: var(--ticket);
   border-color: var(--gate);
   background: rgba(201, 162, 39, 0.1);
+}
+
+.node[data-sel="true"] {
+  border-color: var(--ticket);
+}
+
+.node[data-live="true"] {
+  box-shadow: inset 0 0 0 1px var(--gate);
+}
+
+.machine-story {
+  border: 1px solid var(--hair);
+  padding: 10px 12px;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.machine-story dl {
+  margin: 0 0 12px;
+}
+
+.machine-story dt {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mute);
+  margin-top: 8px;
+}
+
+.machine-story dt:first-child {
+  margin-top: 0;
+}
+
+.machine-story dd {
+  margin: 2px 0 0;
+  font-size: 13px;
+}
+
+.machine-log {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 13px;
+  color: var(--mute);
+}
+
+.machine-log li[data-now="true"] {
+  color: var(--ticket);
+}
+
+@media (max-width: 800px) {
+  .machine-body,
+  .machine-cols {
+    grid-template-columns: 1fr;
+  }
 }
 
 .walk-app .field {

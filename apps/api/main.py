@@ -14,7 +14,7 @@ from pydantic import BaseModel, Field
 from obs import emit, emit_error, setup_logging
 
 from adapters.chat_litellm import build_chat
-from boxes.belt import run_factory, run_radar
+from boxes.belt import paint_chosen, run_factory, run_radar
 from boxes.fixture_dive import persist_unofficial_fixture
 from boxes.export import export_pack
 from boxes.fetcher import run_fetch
@@ -75,6 +75,10 @@ def _friendly(exc: Exception) -> JSONResponse:
 
 class FactoryRunIn(BaseModel):
     report_id: str = Field(min_length=1)
+
+
+class FactoryImageIn(BaseModel):
+    draft_id: str = Field(min_length=1)
 
 
 class ReviewIn(BaseModel):
@@ -182,12 +186,12 @@ def radar_run(request: Request):
             content={"error": "Too many fetches. Please wait a minute and try again."},
         )
     try:
-        deep_dives = run_radar(chat=build_chat())
+        pack = run_radar(chat=build_chat())
         return {
-            "reports": list_reports(),
-            "scores": list_scores(),
-            "signals_seen": list_signals(),
-            "deep_dives": deep_dives,
+            "reports": pack.reports,
+            "scores": pack.scores,
+            "signals_seen": pack.signals,
+            "deep_dives": pack.reports,
         }
     except ValueError as exc:
         return _friendly(exc)
@@ -229,6 +233,20 @@ def factory_run(body: FactoryRunIn):
         return JSONResponse(
             status_code=500,
             content={"error": "Could not build a post from that report. Please try again."},
+        )
+
+
+@app.post("/factory/image")
+def factory_image(body: FactoryImageIn):
+    try:
+        return paint_chosen(body.draft_id)
+    except ValueError as exc:
+        return _friendly(exc)
+    except Exception:
+        logger.exception("factory image failed")
+        return JSONResponse(
+            status_code=500,
+            content={"error": "Could not make that picture. Please try again."},
         )
 
 

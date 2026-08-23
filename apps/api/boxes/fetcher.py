@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import logging
+import os
 
 import httpx
 
 from adapters.common import DEFAULT_QUERY_ID, REQUEST_TIMEOUT, USER_AGENT, normalize_url
 from adapters.gdelt import GdeltSource
+from adapters.grok_web import GrokWebSource
 from adapters.news_rss import NewsRssSource, extra_rss_sources
 from adapters.reddit_json import RedditJsonSource
 from models import Signal
@@ -30,6 +32,8 @@ def default_sources(client: httpx.Client) -> list[TrendSource]:
         RedditJsonSource(client),
     ]
     sources.extend(extra_rss_sources(client))
+    if os.environ.get("XAI_API_KEY", "").strip():
+        sources.append(GrokWebSource())
     return sources
 
 

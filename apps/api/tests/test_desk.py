@@ -38,7 +38,9 @@ def test_radar_run_envelope_keys(monkeypatch: pytest.MonkeyPatch) -> None:
         spent={"gets": 0},
         capped_at="complete",
     )
-    monkeypatch.setattr("main.run_radar", lambda **_: [report])
+    from boxes.belt import RadarPack
+
+    monkeypatch.setattr("main.run_radar", lambda **_: RadarPack([report], [], []))
     client = TestClient(app)
     res = client.post("/radar/run")
     assert res.status_code == 200
@@ -104,6 +106,42 @@ def test_get_brief_includes_grid() -> None:
     missing = client.get("/briefs/brf_missing")
     assert missing.status_code == 404
     assert "error" in missing.json()
+
+
+def test_factory_image_paints_chosen_draft(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from db import init_db, upsert_draft
+    from main import app
+
+    monkeypatch.setenv("IMAGE_GEN_MODE", "stub")
+    monkeypatch.setenv("IMAGE_OUT_DIR", str(tmp_path / "images"))
+    init_db()
+    upsert_draft(
+        Draft(
+            draft_id="dft_paint",
+            brief_id="brf_paint",
+            caption="Hydro Boost after the commute. Dermatologist tested.",
+            variant=1,
+            image_path=None,
+            judge={"verdict": "PASS", "flag_human": False},
+            rules=[],
+            round=1,
+        )
+    )
+    client = TestClient(app)
+    res = client.post("/factory/image", json={"draft_id": "dft_paint"})
+    assert res.status_code == 200
+    body = res.json()
+    assert body["draft_id"] == "dft_paint"
+    assert body["image_path"]
+    png = Path(body["image_path"])
+    assert png.is_file()
+    assert png.read_bytes()[:8] == PNG_MAGIC
+    missing = client.post("/factory/image", json={"draft_id": "dft_nope"})
+    assert missing.status_code == 404
+    assert "error" in missing.json()
+    assert "stack" not in str(missing.json()).lower()
 
 
 def test_get_draft_image_png(tmp_path: Path) -> None:

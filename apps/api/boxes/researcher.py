@@ -120,6 +120,98 @@ def url_host(url: str) -> str:
     return (urlparse(str(url)).hostname or "").lower()
 
 
+_JUNK_HOST_MARKERS = (
+    "googleusercontent.com",
+    "gstatic.com",
+    "ggpht.com",
+    "google-analytics.com",
+    "googletagmanager.com",
+    "googletagservices.com",
+    "googleadservices.com",
+    "googlesyndication.com",
+    "doubleclick.net",
+    "googleapis.com",
+    "googleoptimize.com",
+    "facebook.net",
+    "scorecardresearch.com",
+    "chartbeat.com",
+    "hotjar.com",
+    "cookiebot.com",
+    "cookielaw.org",
+    "onetrust.com",
+    "amazon-adsystem.com",
+)
+
+_JUNK_PATH_MARKERS = ("/gtag/", "/pagead/", "/ads/")
+_JUNK_PATH_SUFFIXES = (
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".gif",
+    ".webp",
+    ".svg",
+    ".ico",
+    ".js",
+    ".css",
+    ".woff",
+    ".woff2",
+)
+
+
+def is_tracker_host(url: str) -> bool:
+    host = url_host(url)
+    return host == "news.google.com" or host.endswith(".news.google.com")
+
+
+def is_junk_url(url: str) -> bool:
+    host = url_host(url)
+    path = (urlparse(url).path or "").lower()
+    if any(token in host for token in _JUNK_HOST_MARKERS):
+        return True
+    if path.endswith(_JUNK_PATH_SUFFIXES):
+        return True
+    if path.endswith("/collect"):
+        return True
+    if any(token in path for token in _JUNK_PATH_MARKERS):
+        return True
+    return False
+
+
+def is_binary_body(raw: str) -> bool:
+    if not raw:
+        return False
+    head = raw[:80]
+    if head.startswith("\x89PNG") or "IHDR" in head:
+        return True
+    if "\x00" in raw[:400]:
+        return True
+    sample = raw[:400]
+    printable = sum(1 for char in sample if char.isprintable() or char in "\n\r\t")
+    return printable < len(sample) * 0.72
+
+
+def publisher_links(html: str, base_url: str) -> list[str]:
+    found: list[str] = []
+    seen: set[str] = set()
+    for href in _HREF_RE.findall(html or ""):
+        if href.startswith("#") or href.lower().startswith("javascript:"):
+            continue
+        absolute = urljoin(base_url, href)
+        parsed = urlparse(absolute)
+        if parsed.scheme not in ("http", "https"):
+            continue
+        if is_tracker_host(absolute) or is_junk_url(absolute):
+            continue
+        if "google.com" in (parsed.hostname or "").lower():
+            continue
+        key = normalize_url(absolute)
+        if key in seen:
+            continue
+        seen.add(key)
+        found.append(absolute)
+    return found
+
+
 def wrap_source(url: str, body: str) -> str:
     safe_url = (url or "").replace("<", "").replace(">", "").replace("\n", " ").strip()
     return f"<source url={safe_url}>\n{body}\n</source>"
@@ -145,6 +237,8 @@ def same_host_links(html: str, base_url: str) -> list[str]:
             continue
         if parsed.netloc.lower() != (base.netloc or "").lower():
             continue
+        if is_tracker_host(absolute) or is_junk_url(absolute):
+            continue
         key = normalize_url(absolute)
         if key in seen:
             continue
@@ -154,11 +248,11 @@ def same_host_links(html: str, base_url: str) -> list[str]:
 
 
 def template_angles(signal: Signal) -> list[str]:
-    topic = clip_text(signal.title, 80) or "this signal"
+    topic = clip_text(signal.title, 80) or "this skincare story"
     return [
-        f"What is happening around: {topic}",
-        f"Why now and who is driving talk about: {topic}",
-        f"Risks, fade, and claim-adjacent issues for: {topic}",
+        topic,
+        f"Night routine after: {topic}",
+        f"Humid commute and: {topic}",
     ]
 
 
@@ -182,8 +276,37 @@ def plan_angles(signal: Signal, chat: ChatModel | None = None) -> list[str]:
     return template_angles(signal)
 
 
+_PAGE_JUNK = (
+    "window.",
+    "document.",
+    "function(",
+    "wiz_global",
+    "<script",
+    "afy8hf",
+    "subscribewithgoogle",
+)
+
+
+def page_quote(raw: str, limit: int = 240) -> str:
+    """Human excerpt from a fetched page. Script dumps stay out of the walk."""
+    if is_binary_body(raw or ""):
+        return ""
+    text = clip_text(raw or "", max(limit * 2, 400))
+    if not text:
+        return ""
+    lower = text.lower()
+    if any(marker in lower for marker in _PAGE_JUNK):
+        return ""
+    if "ihdr" in lower or "idat" in lower:
+        return ""
+    letters = sum(1 for char in text if char.isalpha())
+    if letters < 12:
+        return ""
+    return clip_text(text, limit)
+
+
 def _heuristic_read(angle: str, url: str, body: str) -> list[dict]:
-    text = clip_text(body or "", 400)
+    text = page_quote(body, 400)
     if not text or not url:
         return []
     return [{"text": text, "url": url, "angle": angle}]
@@ -236,6 +359,9 @@ def skeptic_filter(
         url = str(raw.get("url") or "").strip()
         if not url.startswith(("http://", "https://")):
             notes.append(f"dropped (no url): {text[:160]}")
+            continue
+        if is_junk_url(url):
+            notes.append(f"dropped (junk url): {text[:160]}")
             continue
         if fetched is not None and normalize_url(url) not in fetched:
             notes.append(f"dropped (url not fetched): {text[:160]}")
@@ -320,6 +446,57 @@ def _get(
         return None
 
 
+def fetch_readable_seed(
+    client: httpx.Client,
+    url: str,
+    budget: ResearchBudget,
+) -> tuple[str, str | None]:
+    """Open the article. Google News trackers may redirect to a publisher."""
+    if is_junk_url(url):
+        return url, None
+    if not budget.allow_get():
+        return url, None
+    budget.record_get()
+    try:
+        response = client.get(url)
+        if response.status_code >= 400:
+            logger.warning("research GET %s -> %s", url, response.status_code)
+            return url, None
+        final = str(response.url)
+        body = response.text or ""
+        if is_junk_url(final):
+            return url, None
+        if is_tracker_host(url) and not is_tracker_host(final):
+            if is_binary_body(body):
+                return url, None
+            return final, body
+        if not is_tracker_host(final):
+            if url_host(final) != url_host(url):
+                logger.warning(
+                    "research GET %s redirected off-host to %s", url, final
+                )
+                return url, None
+            return final, body
+        for candidate in publisher_links(body, final)[:3]:
+            if not budget.allow_get():
+                break
+            budget.record_get()
+            extra = client.get(candidate)
+            if extra.status_code >= 400:
+                continue
+            dest = str(extra.url)
+            if is_tracker_host(dest) or is_junk_url(dest):
+                continue
+            text = extra.text or ""
+            if is_binary_body(text):
+                continue
+            return dest, text
+        return final, None if is_binary_body(body) else body
+    except Exception as exc:
+        logger.warning("research GET %s failed: %s", url, exc)
+        return url, None
+
+
 def _assemble(
     signal: Signal,
     *,
@@ -334,7 +511,7 @@ def _assemble(
     why_now = clip_text(
         kept[1]["text"]
         if len(kept) > 1
-        else f"Deep-dive after scorer gate on {signal.seen_at.date().isoformat()}",
+        else "This showed up in today's news.",
         500,
     )
     host = urlparse(signal.url).netloc or "unknown-host"
@@ -404,9 +581,12 @@ def run_research(
         fetched_ok: set[str] = set()
         claimed_links: set[str] = set()
         fetched_at = stamp.isoformat()
-        allowed_host = url_host(signal.url)
+        work_url, seed_body = fetch_readable_seed(client, signal.url, budget)
+        allowed_host = url_host(work_url) or url_host(signal.url)
 
         def remember(url: str, body: str | None) -> None:
+            if is_junk_url(url):
+                return
             if url in seen_source_urls:
                 return
             seen_source_urls.add(url)
@@ -416,28 +596,27 @@ def run_research(
                     "url": url,
                     "fetched_at": fetched_at,
                     "hash": _body_hash(raw) if body is not None else "",
-                    "quote": clip_text(raw, 240),
+                    "quote": page_quote(raw, 240),
                 }
             )
 
+        if seed_body is None:
+            remember(work_url, None)
+        else:
+            fetched_ok.add(normalize_url(work_url))
+            remember(work_url, seed_body)
+
         for angle in angles:
-            if not budget.allow_get():
-                break
-            seed_body = _get(
-                client, signal.url, budget, allowed_host=allowed_host
-            )
-            if seed_body is None:
-                remember(signal.url, None)
-                continue
-            fetched_ok.add(normalize_url(signal.url))
-            remember(signal.url, seed_body)
-            findings.extend(
-                read_findings(angle, wrap_source(signal.url, seed_body), chat=chat)
-            )
-            if MAX_LINKED_PER_WORKER < 1:
+            if seed_body:
+                findings.extend(
+                    read_findings(
+                        angle, wrap_source(work_url, seed_body), chat=chat
+                    )
+                )
+            if MAX_LINKED_PER_WORKER < 1 or not seed_body:
                 continue
             link = None
-            for candidate in same_host_links(seed_body, signal.url):
+            for candidate in same_host_links(seed_body, work_url):
                 if candidate not in claimed_links:
                     claimed_links.add(candidate)
                     link = candidate
@@ -453,7 +632,7 @@ def run_research(
             findings.extend(read_findings(angle, wrap_source(link, extra), chat=chat))
 
         if not sources:
-            remember(signal.url, None)
+            remember(work_url, None)
 
         kept, skeptic_note = run_skeptic(
             findings, fetched_urls=fetched_ok, chat=chat

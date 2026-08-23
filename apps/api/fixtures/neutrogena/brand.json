@@ -8,11 +8,16 @@
       "market": "IN",
       "channel": "instagram",
       "title": "IN Instagram voice",
-      "voice": "Warm, clear, science-backed without jargon. Hinglish ok for hooks; benefits stay plain English. Never joke about skin disease.",
+      "voice": "Warm, clear, science-backed without jargon. Benefits stay plain English. Never joke about skin disease.",
+      "examples": [
+        "Double cleanse after a humid day. Hydro Boost after — dermatologist tested.",
+        "AC all day, then monsoon air. Short night routine: cleanse, then Hydro Boost. Dermatologist tested.",
+        "If skin feels tight after the commute, Hydro Boost at night. Dermatologist tested."
+      ],
       "do": [
         "Lead with skin feel and routine fit for Indian weather",
         "Cite dermatologist-tested when the claim is approved",
-        "Keep CTA soft: try, explore, add to routine"
+        "Write the post, not the brief"
       ],
       "dont": [
         "Never claim cures, heals, or #1 rankings",

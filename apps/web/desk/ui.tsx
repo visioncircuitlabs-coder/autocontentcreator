@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
-import { sourceFields } from "./review";
+import { sourceFields, sourceLinkLabel } from "./review";
 import type { TrendReport } from "./types";
+import { SOURCES_BUTTON } from "./words";
 
 type TicketTone = "kill" | "gate" | "pass" | "plain";
 
@@ -52,25 +53,32 @@ export function EmptyDesk({ children }: { children: ReactNode }) {
 
 export function ReportSources({
   sources,
+  heading = "Where we read this",
 }: {
   sources: Array<Record<string, unknown>> | undefined;
+  heading?: string | false;
 }) {
   const rows = (sources ?? []).map((row, index) => ({
     key: `${sourceFields(row).url}-${index}`,
     ...sourceFields(row),
   }));
-  if (!rows.some((row) => row.url || row.quote)) {
-    return <p className="quiet">No links on this idea yet.</p>;
+  const visible = rows.filter((row) => row.url || row.quote);
+  if (!visible.length) {
+    return (
+      <p className="quiet">
+        Could not open the article page. We still have the headline.
+      </p>
+    );
   }
   return (
     <>
-      <h3>Where we read this</h3>
+      {heading ? <h3>{heading}</h3> : null}
       <ul className="source-list">
-        {rows.map((row) => (
+        {visible.map((row) => (
           <li key={row.key}>
             {row.url ? (
               <a href={row.url} target="_blank" rel="noreferrer">
-                {row.url}
+                {sourceLinkLabel(row.url)}
               </a>
             ) : (
               <span>No url on this source.</span>
@@ -80,6 +88,19 @@ export function ReportSources({
         ))}
       </ul>
     </>
+  );
+}
+
+export function SourcesFold({
+  sources,
+}: {
+  sources: Array<Record<string, unknown>> | undefined;
+}) {
+  return (
+    <details className="sources-fold">
+      <summary>{SOURCES_BUTTON}</summary>
+      <ReportSources sources={sources} heading={false} />
+    </details>
   );
 }
 

@@ -46,6 +46,7 @@ class LiteLLMChat:
                 {"role": "user", "content": user},
             ],
             response_format={"type": "json_object"},
+            timeout=20,
         )
         text = response.choices[0].message.content or "{}"
         return schema.model_validate_json(text)

@@ -10,6 +10,7 @@ from html import escape
 from pathlib import Path
 
 from boxes.art_director import compose
+from boxes.visual import visual_prompt
 from db import get_draft, upsert_draft
 from models import Draft
 
@@ -20,11 +21,6 @@ def _export_dir() -> Path:
         return Path(override)
     sqlite = Path(os.environ.get("SQLITE_PATH") or "data/demo.db")
     return sqlite.resolve().parent / "exports"
-
-
-def visual_prompt(draft: Draft) -> str:
-    line = (draft.caption or "").split("\n")[0].strip()[:120]
-    return f"Skincare still life, no text, no logo, no claims. Mood: {line}"
 
 
 def _ensure_image(draft: Draft) -> Draft:

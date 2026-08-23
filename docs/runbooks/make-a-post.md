@@ -2,7 +2,7 @@
 
 For a content person. No training deck. Open the app and do this.
 
-You need the app running (someone already did `docker compose up --build`). Open http://localhost:3050 on your phone or laptop.
+You need the app running (someone already did `docker compose up --build`, or the local API + web). Open http://localhost:3050 on your phone or laptop. How to start it: `docs/howto-run-the-demo.md`.
 
 This is a practice Neutrogena brand. It is not Kenvue. Nothing you approve here goes onto Instagram.
 
@@ -16,7 +16,7 @@ This is a practice Neutrogena brand. It is not Kenvue. Nothing you approve here 
    If it says **Practice idea**, live news did not give us a closer look. That is normal. Continue.
 
 3. **Make a post**  
-   Tap **Make a post**. Wait while it writes and checks claims. Pick Version 1, 2, or 3. Read “We blocked this…” if it appears. Then **Continue to your call**.
+   Tap **Make a post**. Wait while it writes and checks claims. Pick Version 1, 2, or 3. Read “We blocked this…” if it appears. Then tap **Make the picture**. One photo, for the version you picked.
 
 4. **Your call**  
    Type your name. Type why you said yes or no. Both are required. The buttons stay off until you fill them.  
@@ -43,4 +43,4 @@ We never posted. A yes here only files your reason. If you said yes by mistake, 
 
 ## Show the machine
 
-The tiny **Show the machine** control is for a demo to engineers. You do not need it to do your job.
+**How it is made** is optional. Tap it if you want to see the four columns (Radar, Memory, Factory, Command). Tap a box to read what that step does, what it takes in, and what it hands on. While Look for ideas is running, a live list fills in: Google News sent N headlines, then scoring, then the closer look. You do not need this to make a post.
