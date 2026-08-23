@@ -9,6 +9,7 @@ import os
 from pydantic import BaseModel
 
 from adapters.resilience import retry_call
+from harness.breaker import CHAT_BREAKER
 
 logger = logging.getLogger(__name__)
 
@@ -53,6 +54,6 @@ class LiteLLMChat:
                 timeout=20,
             )
 
-        response = retry_call(_call)
+        response = retry_call(lambda: CHAT_BREAKER.call(_call))
         text = response.choices[0].message.content or "{}"
         return schema.model_validate_json(text)

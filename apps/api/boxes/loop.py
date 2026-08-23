@@ -48,6 +48,15 @@ def run_loop(
 
     while True:
         rules = run_hard_rules(current, organic=organic)
+        if rules:
+            # Deterministic failure — skip judge + craft (saves 2 chat calls
+            # per round) and go straight to rewrite with exact reasons.
+            if current.round >= max_rounds:
+                current = current.model_copy(update={"rules": rules, "flag_human": True})
+                return current
+            rewritten = rewrite_fn(current, list(rules))
+            current = rewritten.model_copy(update={"round": current.round + 1})
+            continue
         verdict = run_judge(current, claim_list, chat=chat)
         craft = review_craft(current, chat=chat)
         passed = (

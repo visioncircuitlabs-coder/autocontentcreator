@@ -61,15 +61,27 @@ def run_fetch(
     client = client or build_client()
     try:
         srcs = sources if sources is not None else default_sources(client)
-        collected: list[Signal] = []
-        for source in srcs:
+
+        def _one(source):
             try:
                 batch = source.fetch(query_id)
-                collected.extend(batch)
                 emit("fetch_source", source=source.name, n=len(batch), ok=True)
+                return batch
             except Exception as exc:
                 logger.warning("%s failed: %s", source.name, exc)
                 emit("fetch_source", source=source.name, n=0, ok=False, error=str(exc))
+                return []
+
+        # Sources are independent hosts — fetch in parallel. One dead
+        # source logs and the rest continue (isolation preserved).
+        from concurrent.futures import ThreadPoolExecutor
+
+        collected: list[Signal] = []
+        workers = min(len(srcs), 4) if srcs else 0
+        if workers:
+            with ThreadPoolExecutor(max_workers=workers) as pool:
+                for batch in pool.map(_one, srcs):
+                    collected.extend(batch)
         unique = dedupe_by_url(collected)
         if persist:
             from db import upsert_signals
