@@ -61,6 +61,7 @@ def run_loop(
         payload["flag_human"] = flag_human
         payload["craft"] = craft.verdict
         payload["craft_reasons"] = list(craft.reasons)
+        payload["craft_dimensions"] = dict(craft.dimensions)
         current = current.model_copy(
             update={
                 "rules": rules,
@@ -73,5 +74,15 @@ def run_loop(
             return current
 
         reasons = list(rules) + list(verdict.reasons) + list(craft.reasons)
+        style = verdict.style
+        if (
+            style is not None
+            and style.verdict == "REWRITE"
+            and style.one_line_fix
+            and not any("style rubric" in row for row in reasons)
+        ):
+            reasons.append(
+                f"note: style rubric {style.verdict} (avg {style.average}) — {style.one_line_fix}"
+            )
         rewritten = rewrite_fn(current, reasons)
         current = rewritten.model_copy(update={"round": current.round + 1})

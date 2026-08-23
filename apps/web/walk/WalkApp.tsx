@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 import {
   draftImageUrl,
   downloadZip,
@@ -21,27 +22,55 @@ import {
   shouldOfferFixture,
 } from "../desk/review";
 import type { BriefPack, Decision, Draft, Score, Signal, TrendReport } from "../desk/types";
-import { SourcesFold } from "../desk/ui";
+import {
+  Alert,
+  LoadingDesk,
+  SkeletonLines,
+  SourcesFold,
+  VerdictBadge,
+} from "../desk/ui";
 import {
   ALSO_TODAY,
+  ANGLE_PREFIX,
+  CALL_TITLE,
+  decisionLine,
   DOWNLOAD_BUTTON,
+  EMPTY_MAKE_NOTE,
+  gateLabel,
   LOOK_BUTTON,
+  LOOK_SUB,
+  LOOK_TITLE,
   LOOKING_STEPS,
   MAKE_BUTTON,
   MAKING_STEPS,
+  MAKE_TITLE,
+  NAME_LABEL,
+  NAME_REQUIRED_NOTE,
+  NO_BUTTON,
+  NO_PICTURE_NOTE,
+  PAUSED_NOTE,
   PICTURE_BUTTON,
   PICTURE_WAIT,
-  NAME_LABEL,
-  NO_BUTTON,
-  PAUSED_NOTE,
+  PREVIEW_TITLE,
+  NEWS_TAG,
+  PICK_TITLE,
+  PRACTICE_TAG,
+  PRACTICE_TITLE,
+  radarCountNote,
   REASON_HINT,
+  REVIEW_FORM_TITLE,
   SAMPLE_BUTTON,
   SAMPLE_NOTE,
+  SAMPLE_OPENING,
+  SAVING_BUTTON,
   TODAY_HEADLINES,
+  VARIANT_GROUP_LABEL,
+  VARIANT_HINT,
+  VERSION_LABEL,
+  VOICE_PREFIX,
   WHY_LABEL,
   YES_BUTTON,
   checkLines,
-  gateLabel,
   emptySourceNote,
 } from "../desk/words";
 import { MachineGraph } from "./MachineGraph";
@@ -249,6 +278,38 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
 
   const canStamp = canSubmitReview(user, reason) && !busy && Boolean(chosen);
 
+  // Enter advances a pick step when focus is not already on an interactive
+  // control (so buttons do not double-fire).
+  function onPanelKey(event: ReactKeyboardEvent<HTMLElement>) {
+    if (event.key !== "Enter") return;
+    const target = event.target as HTMLElement | null;
+    if (target?.closest("button, a, input, textarea, select, summary, [role='radio']")) {
+      return;
+    }
+    if (beat === 1 && !looking && !sampleBusy) void look();
+    else if (beat === 2 && picked && !making) void makePost();
+    else if (beat === 3 && chosen && !painting) void makePicture();
+  }
+
+  function onVariantKeys(event: ReactKeyboardEvent<HTMLElement>) {
+    if (!drafts.length) return;
+    const index = Math.max(
+      0,
+      drafts.findIndex((draft) => draft.draft_id === chosen?.draft_id),
+    );
+    let next = -1;
+    if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+      next = (index + 1) % drafts.length;
+    } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+      next = (index - 1 + drafts.length) % drafts.length;
+    }
+    if (next < 0) return;
+    event.preventDefault();
+    const draft = drafts[next];
+    setChosen(draft);
+    document.getElementById(`variant-${draft.variant}`)?.focus();
+  }
+
   return (
     <WalkShell
       beat={beat}
@@ -259,16 +320,15 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
       {showMachine ? (
         <MachineGraph beat={beat} watching={looking || making || painting} />
       ) : null}
-      {error ? (
-        <p className="alert" role="alert">
-          {error}
-        </p>
-      ) : null}
+      {error ? <Alert>{error}</Alert> : null}
 
       {beat === 1 ? (
-        <section className="panel">
-          <h2>Look for ideas</h2>
-          <p>One tap. We search the news and pick something you can turn into a post.</p>
+        <section className="panel" aria-labelledby="look-title" onKeyDown={onPanelKey}>
+          <h2 id="look-title">{LOOK_TITLE}</h2>
+          <p className="panel-sub">{LOOK_SUB}</p>
+          {looking ? (
+            <LoadingDesk label={lookText || LOOKING_STEPS[0]} />
+          ) : null}
           <button className="btn" type="button" disabled={looking} onClick={look}>
             {looking ? lookText || LOOKING_STEPS[0] : LOOK_BUTTON}
           </button>
@@ -276,9 +336,14 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
       ) : null}
 
       {beat === 2 ? (
-        <section className="panel">
-          <h2>{sample ? "Practice idea" : "This idea"}</h2>
-          {looking ? <p className="loading">{lookText}</p> : null}
+        <section className="panel" aria-labelledby="pick-title">
+          <h2 id="pick-title">{sample ? PRACTICE_TITLE : PICK_TITLE}</h2>
+          {didRun && signals.length > 0 ? (
+            <p className="meta-line" role="status">
+              {radarCountNote(signals.length, scores.length)}
+            </p>
+          ) : null}
+          {sampleBusy ? <LoadingDesk label={SAMPLE_OPENING} /> : null}
           {didRun && !picked && quiet.length > 0 ? (
             <ul className="quiet-list">
               {quiet.map((source) => (
@@ -286,7 +351,7 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
               ))}
             </ul>
           ) : null}
-          {!picked && offerSample ? (
+          {!picked && !sampleBusy && offerSample ? (
             <div className="sample ticket">
               <p>{SAMPLE_NOTE}</p>
               <button
@@ -295,17 +360,14 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
                 disabled={sampleBusy}
                 onClick={useSample}
               >
-                {sampleBusy ? "Opening sample…" : SAMPLE_BUTTON}
+                {sampleBusy ? SAMPLE_OPENING : SAMPLE_BUTTON}
               </button>
             </div>
           ) : null}
+          {looking ? <SkeletonLines rows={3} /> : null}
           {!looking && picked ? (
             <div className="picked ticket">
-              {sample ? (
-                <p className="tag">Practice idea</p>
-              ) : (
-                <p className="tag">From today's news</p>
-              )}
+              <p className="tag">{sample ? PRACTICE_TAG : NEWS_TAG}</p>
               <h3>{picked.what}</h3>
               <p>{sample ? SAMPLE_NOTE : picked.why_now}</p>
               {sample ? null : <SourcesFold sources={picked.sources} />}
@@ -333,100 +395,145 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
       ) : null}
 
       {beat === 3 ? (
-        <section className="panel">
-          <h2>Make a post</h2>
-          {making ? <p className="loading">{makeText}</p> : null}
-          {painting ? <p className="loading">{PICTURE_WAIT}</p> : null}
+        <section className="panel" aria-labelledby="make-title" onKeyDown={onPanelKey}>
+          <h2 id="make-title">{MAKE_TITLE}</h2>
+          {making ? <LoadingDesk label={makeText || MAKING_STEPS[0]} /> : null}
+          {painting ? <LoadingDesk label={PICTURE_WAIT} /> : null}
           {brief?.concepts?.length ? (
             <p className="quiet">
-              Angle: {brief.concepts[0].angle}. Voice: {brief.concepts[0].persona}.
+              {ANGLE_PREFIX} {brief.concepts[0].angle}. {VOICE_PREFIX}{" "}
+              {brief.concepts[0].persona}.
             </p>
           ) : null}
-          <div className="versions">
-            {drafts.map((draft) => (
-              <button
-                key={draft.draft_id}
-                type="button"
-                className="version"
-                data-sel={chosen?.draft_id === draft.draft_id ? "true" : "false"}
-                disabled={painting}
-                onClick={() => setChosen(draft)}
-              >
-                Version {draft.variant}
-              </button>
-            ))}
-          </div>
-          {chosen ? (
+          {making ? (
+            <div className="variant-grid" aria-hidden="true">
+              <SkeletonLines rows={2} />
+              <SkeletonLines rows={2} />
+              <SkeletonLines rows={2} />
+            </div>
+          ) : drafts.length > 0 ? (
             <>
-              <p className="caption-block">{chosen.caption}</p>
-              <ul className="checks">
-                {checkLines(chosen).map((line) => (
-                  <li key={line}>{line}</li>
-                ))}
-              </ul>
-              <button
-                className="btn"
-                type="button"
-                disabled={painting}
-                onClick={() => void makePicture()}
+              <div
+                className="variant-grid"
+                role="radiogroup"
+                aria-label={VARIANT_GROUP_LABEL}
+                onKeyDown={onVariantKeys}
               >
-                {painting ? PICTURE_WAIT : PICTURE_BUTTON}
-              </button>
+                {drafts.map((draft, index) => (
+                  <button
+                    key={draft.draft_id}
+                    id={`variant-${draft.variant}`}
+                    type="button"
+                    role="radio"
+                    tabIndex={chosen?.draft_id === draft.draft_id || index === 0 ? 0 : -1}
+                    aria-checked={chosen?.draft_id === draft.draft_id}
+                    data-sel={chosen?.draft_id === draft.draft_id ? "true" : "false"}
+                    disabled={painting}
+                    onClick={() => setChosen(draft)}
+                  >
+                    <span className="variant-top">
+                      <span className="tag">
+                        {VERSION_LABEL} {draft.variant}
+                      </span>
+                      <VerdictBadge judge={draft.judge} />
+                    </span>
+                    <span className="snip">
+                      {draft.caption.split("\n")[0]}
+                    </span>
+                  </button>
+                ))}
+              </div>
+              <p className="hint-line">{VARIANT_HINT}</p>
+              {chosen ? (
+                <>
+                  <p className="caption-block">{chosen.caption}</p>
+                  <ul className="checks">
+                    {checkLines(chosen).map((line) => (
+                      <li key={line}>{line}</li>
+                    ))}
+                  </ul>
+                  <button
+                    className="btn"
+                    type="button"
+                    disabled={painting}
+                    onClick={() => void makePicture()}
+                  >
+                    {painting ? PICTURE_WAIT : PICTURE_BUTTON}
+                  </button>
+                </>
+              ) : null}
             </>
-          ) : !making ? (
-            <p>Make a post from the idea you picked.</p>
-          ) : null}
+          ) : (
+            <p className="quiet">{EMPTY_MAKE_NOTE}</p>
+          )}
         </section>
       ) : null}
 
       {beat === 4 ? (
-        <section className="panel">
-          <h2>Your call</h2>
+        <section className="panel" aria-labelledby="call-title">
+          <h2 id="call-title">{CALL_TITLE}</h2>
           {chosen ? <p className="caption-block">{chosen.caption}</p> : null}
-          <label className="field">
-            {NAME_LABEL}
-            <input
-              value={user}
-              onChange={(event) => saveName(event.target.value)}
-              autoComplete="name"
-            />
-          </label>
-          <label className="field">
-            {WHY_LABEL}
-            <textarea
-              value={reason}
-              onChange={(event) => setReason(event.target.value)}
-              rows={4}
-            />
-          </label>
-          <p className="quiet">{REASON_HINT}</p>
-          <div className="row">
-            <button
-              className="btn"
-              type="button"
-              disabled={!canStamp}
-              onClick={() => decide("approve")}
-            >
-              {YES_BUTTON}
-            </button>
-            <button
-              className="btn btn-ink"
-              type="button"
-              disabled={!canStamp}
-              onClick={() => decide("reject")}
-            >
-              {NO_BUTTON}
-            </button>
-          </div>
+          <form
+            className="review-form"
+            aria-label={REVIEW_FORM_TITLE}
+            onSubmit={(event) => {
+              event.preventDefault();
+              void decide("approve");
+            }}
+          >
+            <h3>{REVIEW_FORM_TITLE}</h3>
+            <label className="field" htmlFor="review-name">
+              {NAME_LABEL}
+              <input
+                id="review-name"
+                value={user}
+                onChange={(event) => saveName(event.target.value)}
+                autoComplete="name"
+                required
+                aria-describedby="review-hint"
+              />
+            </label>
+            <label className="field" htmlFor="review-reason">
+              {WHY_LABEL}
+              <textarea
+                id="review-reason"
+                value={reason}
+                onChange={(event) => setReason(event.target.value)}
+                rows={4}
+                required
+                aria-describedby="review-hint"
+              />
+            </label>
+            <p className="hint-line" id="review-hint">
+              {canSubmitReview(user, reason) ? REASON_HINT : NAME_REQUIRED_NOTE}
+            </p>
+            <div className="btn-row">
+              <button
+                className="btn btn-approve"
+                type="submit"
+                disabled={!canStamp}
+              >
+                {YES_BUTTON}
+              </button>
+              <button
+                className="btn btn-reject"
+                type="button"
+                disabled={!canStamp}
+                onClick={() => decide("reject")}
+              >
+                {NO_BUTTON}
+              </button>
+            </div>
+          </form>
         </section>
       ) : null}
 
       {beat === 5 ? (
-        <section className="panel">
-          <h2>Phone preview</h2>
+        <section className="panel" aria-labelledby="preview-title">
+          <h2 id="preview-title">{PREVIEW_TITLE}</h2>
           {decision ? (
-            <p>
-              {decision.user} said {decision.verdict === "approve" ? "yes" : "no"}.
+            <p className="meta-line" role="status">
+              {decisionLine(decision.user, decision.verdict === "approve")}
             </p>
           ) : null}
           {chosen ? (
@@ -441,7 +548,7 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
               </div>
               <div className="ig-photo">
                 {imgBroken ? (
-                  <div className="missing">No picture on this version yet.</div>
+                  <div className="missing">{NO_PICTURE_NOTE}</div>
                 ) : (
                   <img
                     src={draftImageUrl(chosen.draft_id)}
@@ -452,10 +559,12 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
               </div>
               <div className="ig-caption">{chosen.caption}</div>
             </div>
-          ) : null}
+          ) : (
+            <SkeletonLines rows={3} />
+          )}
           <p className="quiet">{PAUSED_NOTE}</p>
           <button className="btn" type="button" disabled={!chosen || saving} onClick={saveZip}>
-            {saving ? "Saving…" : DOWNLOAD_BUTTON}
+            {saving ? SAVING_BUTTON : DOWNLOAD_BUTTON}
           </button>
         </section>
       ) : null}

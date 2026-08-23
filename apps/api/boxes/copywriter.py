@@ -17,6 +17,7 @@ from boxes.hard_rules import (
     without_disclaimer,
 )
 from boxes.product_facts import compare_claims
+from boxes.rubric import MODE_PROMPT_BLOCK, RUBRIC_VOICE
 from boxes.strategist import contains_disease, make_concept
 from models import Brief, Concept, Draft
 from ports import ChatModel
@@ -35,6 +36,11 @@ DEFAULT_EXAMPLES = (
 
 COPY_SYSTEM = (
     "You write Instagram captions for a Neutrogena-like skincare brand in India. "
+    "Follow the style rubric inside <rubric>: warm peer-level voice, hook in "
+    "<=8 words (command / contradiction / confession / specific number — never "
+    "the brand name), every claim carries a number or timeframe, concrete "
+    "images over adjective pairs, cut filler (very, really, actually, simply, "
+    "just), max one exclamation, one CTA with a reason. "
     "Match the voice of the posts inside <examples>. Do not copy them word for word. "
     "Each caption is a post a person could paste. Tie it to <idea>. "
     "Use only approved claim phrases from <approved>. "
@@ -205,10 +211,11 @@ def _template_captions(
 ) -> list[str]:
     news = (concept.angle or "this skincare talk").split("\n")[0].strip()[:90]
     pain = concept.claim_safe_pain or "tight skin after AC"
+    # One template per rubric mode: imperative / peer-voice / describe-don't-promise.
     raw = [
-        f"{news}\n\n{product} after you cleanse — {approved}.",
-        f"{pain} after a long AC day. {product} is {approved}. Use it at night.",
-        f"Keep the night routine short: cleanse, then {product}. {approved}.",
+        f"{news}. Cleanse first, then {product} — {approved}.",
+        f"{pain} after a long AC day, na. {product} is {approved}. I keep it on the night shelf.",
+        f"A night gel step after cleansing: {product}, {approved}. Absorbs before the lights go out.",
     ]
     out: list[str] = []
     for caption in raw:
@@ -280,6 +287,9 @@ def _from_chat(
     examples = example_captions(brief)
     approved = _approved_phrase(brief)
     user = (
+        "<rubric>\n"
+        f"{RUBRIC_VOICE}\n{MODE_PROMPT_BLOCK}\n"
+        "</rubric>\n"
         "<examples>\n"
         + "\n---\n".join(examples)
         + "\n</examples>\n"

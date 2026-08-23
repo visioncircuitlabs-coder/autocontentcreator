@@ -1,7 +1,12 @@
 import type { ReactNode } from "react";
 import { sourceFields, sourceLinkLabel } from "./review";
 import type { TrendReport } from "./types";
-import { SOURCES_BUTTON } from "./words";
+import {
+  SOURCES_BUTTON,
+  VERDICT_FAIL,
+  VERDICT_NONE,
+  VERDICT_PASS,
+} from "./words";
 
 type TicketTone = "kill" | "gate" | "pass" | "plain";
 
@@ -48,6 +53,32 @@ export function EmptyDesk({ children }: { children: ReactNode }) {
       <h2>Empty desk</h2>
       <p>{children}</p>
     </Ticket>
+  );
+}
+
+export function VerdictBadge({
+  judge,
+}: {
+  judge: Record<string, unknown> | null;
+}) {
+  const verdict = String(judge?.verdict ?? "");
+  if (verdict === "PASS") {
+    return <span className="badge badge-pass">{VERDICT_PASS}</span>;
+  }
+  if (verdict === "FAIL") {
+    return <span className="badge badge-fail">{VERDICT_FAIL}</span>;
+  }
+  return <span className="badge badge-none">{VERDICT_NONE}</span>;
+}
+
+export function SkeletonLines({ rows = 3 }: { rows?: number }) {
+  return (
+    <div className="skel-card" aria-hidden="true">
+      <span className="skel skel-tag" />
+      {Array.from({ length: rows }, (_, index) => (
+        <span key={index} className={index === rows - 1 ? "skel skel-short" : "skel"} />
+      ))}
+    </div>
   );
 }
 

@@ -30,6 +30,41 @@ export const DOWNLOAD_BUTTON = "Download pack";
 export const SOURCES_BUTTON = "Sources";
 export const PAUSED_NOTE = "This does not go live. Someone still has to post it.";
 
+export const LOOK_TITLE = "Look for ideas";
+export const LOOK_SUB =
+  "One tap. We search the news and pick something you can turn into a post.";
+export const MAKE_TITLE = "Make a post";
+export const CALL_TITLE = "Your call";
+export const PREVIEW_TITLE = "Phone preview";
+export const PICK_TITLE = "This idea";
+export const PRACTICE_TITLE = "Practice idea";
+export const PRACTICE_TAG = "Practice idea";
+export const NEWS_TAG = "From today's news";
+export const SAMPLE_OPENING = "Opening the sample…";
+export const SAVING_BUTTON = "Saving…";
+export const VERSION_LABEL = "Version";
+export const VARIANT_GROUP_LABEL = "Caption versions";
+export const VARIANT_HINT =
+  "Pick a version. Left and right arrow keys switch between them.";
+export const VERDICT_PASS = "Claim check: pass";
+export const VERDICT_FAIL = "Claim check: failed";
+export const VERDICT_NONE = "Not checked yet";
+export const EMPTY_MAKE_NOTE = "Make a post from the idea you picked.";
+export const NO_PICTURE_NOTE = "No picture on this version yet.";
+export const REVIEW_FORM_TITLE = "Who made this call";
+export const NAME_REQUIRED_NOTE = "Add your name and a reason to unlock Yes or No.";
+export const ANGLE_PREFIX = "Angle:";
+export const VOICE_PREFIX = "Voice:";
+
+export function radarCountNote(seen: number, scored: number): string {
+  const noun = seen === 1 ? "headline" : "headlines";
+  return `This look read ${seen} ${noun} and scored ${scored} of them.`;
+}
+
+export function decisionLine(name: string, approved: boolean): string {
+  return `${name} said ${approved ? "yes" : "no"} on this draft.`;
+}
+
 export const SOURCE_LABELS: Record<string, string> = {
   gdelt: "News wire",
   news_rss: "Google News",

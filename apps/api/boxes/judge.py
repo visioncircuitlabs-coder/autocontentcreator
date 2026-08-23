@@ -6,10 +6,11 @@ import logging
 import re
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from boxes.hard_rules import has_disclaimer, load_disclaimer
 from boxes.product_facts import compare_claims
+from boxes.rubric import DIMENSIONS, find_cliches, score_dimensions, style_verdict
 from models import Claim, Draft
 from ports import ChatModel
 
@@ -27,11 +28,33 @@ IMPLIED_SYSTEM = (
 ImpliedCheck = Literal["skipped", "ran", "flagged"]
 
 
+class StyleScore(BaseModel):
+    """Rubric §3 craft dimensions, scored 1-5. Deterministic (no LLM)."""
+
+    dimensions: dict[str, int] = Field(default_factory=dict)
+    average: float = 0.0
+    verdict: Literal["PASS", "REWRITE"] = "PASS"
+    one_line_fix: str | None = None
+
+
 class JudgeResult(BaseModel):
     verdict: Literal["PASS", "FAIL"]
     reasons: list[str]
     rewrite: str | None = None
     implied_check: ImpliedCheck = "skipped"
+    style: StyleScore | None = None
+
+
+def score_style(caption: str) -> StyleScore:
+    """Per-dimension craft scores + overall PASS/REWRITE + highest-leverage fix."""
+    scores = score_dimensions(caption)
+    verdict_label, average, fix = style_verdict(scores)
+    return StyleScore(
+        dimensions={dim: int(scores.get(dim, 0)) for dim in DIMENSIONS},
+        average=average,
+        verdict=verdict_label,
+        one_line_fix=fix,
+    )
 
 
 class ImpliedClaimOut(BaseModel):
@@ -178,9 +201,15 @@ def run_judge(
         if blocking
         else None
     )
+    style = score_style(caption)
+    reasons_out = list(blocking) + list(notes)
+    if not blocking and style.verdict == "REWRITE" and style.one_line_fix:
+        # Compliance holds; surface the rubric fix as advisory polish.
+        reasons_out.append(f"note: style rubric {style.verdict} (avg {style.average}) — {style.one_line_fix}")
     return JudgeResult(
         verdict="FAIL" if blocking else "PASS",
-        reasons=blocking + notes,
+        reasons=reasons_out,
         rewrite=rewrite,
         implied_check=implied_check,
+        style=style,
     )

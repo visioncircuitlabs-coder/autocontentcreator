@@ -9,6 +9,7 @@ import re
 from pydantic import AliasChoices, BaseModel, Field
 
 from boxes.brief import load_brief
+from boxes.rubric import MODE_PROMPT_BLOCK, RUBRIC_VOICE
 from models import Brief, Concept
 from ports import ChatModel
 
@@ -48,6 +49,13 @@ STRATEGIST_SYSTEM = (
     "Axes: angle, persona, claim-safe pain, channel, indic_register "
     "(hindi | hinglish | roman). "
     "Pain is everyday skin feel (tightness, humidity shine, dryness, dullness). "
+    "Follow the style rubric voice rules inside <rubric>: hooks are commands, "
+    "contradictions, confessions, or specific numbers — never the brand name. "
+    "Mine Indian situations (3 PM webcam shine, monsoon frizz, metro pollution) "
+    "for angles; each angle states one human insight stated plainly. "
+    "Exemplar patterns to draw from: Nike imperative compression (verb-first, "
+    "no hedging), Apple poetry-line + proof-line (one concrete noun does the work), "
+    "Glossier peer voice (write at eye level, not from a podium). "
     "Never use disease names (PCOS, PCOD, thyroid, diabetes, cancer). "
     "Never treat a medical condition as a marketing angle. "
     "One variable per concept. Output concepts, not captions. "
@@ -199,7 +207,12 @@ def template_concepts(brief: Brief) -> list[Concept]:
 
 
 def _from_chat(brief: Brief, chat: ChatModel) -> list[Concept]:
-    user = f"<brief>\n{brief.model_dump_json()}\n</brief>"
+    user = (
+        "<rubric>\n"
+        f"{RUBRIC_VOICE}\n{MODE_PROMPT_BLOCK}\n"
+        "</rubric>\n"
+        f"<brief>\n{brief.model_dump_json()}\n</brief>"
+    )
     try:
         out = chat.complete_json(STRATEGIST_SYSTEM, user, ConceptGridOut)
         if not isinstance(out, ConceptGridOut):
