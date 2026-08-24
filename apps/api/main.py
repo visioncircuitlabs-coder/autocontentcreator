@@ -24,6 +24,7 @@ from boxes.export import export_pack
 from boxes.fetcher import run_fetch
 from boxes.metrics import collect_metrics
 from boxes.review import decide
+from harness.admission import Overloaded, run_slot
 from db import (
     get_brief,
     get_conn,
@@ -269,7 +270,8 @@ def radar_run(request: Request):
     if hit:
         return cached
     try:
-        pack = run_radar(chat=build_chat())
+        with run_slot("interactive"):
+            pack = run_radar(chat=build_chat())
         payload = {
             "reports": pack.reports,
             "scores": pack.scores,
@@ -281,6 +283,12 @@ def radar_run(request: Request):
         return payload
     except ValueError as exc:
         return _friendly(exc)
+    except Overloaded as exc:
+        return JSONResponse(
+            status_code=503,
+            headers={"Retry-After": str(exc.retry_after_s)},
+            content={"error": str(exc)},
+        )
     except Exception:
         logger.exception("radar run failed")
         return JSONResponse(
@@ -315,12 +323,19 @@ def factory_run(body: FactoryRunIn, request: Request):
     if hit:
         return cached
     try:
-        result = run_factory(body.report_id, chat=build_chat())
+        with run_slot("interactive"):
+            result = run_factory(body.report_id, chat=build_chat())
         emit("factory_end", report_id=body.report_id)
         idempotency.store(key, "factory_run", result)
         return result
     except ValueError as exc:
         return _friendly(exc)
+    except Overloaded as exc:
+        return JSONResponse(
+            status_code=503,
+            headers={"Retry-After": str(exc.retry_after_s)},
+            content={"error": str(exc)},
+        )
     except Exception:
         logger.exception("factory run failed")
         return JSONResponse(

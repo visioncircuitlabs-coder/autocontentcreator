@@ -5,6 +5,7 @@ import os
 import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
+from uuid import uuid4
 
 from models import Brief, Concept, Decision, Draft, RegistryClaim, Score, Signal, TrendReport
 
@@ -159,6 +160,16 @@ def init_db() -> None:
                 review_by TEXT,
                 notes TEXT NOT NULL DEFAULT '',
                 seeded_at TEXT
+            );
+
+            CREATE TABLE IF NOT EXISTS runs (
+                run_id TEXT PRIMARY KEY,
+                kind TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'running',
+                step_results TEXT NOT NULL DEFAULT '[]',
+                params TEXT NOT NULL DEFAULT '{}',
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL
             );
             """
         )
@@ -769,6 +780,194 @@ def list_registry_claims() -> list[RegistryClaim]:
                 )
             )
         return out
+    finally:
+        conn.close()
+
+
+_RUN_LEDGER_STARTS = "--- Run ledger: per-run step results for resumable pipelines ---"
+
+RUN_KINDS = ("radar", "factory")
+RUN_STATUSES = ("running", "done", "failed", "interrupted")
+STALE_RUNNING_AFTER_S = 30 * 60  # running longer than this reads as interrupted
+
+
+def _now_iso() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+
+def _effective_run_status(status: str, updated_at: str | None, now: datetime | None) -> str:
+    """A row stuck in 'running' past the staleness window reads as interrupted."""
+    if status != "running":
+        return status
+    stamp = _parse_dt(updated_at)
+    if stamp is None:
+        return status
+    now_dt = now or datetime.now(timezone.utc)
+    if (now_dt - stamp).total_seconds() > STALE_RUNNING_AFTER_S:
+        return "interrupted"
+    return status
+
+
+def _run_from_row(row: sqlite3.Row, now: datetime | None = None) -> dict:
+    keys = row.keys()
+    status = _effective_run_status(
+        row["status"], row["updated_at"] if "updated_at" in keys else None, now
+    )
+    return {
+        "run_id": row["run_id"],
+        "kind": row["kind"],
+        "status": status,
+        "step_results": _json_load(row["step_results"], []) if "step_results" in keys else [],
+        "params": _json_load(row["params"], {}) if "params" in keys else {},
+        "created_at": row["created_at"] if "created_at" in keys else None,
+        "updated_at": row["updated_at"] if "updated_at" in keys else None,
+    }
+
+
+def create_run(
+    kind: str, *, params: dict | None = None, run_id: str | None = None
+) -> dict:
+    """Open a ledger row for one radar/factory run. Starts life as 'running'."""
+    if kind not in RUN_KINDS:
+        raise ValueError("Runs are either 'radar' or 'factory'.")
+    init_db()
+    rid = run_id or f"run_{uuid4().hex[:10]}"
+    ts = _now_iso()
+    conn = connect()
+    try:
+        conn.execute(
+            """
+            INSERT OR REPLACE INTO runs (
+                run_id, kind, status, step_results, params, created_at, updated_at
+            ) VALUES (?, ?, 'running', '[]', ?, ?, ?)
+            """,
+            (rid, kind, json.dumps(params or {}), ts, ts),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+    return get_run(rid) or {
+        "run_id": rid,
+        "kind": kind,
+        "status": "running",
+        "step_results": [],
+        "params": params or {},
+        "created_at": ts,
+        "updated_at": ts,
+    }
+
+
+def update_run(run_id: str, *, status: str | None = None) -> dict | None:
+    """Flip a run's status and bump updated_at. None if unknown."""
+    if status is not None and status not in RUN_STATUSES:
+        raise ValueError("That run status does not exist.")
+    init_db()
+    conn = connect()
+    try:
+        if conn.execute("SELECT 1 FROM runs WHERE run_id = ?", (run_id,)).fetchone() is None:
+            return None
+        sets = ["updated_at = ?"]
+        args: list[object] = [_now_iso()]
+        if status is not None:
+            sets.append("status = ?")
+            args.append(status)
+        args.append(run_id)
+        conn.execute(f"UPDATE runs SET {', '.join(sets)} WHERE run_id = ?", args)
+        conn.commit()
+    finally:
+        conn.close()
+    return get_run(run_id)
+
+
+def record_step_result(run_id: str, entry: dict) -> None:
+    """Append one StepResult snapshot into the run's ordered step list.
+
+    Same-name entries replace in place so reruns stay idempotent per run.
+    Raises ValueError when the run row does not exist.
+    """
+    init_db()
+    conn = connect()
+    try:
+        row = conn.execute(
+            "SELECT step_results FROM runs WHERE run_id = ?", (run_id,)
+        ).fetchone()
+        if row is None:
+            raise ValueError(f"That run was not found: {run_id}")
+        steps_list = _json_load(row["step_results"], [])
+        if not isinstance(steps_list, list):
+            steps_list = []
+        replaced = False
+        out: list[dict] = []
+        for item in steps_list:
+            if isinstance(item, dict) and item.get("name") == entry.get("name"):
+                out.append(entry)
+                replaced = True
+            else:
+                out.append(item)
+        if not replaced:
+            out.append(entry)
+        conn.execute(
+            "UPDATE runs SET step_results = ?, updated_at = ? WHERE run_id = ?",
+            (json.dumps(out), _now_iso(), run_id),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def get_run(run_id: str, *, now: datetime | None = None) -> dict | None:
+    """Load one run row; stale 'running' rows surface as 'interrupted'."""
+    init_db()
+    conn = connect()
+    try:
+        row = conn.execute(
+            "SELECT * FROM runs WHERE run_id = ?", (run_id,)
+        ).fetchone()
+        if row is None:
+            return None
+        return _run_from_row(row, now=now)
+    finally:
+        conn.close()
+
+
+def list_runs(
+    *,
+    status: str | None = None,
+    kind: str | None = None,
+    limit: int = 100,
+    now: datetime | None = None,
+) -> list[dict]:
+    """Newest-first run listing with optional status/kind filters."""
+    if status is not None and status not in RUN_STATUSES:
+        raise ValueError("Unknown run status. Use running, done, failed or interrupted.")
+    if kind is not None and kind not in RUN_KINDS:
+        raise ValueError("Unknown run kind. Use radar or factory.")
+    init_db()
+    conn = connect()
+    try:
+        rows = conn.execute(
+            "SELECT * FROM runs ORDER BY created_at DESC, run_id DESC"
+        ).fetchall()
+    finally:
+        conn.close()
+    out = [_run_from_row(row, now=now) for row in rows]
+    if status is not None:
+        out = [item for item in out if item["status"] == status]
+    if kind is not None:
+        out = [item for item in out if item["kind"] == kind]
+    return out[: max(1, min(limit, 500))]
+
+
+def find_brief_id_for_report(report_id: str) -> str | None:
+    """Most recent brief built from a report — lets factory resume skip rebuilds."""
+    init_db()
+    conn = connect()
+    try:
+        row = conn.execute(
+            "SELECT brief_id FROM briefs WHERE report_id = ? ORDER BY rowid DESC LIMIT 1",
+            (report_id,),
+        ).fetchone()
+        return row["brief_id"] if row else None
     finally:
         conn.close()
 
