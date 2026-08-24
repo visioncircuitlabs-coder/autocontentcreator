@@ -292,6 +292,11 @@ def _from_chat(
 ) -> list[str]:
     examples = example_captions(brief)
     approved = _approved_phrase(brief)
+    learn_text, n_winners, n_avoid = learning_block(
+        brief.sku if brief else None
+    )
+    if n_winners or n_avoid:
+        emit("learning_applied", winners=n_winners, avoid=n_avoid)
     user = (
         "<rubric>\n"
         f"{RUBRIC_VOICE}\n{MODE_PROMPT_BLOCK}\n"
@@ -304,6 +309,7 @@ def _from_chat(
         f"<concept>\n{concept.model_dump_json()}\n</concept>\n"
         f"<seed>\n{seed_caption or ''}\n</seed>\n"
         f"<reasons>\n{reasons}\n</reasons>"
+        + (f"\n<learning>\n{learn_text}\n</learning>" if learn_text else "")
     )
     try:
         out = chat.complete_json(COPY_SYSTEM, user, CopyOut)
