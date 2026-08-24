@@ -105,8 +105,13 @@ def run_hard_rules(
     *,
     organic: bool = True,
     disclaimer: str | None = None,
+    market: str | None = None,
 ) -> list[str]:
-    """Return violation strings. Empty list = pass."""
+    """Return violation strings. Empty list = pass.
+
+    market (optional): target jurisdiction code (e.g. 'IN', 'US'). When
+    provided, registry checks enforce per-market clearance (G8).
+    """
     caption = draft.caption or ""
     disc = load_disclaimer() if disclaimer is None else disclaimer
     body = without_disclaimer(caption, disc)
@@ -125,20 +130,20 @@ def run_hard_rules(
     if has_benefit_line(body) and not has_disclaimer(caption, disc):
         reasons.append("benefit line requires market disclaimer")
 
-    reasons.extend(check_registry(body))
+    reasons.extend(check_registry(body, market=market))
 
     return reasons
 
 
-def check_registry(text: str, *, today=None) -> list[str]:
+def check_registry(text: str, *, today=None, market: str | None = None) -> list[str]:
     """Check draft copy against the claims registry. No LLM.
 
     Violations:
       - a registry phrase appears with status != approved, no source citation,
-        or a review date in the past;
+        a review date in the past — or not cleared for the target market (G8);
       - a benefit word appears that is not covered by any approved, unexpired
         registry phrase (unregistered benefit claim).
-    Empty list = every benefit phrase is registered and approved.
+    Empty list = every benefit phrase is registered and approved for market.
     """
     from boxes.claims_registry import registry_phrases
 
@@ -171,12 +176,14 @@ def check_registry(text: str, *, today=None) -> list[str]:
     seen: set[str] = set()
     for start, end, span, claim in sorted(hits, key=lambda h: h[0]):
         cid = claim.claim_id
-        if usable(claim, today=today):
+        if usable(claim, today=today, market=market):
             covered.append((start, end))
             continue
         detail = f"status={claim.status}"
         if claim.status == "approved" and not claim.source_url.strip():
             detail = "missing source_url"
+        elif claim.status == "approved" and market and claim.jurisdictions and market.upper() not in [j.upper() for j in claim.jurisdictions]:
+            detail = f"not cleared for market {market.upper()}"
         elif claim.status == "approved":
             detail += f", review_by={claim.review_by.date().isoformat()}"
         key = f"{cid}:{detail}"

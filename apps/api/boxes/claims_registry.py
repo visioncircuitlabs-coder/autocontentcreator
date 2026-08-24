@@ -44,6 +44,7 @@ def load_registry(path: Path | None = None) -> list[RegistryClaim]:
                 status=row["status"],
                 review_by=datetime.fromisoformat(str(review)) if review else None,
                 notes=str(row.get("notes") or ""),
+                jurisdictions=[str(j).upper() for j in (row.get("jurisdictions") or [])],
             )
         )
     return out
@@ -75,13 +76,28 @@ def is_expired(claim: RegistryClaim, *, today: date | None = None) -> bool:
     return claim.review_by.date() < day
 
 
-def usable(claim: RegistryClaim, *, today: date | None = None) -> bool:
-    """A claim may appear in copy only when approved, cited, and in its review window."""
-    return (
-        claim.status == "approved"
-        and bool(claim.source_url.strip())
-        and not is_expired(claim, today=today)
-    )
+def usable(
+    claim: RegistryClaim,
+    *,
+    today: date | None = None,
+    market: str | None = None,
+) -> bool:
+    """A claim may appear in copy only when approved, cited, in its review
+    window — and cleared for the target market (G8).
+
+    Market rule: empty `jurisdictions` = worldwide clearance. A non-empty
+    list means the claim is usable ONLY in those markets; copy targeted at
+    any other market treats the claim as not-usable.
+    """
+    if claim.status != "approved" or not claim.source_url.strip():
+        return False
+    if is_expired(claim, today=today):
+        return False
+    if market:
+        cleared = [j.upper() for j in (claim.jurisdictions or [])]
+        if cleared and market.upper() not in cleared:
+            return False
+    return True
 
 
 def registry_phrases(path: Path | None = None) -> dict[str, list[str]]:

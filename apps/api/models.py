@@ -58,6 +58,8 @@ class RegistryClaim(BaseModel):
 
     A claim may only be used if status == 'approved', its review_by date has
     not passed, and it carries a human-checkable source citation.
+    jurisdictions lists the markets where the claim is cleared (['IN'] etc.);
+    empty/missing means worldwide.
     """
 
     claim_id: str
@@ -69,6 +71,7 @@ class RegistryClaim(BaseModel):
     status: Literal["approved", "restricted", "forbidden"]
     review_by: datetime | None = None
     notes: str = ""
+    jurisdictions: list[str] = Field(default_factory=list)
 
 
 class Concept(BaseModel):

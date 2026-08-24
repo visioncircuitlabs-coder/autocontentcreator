@@ -34,8 +34,13 @@ def run_loop(
     claims: list[Claim] | None = None,
     chat: ChatModel | None = None,
     organic: bool = True,
+    market: str | None = None,
 ) -> Draft:
-    """Hard rules + claims judge + AI craft review. Rewrite. Max rounds, then a person."""
+    """Hard rules + claims judge + AI craft review. Rewrite. Max rounds, then a person.
+
+    market (optional): target jurisdiction for per-market claim clearance (G8).
+    Falls back to the brief's market when the draft's brief is resolvable.
+    """
     if rewriter is None:
 
         def rewrite_fn(draft: Draft, reasons: list[str]) -> Draft:
@@ -44,10 +49,16 @@ def run_loop(
     else:
         rewrite_fn = rewriter
     claim_list = claims if claims is not None else load_claim_models()
+    if market is None and draft.brief_id:
+        from db import get_brief
+
+        brief = get_brief(draft.brief_id)
+        if brief is not None:
+            market = brief.market
     current = draft if draft.round >= 1 else draft.model_copy(update={"round": 1})
 
     while True:
-        rules = run_hard_rules(current, organic=organic)
+        rules = run_hard_rules(current, organic=organic, market=market)
         if rules:
             # Deterministic failure — skip judge + craft (saves 2 chat calls
             # per round) and go straight to rewrite with exact reasons.

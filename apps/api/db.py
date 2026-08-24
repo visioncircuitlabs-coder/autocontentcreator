@@ -150,17 +150,18 @@ def init_db() -> None:
             );
 
             CREATE TABLE IF NOT EXISTS claims_registry (
-                claim_id TEXT PRIMARY KEY,
-                text TEXT NOT NULL,
-                sku TEXT NOT NULL DEFAULT '*',
-                market TEXT NOT NULL DEFAULT 'IN',
-                source_url TEXT NOT NULL,
-                evidence_ref TEXT NOT NULL DEFAULT '',
-                status TEXT NOT NULL,
-                review_by TEXT,
-                notes TEXT NOT NULL DEFAULT '',
-                seeded_at TEXT
-            );
+                            claim_id TEXT PRIMARY KEY,
+                            text TEXT NOT NULL,
+                            sku TEXT NOT NULL DEFAULT '*',
+                            market TEXT NOT NULL DEFAULT 'IN',
+                            source_url TEXT NOT NULL,
+                            evidence_ref TEXT NOT NULL DEFAULT '',
+                            status TEXT NOT NULL,
+                            review_by TEXT,
+                            notes TEXT NOT NULL DEFAULT '',
+                            jurisdictions TEXT NOT NULL DEFAULT '[]',
+                            seeded_at TEXT
+                        );
 
             CREATE TABLE IF NOT EXISTS runs (
                 run_id TEXT PRIMARY KEY,
@@ -175,6 +176,12 @@ def init_db() -> None:
         )
         _ensure_column(
             conn, "drafts", "flag_human", "flag_human INTEGER NOT NULL DEFAULT 0"
+        )
+        _ensure_column(
+            conn,
+            "claims_registry",
+            "jurisdictions",
+            "jurisdictions TEXT NOT NULL DEFAULT '[]'",
         )
         conn.commit()
     finally:
@@ -767,8 +774,8 @@ def upsert_registry_claims(claims: list[RegistryClaim]) -> None:
             """
             INSERT OR REPLACE INTO claims_registry (
                 claim_id, text, sku, market, source_url, evidence_ref,
-                status, review_by, notes, seeded_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                status, review_by, notes, jurisdictions, seeded_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             [
                 (
@@ -781,6 +788,7 @@ def upsert_registry_claims(claims: list[RegistryClaim]) -> None:
                     c.status,
                     c.review_by.isoformat() if c.review_by else None,
                     c.notes,
+                    json.dumps(c.jurisdictions or []),
                     now,
                 )
                 for c in claims
@@ -819,6 +827,10 @@ def list_registry_claims() -> list[RegistryClaim]:
                     status=row["status"],
                     review_by=parsed,
                     notes=row["notes"] or "",
+                    jurisdictions=_json_load(
+                        row["jurisdictions"] if "jurisdictions" in row.keys() else "[]",
+                        [],
+                    ),
                 )
             )
         return out

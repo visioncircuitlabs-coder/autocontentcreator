@@ -95,7 +95,8 @@
       "evidence_ref": "fixtures/neutrogena/claims.json#reg-spf-protects",
       "status": "approved",
       "review_by": "2026-12-31",
-      "notes": "Sun-protection phrasing; review before next summer campaign.",
+      "jurisdictions": ["IN", "US"],
+      "notes": "Sun-protection phrasing; cleared IN + US only. EU needs Reg 655/2013 annex review.",
       "lookalikes": ["spf 50 protects", "broad spectrum spf protects"]
     },
     {

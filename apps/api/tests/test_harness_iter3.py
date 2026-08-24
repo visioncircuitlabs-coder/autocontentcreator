@@ -4,9 +4,23 @@ from __future__ import annotations
 
 import threading
 
+import pytest
+
 from harness import chat_wallet
 from harness.breaker import IMAGE_BREAKER, BreakerOpen, CircuitBreaker
 from harness.steps import current_run_id, new_run_id, set_run_id
+
+
+@pytest.fixture(autouse=True)
+def _closed_breakers():
+    """Order-proof: other tests may leave shared breakers OPEN mid-session."""
+    from harness.breaker import CHAT_BREAKER, IMAGE_BREAKER
+
+    CHAT_BREAKER.reset()
+    IMAGE_BREAKER.reset()
+    yield
+    CHAT_BREAKER.reset()
+    IMAGE_BREAKER.reset()
 
 
 def test_image_breaker_exists_and_opens():
