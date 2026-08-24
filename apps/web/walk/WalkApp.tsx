@@ -41,6 +41,7 @@ import {
   LOOK_SUB,
   LOOK_TITLE,
   LOOKING_STEPS,
+  memoryLine,
   MAKE_BUTTON,
   MAKING_STEPS,
   MAKE_TITLE,
@@ -533,9 +534,12 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
         <section className="panel" aria-labelledby="preview-title">
           <h2 id="preview-title">{PREVIEW_TITLE}</h2>
           {decision ? (
-            <p className="meta-line" role="status">
-              {decisionLine(decision.user, decision.verdict === "approve")}
-            </p>
+            <>
+              <p className="meta-line" role="status">
+                {decisionLine(decision.user, decision.verdict === "approve")}
+              </p>
+              <p className="quiet">{memoryLine(decision.verdict === "approve")}</p>
+            </>
           ) : null}
           {chosen ? (
             <div className="ig" aria-label="Phone preview, not live">

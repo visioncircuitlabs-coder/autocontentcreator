@@ -65,6 +65,13 @@ export function decisionLine(name: string, approved: boolean): string {
   return `${name} said ${approved ? "yes" : "no"} on this draft.`;
 }
 
+// The machine learns from every stamp. Say so plainly, once, at Preview.
+export function memoryLine(approved: boolean): string {
+  return approved
+    ? "Saved to brand memory: this pattern is now a winner."
+    : "Saved to brand memory: this reason is now an anti-pattern.";
+}
+
 export const SOURCE_LABELS: Record<string, string> = {
   gdelt: "News wire",
   news_rss: "Google News",
