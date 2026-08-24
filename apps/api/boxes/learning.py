@@ -209,8 +209,13 @@ def resolve_lessons_path() -> Path:
     return Path(base) / "lessons.md"
 
 
-def _parse_lessons(text: str) -> list[dict]:
-    """Extract active lesson dicts per the contract; never raises."""
+def _parse_all_lessons(text: str) -> list[dict]:
+    """Extract every parseable lesson dict per the contract; never raises.
+
+    Same fields as get_active_lessons returns, but ANY status passes
+    (active/draft/retired/...) as long as the block carries a non-empty
+    rule — callers doing coverage/dedupe work need retired rules too.
+    """
     lessons: list[dict] = []
     fields: dict[str, str] = {}
     lesson_id = ""
@@ -220,12 +225,11 @@ def _parse_lessons(text: str) -> list[dict]:
         if not lesson_id:
             return  # prose/garbage outside any "### les_" block
         rule = fields.get("rule", "").strip()
-        status = fields.get("status", "").strip()
-        if rule and status.lower() == "active":
+        if rule:
             lessons.append(
                 {
                     "id": lesson_id,
-                    "status": status.lower(),
+                    "status": fields.get("status", "").strip().lower(),
                     "scope": fields.get("scope", "").strip(),
                     "rule": rule,
                     "source": fields.get("source", "").strip(),
@@ -247,6 +251,15 @@ def _parse_lessons(text: str) -> list[dict]:
                 fields[key] = value.strip()  # unknown keys dropped; last wins
     flush()  # EOF ends the final block
     return lessons
+
+
+def _parse_lessons(text: str) -> list[dict]:
+    """Active-only view of _parse_all_lessons (the public contract)."""
+    return [
+        lesson
+        for lesson in _parse_all_lessons(text)
+        if lesson["status"] == "active"
+    ]
 
 
 def get_active_lessons(path: Path | None = None) -> list[dict]:
@@ -301,3 +314,74 @@ def learning_block(
         lines = "\n".join(f"- [{l['scope']}] {l['rule']}" for l in lessons)
         parts.append(f"<lessons>\n{lines}\n</lessons>")
     return "\n".join(parts), len(winners), len(avoid)
+
+
+# --- Lesson suggestions (machine-proposed, human-promoted) ---------------------
+#
+# Anti-patterns no lesson covers yet are candidates for a new rule. memory_store
+# writes them as status:"draft" blocks via append_draft_lesson(); a human then
+# promotes or retires them by editing lessons.md. Coverage is deliberately
+# crude but deterministic: an anti-pattern counts as covered when some 4-word
+# contiguous slice of it appears inside a lesson rule (or the texts match
+# outright) — good enough to stop re-suggesting what a rule already says.
+
+_COVERAGE_WINDOW = 4
+
+
+def _covered_by_rules(reason: str, rules: list[str]) -> bool:
+    """True when any 4 consecutive words of reason appear in some rule."""
+    reason_norm = normalize_text(reason)
+    if not reason_norm:
+        return True  # nothing to suggest anyway
+    words = reason_norm.split(" ")
+    windows = (
+        {" ".join(words[i : i + _COVERAGE_WINDOW]) for i in range(len(words) - 3)}
+        if len(words) >= _COVERAGE_WINDOW
+        else set()
+    )
+    for rule in rules:
+        rule_norm = normalize_text(rule)
+        if not rule_norm:
+            continue
+        if reason_norm == rule_norm:
+            return True
+        if any(window in rule_norm for window in windows):
+            return True
+    return False
+
+
+def get_lesson_suggestions(limit: int = 5) -> list[dict]:
+    """Top rejection reasons NOT covered by any existing lesson rule.
+
+    Counts are recomputed from list_track_record() exactly like
+    get_anti_patterns does internally (distilled reason preferred); coverage
+    is checked against every parseable lessons.md rule — active, draft AND
+    retired — so re-proposing something a human already retired is avoided.
+    Returns [{"reason", "count"}] ranked by count desc, then reason asc;
+    capped at `limit`. Deliberately uncached like get_active_lessons.
+    """
+    limit = max(1, int(limit))
+    counter: Counter[str] = Counter()
+    for row in list_track_record():
+        if (row.get("verdict") or "").strip().lower() != "reject":
+            continue
+        reason = (row.get("distilled") or row.get("reason") or "").strip()
+        if not reason:
+            continue
+        counter[normalize_text(reason)[:280]] += 1
+
+    try:
+        text = resolve_lessons_path().read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        text = ""
+    rules = [lesson["rule"] for lesson in _parse_all_lessons(text)]
+
+    ranked = sorted(counter.items(), key=lambda kv: (-kv[1], kv[0]))
+    suggestions: list[dict] = []
+    for reason, count in ranked:
+        if len(suggestions) >= limit:
+            break
+        if _covered_by_rules(reason, rules):
+            continue
+        suggestions.append({"reason": reason, "count": count})
+    return suggestions

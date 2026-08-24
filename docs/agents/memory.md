@@ -46,6 +46,17 @@ rebuilds.
   breaks because of a typo.
 - Active lessons ride into every caption-writing prompt inside `<lessons>`.
 
+## Draft lessons — the machine proposes, you dispose
+
+When rejections pile up around something no lesson covers yet, call
+`append_draft_lesson()` (or ask for lesson suggestions via
+`learning.get_lesson_suggestions()`) and the rule lands in `lessons.md` as
+`status: draft`. A draft changes nothing until a human flips one word —
+`draft` → `active`. Retired rules keep blocking duplicate proposals, so a
+dismissed suggestion stays dismissed. Every rebuild snapshots all five files
+into `.checkpoints/cp_NNN/` first (latest five kept), so any bad compounding
+is revertible.
+
 ## Where each idea came from
 
 | Idea | Borrowed from |

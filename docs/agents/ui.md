@@ -25,6 +25,7 @@ Words: `apps/web/desk/words.ts`. Map: `docs/conventions/words-we-use.md`.
 - **Make a post** = text factory only. Do not call Imagine here.
 - **Make the picture** after a version is selected. One photo for that `draft_id`. Then beat 4.
 - Yes/No stay disabled until name and why are non-empty (`canSubmitReview`). API also rejects blanks.
+- Every yes/no lands in brand memory (`data/memory/`); Preview says so in one quiet line. See [memory.md](memory.md).
 - Quiet sources: `News wire sent nothing back` (etc.), keep going.
 - 504 copy is **That took too long. Try again.** — not “that look took too long.” Factory and Imagine also sit behind the same proxy.
 - Client events (`logClient`) never block the walk.

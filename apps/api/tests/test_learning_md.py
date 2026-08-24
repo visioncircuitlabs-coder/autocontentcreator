@@ -17,9 +17,12 @@ the human-editable contract shared with boxes/memory_store.py:
 
 from __future__ import annotations
 
+from datetime import datetime, timedelta, timezone
+
 import pytest
 
 from boxes import learning
+from db import insert_track_record
 
 WELL_FORMED = """\
 # Brand Lessons
@@ -206,3 +209,76 @@ def test_learning_block_still_returns_empty_when_everything_empty():
     text, n_winners, n_avoid = learning.learning_block()
     assert text == ""
     assert (n_winners, n_avoid) == (0, 0)
+
+
+# --- get_lesson_suggestions ----------------------------------------------------
+
+
+BASE = datetime(2026, 8, 24, 10, 0, 0, tzinfo=timezone.utc)
+
+REASON_COVERED = "sounds like an ad not a friend"
+REASON_UNCOVERED_A = "emoji walls bury the message"
+REASON_UNCOVERED_B = "price shock in the first line"
+
+
+def _seed_reject(distilled: str, draft_id: str, minutes: int = 0) -> None:
+    """Route one rejection through the real SQLite write path."""
+    insert_track_record(
+        {
+            "draft_id": draft_id,
+            "decided_at": (BASE + timedelta(minutes=minutes)).isoformat(),
+            "user": "riya",
+            "verdict": "reject",
+            "reason": distilled,
+            "distilled": distilled,
+            "caption": f"caption {draft_id}",
+            "judge": None,
+            "sku": "DEMO-HYDRO-BOOST",
+            "market": "IN",
+            "flag_human": False,
+        }
+    )
+    learning.reset_learning_cache()
+
+
+def _write_lessons_rule(rule: str, status: str = "active") -> None:
+    lessons_md = learning.resolve_lessons_path()
+    lessons_md.parent.mkdir(parents=True, exist_ok=True)
+    lessons_md.write_text(
+        "# Brand Lessons\n\n"
+        f"### les_001\n- status: {status}\n- scope: global\n"
+        f"- rule: {rule}\n- source: human review\n",
+        encoding="utf-8",
+    )
+
+
+def test_get_lesson_suggestions_excludes_covered_includes_uncovered():
+    _seed_reject(REASON_COVERED, "dft_a1")
+    _seed_reject(REASON_COVERED, "dft_a2", minutes=1)
+    _seed_reject(REASON_UNCOVERED_B, "dft_b1", minutes=2)
+    _seed_reject(REASON_UNCOVERED_A, "dft_c1", minutes=3)
+    # Rule embeds a 4-word contiguous slice of REASON_COVERED verbatim.
+    _write_lessons_rule("Anything that sounds like an ad not a friend is out.")
+
+    suggestions = learning.get_lesson_suggestions()
+
+    assert suggestions == [
+        {"reason": REASON_UNCOVERED_A, "count": 1},
+        {"reason": REASON_UNCOVERED_B, "count": 1},
+    ], "the covered reason never comes back, uncovered ones do"
+    assert learning.get_lesson_suggestions(limit=1) == [
+        {"reason": REASON_UNCOVERED_A, "count": 1}
+    ]
+
+
+def test_get_lesson_suggestions_treats_draft_and_retired_rules_as_coverage():
+    _seed_reject(REASON_COVERED, "dft_r1")
+    for status in ("draft", "retired"):
+        _write_lessons_rule(
+            "Anything that sounds like an ad not a friend is out.", status=status
+        )
+        assert learning.get_lesson_suggestions() == []
+
+
+def test_get_lesson_suggestions_empty_when_no_rejections():
+    assert learning.get_lesson_suggestions() == []

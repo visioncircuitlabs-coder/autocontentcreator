@@ -297,3 +297,122 @@ def test_unwritable_memory_dir_raises_friendly_error(monkeypatch, tmp_path):
 
     with pytest.raises(ValueError, match="Could not write brand memory files"):
         memory_store.rebuild_all()
+
+
+# --- pre-rebuild checkpoints -----------------------------------------------------
+
+
+def _populate_memory_dir(mem_dir: Path) -> None:
+    """Give the memory dir all five .md files via the real write paths."""
+    _seed(_entry("dft_cp"))
+    memory_store.record_decision(_entry())
+    memory_store.ensure_seed_files()
+
+
+def test_rebuild_all_checkpoints_prior_files_before_rewrite(mem_dir):
+    _populate_memory_dir(mem_dir)
+    (mem_dir / "winners.md").write_text("STALE RENDER", encoding="utf-8")
+
+    result = memory_store.rebuild_all()
+
+    assert memory_store.list_checkpoints() == ["cp_001"]
+    saved = (mem_dir / ".checkpoints" / "cp_001" / "winners.md")
+    assert saved.read_text(encoding="utf-8") == "STALE RENDER"
+    assert (mem_dir / "winners.md").read_text(encoding="utf-8") != "STALE RENDER"
+    assert ".checkpoints" not in result["files"]
+
+
+def test_second_rebuild_gets_next_sequential_checkpoint(mem_dir):
+    _populate_memory_dir(mem_dir)
+
+    memory_store.rebuild_all()
+    memory_store.rebuild_all()
+
+    assert memory_store.list_checkpoints() == ["cp_001", "cp_002"]
+
+
+def test_checkpoint_pruning_keeps_only_latest_five_sorted(mem_dir):
+    _populate_memory_dir(mem_dir)
+
+    for _ in range(7):
+        memory_store.rebuild_all()
+
+    checkpoints = memory_store.list_checkpoints()
+    assert len(checkpoints) == 5
+    assert checkpoints == sorted(checkpoints)
+    assert checkpoints == ["cp_003", "cp_004", "cp_005", "cp_006", "cp_007"]
+    for pruned in ("cp_001", "cp_002"):
+        assert not (mem_dir / ".checkpoints" / pruned).exists()
+
+
+def test_rebuild_with_empty_memory_dir_creates_no_checkpoint(mem_dir):
+    result = memory_store.rebuild_all()
+
+    assert not (mem_dir / ".checkpoints").exists()
+    assert memory_store.list_checkpoints() == []
+    assert ".checkpoints" not in result["files"]
+
+
+# --- append_draft_lesson -----------------------------------------------------------
+
+
+def test_append_draft_lesson_appends_next_id_as_draft(mem_dir):
+    memory_store.ensure_seed_files()
+    new_id = memory_store.append_draft_lesson(
+        "Never open with a discount code.",
+        source="anti-pattern watcher",
+        scope="reels",
+    )
+
+    assert new_id == "les_002"
+    text = (mem_dir / "lessons.md").read_text(encoding="utf-8")
+    assert (
+        "\n### les_002\n"
+        "- status: draft\n"
+        "- scope: reels\n"
+        "- rule: Never open with a discount code.\n"
+        "- source: anti-pattern watcher\n"
+    ) in text
+
+    # Drafts are invisible to the active-only public parser...
+    assert [lesson["id"] for lesson in learning.get_active_lessons()] == ["les_001"]
+
+    # ...until a human promotes one by flipping status in the file.
+    (mem_dir / "lessons.md").write_text(
+        text.replace("### les_002\n- status: draft", "### les_002\n- status: active"),
+        encoding="utf-8",
+    )
+    assert [lesson["id"] for lesson in learning.get_active_lessons()] == [
+        "les_001",
+        "les_002",
+    ]
+
+
+def test_append_draft_lesson_dedupe_returns_existing_id_without_appending(mem_dir):
+    memory_store.ensure_seed_files()
+
+    first = memory_store.append_draft_lesson("Keep hooks under twelve words.")
+    duplicate = memory_store.append_draft_lesson("  keep   HOOKS under twelve words. ")
+    hits_active_seed = memory_store.append_draft_lesson(
+        "Open with the skin moment, never with the brand name."
+    )
+    retired_does_not_block = memory_store.append_draft_lesson("Gone.")
+
+    assert first == "les_002"
+    assert duplicate == first, "normalized rule match returns the existing id"
+    assert hits_active_seed == "les_001"
+    assert retired_does_not_block == "les_003", "retired rules don't block re-proposal"
+
+    text = (mem_dir / "lessons.md").read_text(encoding="utf-8")
+    assert text.count("### les_") == 3  # seed + exactly two drafts, no dupes
+
+
+def test_append_draft_lesson_unwritable_memory_dir_raises_friendly_error(
+    monkeypatch, tmp_path
+):
+    blocker = tmp_path / "blocker.file"
+    blocker.write_text("a file, not a directory", encoding="utf-8")
+    monkeypatch.setenv("MEMORY_DIR", str(blocker / "memory"))
+
+    with pytest.raises(ValueError, match="Could not write brand memory files"):
+        memory_store.append_draft_lesson("A rule that will never land.")
