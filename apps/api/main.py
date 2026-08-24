@@ -30,11 +30,13 @@ from db import (
     get_conn,
     get_draft,
     get_report,
+    get_run,
     init_db,
     list_concepts,
     list_drafts,
     list_queue,
     list_reports,
+    list_runs,
     list_scores,
     list_events,
     list_signals,
@@ -506,6 +508,66 @@ def get_draft_image(draft_id: str):
 @app.get("/queue")
 def get_queue():
     return list_queue()
+
+
+@app.get("/runs")
+def get_run_list(status: str | None = None, kind: str | None = None, limit: int = 100):
+    try:
+        from datetime import datetime, timezone
+
+        return list_runs(status=status, kind=kind, limit=limit, now=datetime.now(timezone.utc))
+    except ValueError as exc:
+        return _friendly(exc)
+
+
+@app.get("/runs/{run_id}")
+def get_one_run(run_id: str):
+    from datetime import datetime, timezone
+
+    run = get_run(run_id, now=datetime.now(timezone.utc))
+    if run is None:
+        return JSONResponse(
+            status_code=404,
+            content={"error": "That run was not found."},
+        )
+    return run
+
+
+@app.post("/runs/{run_id}/resume")
+def resume_one_run(run_id: str):
+    """Re-run a failed/interrupted pipeline. Idempotent stages skip safely."""
+    from datetime import datetime, timezone
+
+    from harness.resumer import resume_run
+
+    run = get_run(run_id, now=datetime.now(timezone.utc))
+    if run is None:
+        return JSONResponse(
+            status_code=404,
+            content={"error": "That run was not found."},
+        )
+    if run["status"] == "running":
+        return JSONResponse(
+            status_code=409,
+            content={"error": "That run is still going. Let it finish first."},
+        )
+    try:
+        with run_slot("interactive"):
+            return resume_run(run, chat=build_chat(), now=datetime.now(timezone.utc))
+    except ValueError as exc:
+        return _friendly(exc)
+    except Overloaded as exc:
+        return JSONResponse(
+            status_code=503,
+            headers={"Retry-After": str(exc.retry_after_s)},
+            content={"error": str(exc)},
+        )
+    except Exception:
+        logger.exception("run resume failed")
+        return JSONResponse(
+            status_code=500,
+            content={"error": "Could not restart that run. Please try again."},
+        )
 
 
 class KeyIn(BaseModel):
