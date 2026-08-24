@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import os
 import sqlite3
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from uuid import uuid4
 
@@ -711,6 +711,48 @@ def list_events(limit: int = 100) -> list[dict]:
         return out
     finally:
         conn.close()
+
+
+def get_step_ms_series(hours: float = 24) -> list[dict]:
+    """Parsed harness_step timing rows for the last `hours`.
+
+    One row per step execution: {"ts", "step", "ok", "ms"}. Feeds the SLO
+    percentiles in harness/slo.py — list_events() is capped and unfiltered,
+    so this walks only kind='harness_step' inside the window. Rows with a
+    malformed payload are skipped, never raise.
+    """
+    init_db()
+    cutoff = (datetime.now(timezone.utc) - timedelta(hours=max(0.0, hours))).isoformat()
+    conn = connect()
+    try:
+        rows = conn.execute(
+            "SELECT ts, payload FROM events"
+            " WHERE kind = 'harness_step' AND ts >= ? ORDER BY ts ASC",
+            (cutoff,),
+        ).fetchall()
+    finally:
+        conn.close()
+    out: list[dict] = []
+    for row in rows:
+        try:
+            payload = json.loads(row["payload"])
+        except (json.JSONDecodeError, TypeError):
+            continue
+        if not isinstance(payload, dict):
+            continue
+        step_name = payload.get("step")
+        ms = payload.get("ms")
+        if not isinstance(step_name, str) or not isinstance(ms, (int, float)):
+            continue
+        out.append(
+            {
+                "ts": row["ts"],
+                "step": step_name,
+                "ok": bool(payload.get("ok")),
+                "ms": ms,
+            }
+        )
+    return out
 
 
 def upsert_registry_claims(claims: list[RegistryClaim]) -> None:

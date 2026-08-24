@@ -18,20 +18,39 @@ apps/api/                 FastAPI engine
   main.py                 HTTP surface
   models.py               Signal, Score, TrendReport, Brief, Concept, Draft, Decision
   ports.py                TrendSource, ChatModel, ImageGen
-  db.py                   SQLite
+  db.py                   SQLite (signals, scores, reports, claims, briefs,
+                          concepts, drafts, decisions, events, track_record,
+                          api_keys, runs, claims_registry, idempotency_keys)
   obs.py                  JSONL events
   adapters/               gdelt, news_rss, reddit_json, grok_web, chat_litellm,
-                          image_imagine, image_http, image_stub
+                          image_imagine, image_http, image_stub, resilience
   boxes/                  one module per box + belt.py
+    auth.py               API keys + roles (viewer/approver/admin)
+    brand_pack.py         BRAND_SLUG → fixture pack loader
+    claims_registry.py    evidence-bound benefit claims
+    audit.py              provenance chain for a draft
+    evidence.py           hash-chain + manifest (tamper-evident exports)
+    image_budget.py       Grok $ cap gate
+    metrics.py            /metrics aggregation
+    learning.py           approval-memory → writer prompt
+    rubric.py             deterministic craft scorer v2
+    strategist/copywriter/judge/craft/loop/hard_rules/review/export/...
+  harness/                agent-harness primitives (no frameworks)
+    breaker.py            circuit breakers (chat + image)
+    steps.py              StepResult envelope, run-id contextvar
+    admission.py          bounded concurrency + 503 shedding
+    chat_wallet.py        token/$ accounting
+    resumer.py            failed-run resume
+    eval.py               golden-set evaluation
   fixtures/neutrogena/    unofficial brand pack
 apps/web/                 Next.js App Router
   app/page.tsx            WalkApp (the product)
   app/engine/[...path]    300s proxy → API
   walk/                   five-beat UI
-  desk/                   API client, words, review helpers, leftover desk pages
+  desk/                   API client, words, ops strip, review helpers
 infra/docker-compose.yml  api :8000, web :3050→3000
-data/                     demo.db, images/, exports/, logs/  (local, not source)
-docs/                     human + agent docs
+data/                     demo.db, images/, exports/, logs/, spend.jsonl (local)
+docs/                     human + agent docs; docs/bar/ = research bars
 ```
 
 Feature folders, not type folders, once new product code starts. Boxes already follow that: `boxes/copywriter.py`, not `services/`.
