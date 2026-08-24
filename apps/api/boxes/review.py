@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 from boxes.feedback import write_feedback
 from db import get_draft, insert_decision
 from models import Decision
+from obs import emit
 
 ALLOWED = {"approve", "reject"}
 
@@ -32,5 +33,11 @@ def decide(draft_id: str, user: str, verdict: str, reason: str) -> Decision:
         decided_at=datetime.now(timezone.utc),
     )
     insert_decision(decision)
-    write_feedback(decision, draft)
+    entry = write_feedback(decision, draft)
+    try:
+        from boxes import memory_store  # lazy: memory may not be wired yet
+
+        memory_store.record_decision(entry)
+    except Exception as exc:  # memory mirror must never fail an approval
+        emit("memory_mirror_fail", error=str(exc))
     return decision

@@ -24,6 +24,7 @@ WRITE_ROLES: dict[str, str] = {
     "/factory/run": "viewer",
     "/factory/image": "approver",
     "/review": "approver",
+    "/memory/rebuild": "admin",
     "/events": "viewer",
 }
 

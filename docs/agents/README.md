@@ -19,6 +19,7 @@ This folder is the **operating manual for coding agents**. Humans should start a
 | Not break the product | [invariants.md](invariants.md) |
 | Know what exists | [system.md](system.md) |
 | Map a box to files | [boxes.md](boxes.md) |
+| Understand brand memory (md files that learn) | [memory.md](memory.md) |
 | Change Look / Pick / Make / Preview | [ui.md](ui.md) |
 | Run, env, Docker, worktrees | [runtime.md](runtime.md) |
 | Avoid a known trap | [gotchas.md](gotchas.md) |

@@ -12,9 +12,11 @@ factory runs do not re-query SQLite on every call.
 
 from __future__ import annotations
 
+import os
 import re
 import time
 from collections import Counter
+from pathlib import Path
 
 from db import list_track_record
 
@@ -179,20 +181,111 @@ def get_hard_bans(limit: int = 20) -> list[dict]:
     return _cached(("bans", ""), compute)
 
 
+# --- Human-edited lessons (Markdown read path) --------------------------------
+#
+# boxes/memory_store.py maintains data/memory/lessons.md as a human-editable
+# lessons file; this side only READS it so hand edits flow back into the
+# writer prompt. Parsing is deliberately tolerant: a mangled file must never
+# break generation, so garbage between blocks is skipped silently.
+#
+# Contract (one block):
+#     ### les_001
+#     - status: active
+#     - scope: global
+#     - rule: One-line rule text here.
+#     - source: where it came from
+
+DEFAULT_MEMORY_DIR = "data/memory"
+
+_LESSON_FIELD_KEYS = frozenset({"status", "scope", "rule", "source"})
+
+
+def resolve_lessons_path() -> Path:
+    """Path of the Markdown lessons file ($MEMORY_DIR/lessons.md).
+
+    Same env-default convention as db.DEFAULT_SQLITE_PATH ("data/demo.db").
+    """
+    base = os.environ.get("MEMORY_DIR", DEFAULT_MEMORY_DIR)
+    return Path(base) / "lessons.md"
+
+
+def _parse_lessons(text: str) -> list[dict]:
+    """Extract active lesson dicts per the contract; never raises."""
+    lessons: list[dict] = []
+    fields: dict[str, str] = {}
+    lesson_id = ""
+
+    def flush() -> None:
+        nonlocal fields, lesson_id
+        if not lesson_id:
+            return  # prose/garbage outside any "### les_" block
+        rule = fields.get("rule", "").strip()
+        status = fields.get("status", "").strip()
+        if rule and status.lower() == "active":
+            lessons.append(
+                {
+                    "id": lesson_id,
+                    "status": status.lower(),
+                    "scope": fields.get("scope", "").strip(),
+                    "rule": rule,
+                    "source": fields.get("source", "").strip(),
+                }
+            )
+        fields, lesson_id = {}, ""
+
+    for raw_line in text.splitlines():
+        line = raw_line.strip()
+        if line.startswith("### les_"):
+            flush()  # previous block ends here (if any)
+            lesson_id = line[4:].strip()  # keep the full id, e.g. "les_001"
+        elif line.startswith("### "):
+            flush()  # any other heading just terminates the current block
+        elif line.startswith("- ") and ":" in line and lesson_id:
+            key, _, value = line[2:].partition(":")
+            key = key.strip().lower()
+            if key in _LESSON_FIELD_KEYS:
+                fields[key] = value.strip()  # unknown keys dropped; last wins
+    flush()  # EOF ends the final block
+    return lessons
+
+
+def get_active_lessons(path: Path | None = None) -> list[dict]:
+    """Active human-written lessons from the Markdown file.
+
+    Returns [{"id", "status", "scope", "rule", "source"}] for blocks whose
+    status is "active" (case-insensitive) and that carry a non-empty rule.
+    Blocks missing a rule are skipped; unparsable content is ignored
+    silently. Deliberately uncached — humans edit the file live and it is
+    tiny. Missing/unreadable file -> [].
+    """
+    lessons_path = path if path is not None else resolve_lessons_path()
+    try:
+        text = lessons_path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return []
+    return _parse_lessons(text)
+
+
 def learning_block(
     sku: str | None = None,
     *,
     winners_limit: int = 5,
     avoid_limit: int = 5,
 ) -> tuple[str, int, int]:
-    """`<winners>` + `<avoid>` prompt block. Returns (text, n_winners, n_avoid).
+    """`<winners>` + `<avoid>` + `<lessons>` prompt block.
 
-    Empty string when the ledger has nothing to teach yet — callers skip the
-    tags entirely rather than shipping empty scaffolding.
+    Returns (text, n_winners, n_avoid) — the counts cover only ledger rows;
+    human-written Markdown lessons (data/memory/lessons.md, edited live)
+    ride along as an appended <lessons> tag without changing the counts.
+
+    Empty string when neither the ledger nor the lessons file has anything
+    to teach — callers skip the tags entirely rather than shipping empty
+    scaffolding.
     """
     winners = get_exemplars(sku=sku, limit=winners_limit)
     avoid = get_anti_patterns(limit=avoid_limit)
-    if not winners and not avoid:
+    lessons = get_active_lessons()
+    if not winners and not avoid and not lessons:
         return "", 0, 0
     parts: list[str] = []
     if winners:
@@ -204,4 +297,7 @@ def learning_block(
     if avoid:
         lines = "\n".join(f"- {reason}" for reason in avoid)
         parts.append(f"<avoid>\n{lines}\n</avoid>")
+    if lessons:
+        lines = "\n".join(f"- [{l['scope']}] {l['rule']}" for l in lessons)
+        parts.append(f"<lessons>\n{lines}\n</lessons>")
     return "\n".join(parts), len(winners), len(avoid)

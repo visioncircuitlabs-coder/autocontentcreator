@@ -100,6 +100,12 @@ class ReviewIn(BaseModel):
 async def lifespan(app: FastAPI):
     setup_logging()
     init_db()
+    try:
+        from boxes.memory_store import ensure_seed_files  # lazy: may not exist yet
+
+        ensure_seed_files()
+    except Exception:
+        logger.warning("could not seed brand-memory files", exc_info=True)
     emit("api_start", chat=bool(build_chat()))
     yield
 
@@ -404,6 +410,23 @@ def review_draft(draft_id: str, body: ReviewIn):
         return JSONResponse(
             status_code=500,
             content={"error": "Could not save that decision. Please try again."},
+        )
+
+
+@app.post("/memory/rebuild")
+def rebuild_memory(request: Request):
+    """Ops: rebuild the readable brand-memory markdown from the ledger."""
+    try:
+        from boxes.memory_store import rebuild_all  # lazy: may not exist yet
+
+        return rebuild_all(preserve_lessons=True)
+    except ValueError as exc:
+        return _friendly(exc)
+    except Exception:
+        logger.exception("memory rebuild failed")
+        return JSONResponse(
+            status_code=500,
+            content={"error": "Could not rebuild brand memory. Please try again."},
         )
 
 

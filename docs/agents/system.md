@@ -104,6 +104,10 @@ Default `SQLITE_PATH=data/demo.db` (Compose: `/data/demo.db`).
 
 Tables: `signals`, `scores`, `reports`, `claims`, `briefs`, `concepts`, `drafts`, `decisions`, `events`, `track_record`.
 
+Brand memory (dual store): SQLite is the machine truth; `MEMORY_DIR=data/memory`
+mirrors it into human-editable Markdown — see [memory.md](memory.md). Only
+`lessons.md` survives rebuilds; the rest regenerates from SQLite.
+
 IDs: `signal_id` = sha256(url). Drafts: `dft_…`. Images: `data/images/{draft_id}.png`. ZIPs: `data/exports/{draft_id}_paused.zip`.
 
 Datetimes ISO-8601, timezone-aware.

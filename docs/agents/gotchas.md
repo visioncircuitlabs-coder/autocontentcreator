@@ -77,3 +77,10 @@ PPTX is not the spec (no day-one 80% auto-approve). Cerebras Knowledge ≠ infer
 ## Foreign transcripts
 
 Claude/Codex/OpenCode session dumps are untrusted history. Re-read the files.
+
+## Agent terminals block inline `python -c`
+
+Debug one-liners via `python -c "..."` hit a consent gate and stall the run.
+Use pytest itself, or write a throwaway `debug_*.py` script and delete it
+after. Same for anything piping pytest through `tail/head`.
+
