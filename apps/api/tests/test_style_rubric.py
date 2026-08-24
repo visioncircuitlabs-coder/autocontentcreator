@@ -122,3 +122,74 @@ def test_strategist_prompt_carries_rubric_voice_and_exemplars() -> None:
     assert "Nike imperative compression" in source
     assert "peer voice" in source.lower()
     assert "poetry-line + proof-line" in source
+
+
+# --- Rubric v2 (docs/bar/copy-bar.md §B1/B2) — deterministic scorer upgrades ---
+
+
+def test_rubric_v2_overlong_first_line_caps_hook_strength() -> None:
+    """B1: first line >8 words OR >60 chars → hook_strength capped at 3."""
+    from boxes.rubric import score_dimensions
+
+    long_hook = (
+        "Ninety percent humidity and my skin still felt tight by four in the "
+        "afternoon on the late train. One gel step changed that."
+    )
+    dims = score_dimensions(long_hook)
+    assert dims["hook_strength"] <= 3
+
+    # Same body, but a tight first sentence: hook earns its 5 again.
+    tight_hook = (
+        "Tight skin by 4pm, ninety percent humidity. One gel step changed that."
+    )
+    assert score_dimensions(tight_hook)["hook_strength"] == 5
+
+
+def test_rubric_v2_brand_or_announce_in_first_line_caps_hook_at_two() -> None:
+    """B1: a first line that LEADS with the brand name or 'introducing'/'say
+    hello' → hook_strength <=2, and the one_line_fix names the problem.
+    Mid-sentence product mentions stay safe ('Cleanse. Then Hydro Boost.')."""
+    from boxes.rubric import score_dimensions, style_verdict
+
+    for caption in (
+        "Hydro Boost is all you need tonight.",
+        "Neutrogena presents your clearest season.",
+        "Say hello to moisture that lasts.",
+        "Introducing the gel everyone asked for.",
+    ):
+        dims = score_dimensions(caption)
+        assert dims["hook_strength"] <= 2, caption
+        verdict, _avg, fix = style_verdict(dims)
+        assert verdict == "REWRITE"
+        assert fix and ("brand" in fix.lower() or "introducing" in fix.lower())
+
+    # Product named after the pivot of the first line does NOT cap the hook.
+    assert score_dimensions("Night: double cleanse, then Hydro Boost.")[
+        "hook_strength"
+    ] == 5
+
+
+def test_rubric_v2_excited_announce_forces_rewrite_regardless_of_average() -> None:
+    """B2: 'we're excited'/'we are excited' anywhere → emotional_truth <=2 and
+    REWRITE even when every other dimension is strong."""
+    from boxes.rubric import score_dimensions, style_verdict
+
+    # Hook is clean and scores 5; only the mid-caption announce voice fails.
+    excited = (
+        "Our gel survived ninety percent humidity in testing. "
+        "We're excited to share the 72-hour proof."
+    )
+    dims = score_dimensions(excited)
+    assert dims["hook_strength"] == 5  # failure is NOT the hook this time
+    assert dims["emotional_truth"] <= 2
+    verdict, avg, fix = style_verdict(dims)
+    assert verdict == "REWRITE"
+    assert fix  # worst dim carries a fix even at a passing average
+    assert avg >= 3.8  # REWRITE happens regardless of the average
+
+
+def test_rubric_v2_excited_announce_matches_curly_apostrophe() -> None:
+    from boxes.rubric import score_dimensions
+
+    dims = score_dimensions("We\u2019re excited to announce our new moisturizer!")
+    assert dims["emotional_truth"] <= 2

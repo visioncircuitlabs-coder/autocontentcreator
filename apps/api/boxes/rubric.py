@@ -26,6 +26,18 @@ RUBRIC_VOICE = (
 
 BANNED_OPENERS = ("introducing", "say hello to", "we're excited", "we are excited")
 
+# Rubric v2 deterministic tightenings (docs/bar/copy-bar.md §B1/B2).
+# B1 — the hook line: <=8 words AND <=60 chars; a first line that LEADS with
+# the brand name or an announcing word (F1 "brand-name opener") caps the hook
+# at 2, and the one_line_fix names it.
+HOOK_MAX_WORDS = 8
+HOOK_MAX_CHARS = 60
+BRAND_HOOK_NAMES = ("hydro boost", "neutrogena")
+ANNOUNCE_HOOK_WORDS = ("introducing", "say hello")
+# B2 — voice physics: corporate announce register fails ANYWHERE in the copy,
+# not just as an opener; caps emotional_truth at 2 (forces REWRITE).
+EXCITED_ANNOUNCE = ("we're excited", "we are excited")
+
 CLICHE_BLACKLIST = (
     "glow like never before",
     "unleash your",
@@ -106,7 +118,7 @@ DIMENSION_FIXES = {
     "hook_strength": "Rewrite the first line as a <=8-word command, contradiction, confession, or specific number — never the brand name or 'Introducing'.",
     "rhythm_economy": "Cut filler words and doubled adjectives; vary sentence length so every word is load-bearing.",
     "specificity": "Anchor each benefit with a number, ingredient concentration, timeframe, or sensory detail.",
-    "emotional_truth": "Root the emotion in a recognizable situation (3 PM webcam shine, monsoon commute) instead of adjectives.",
+    "emotional_truth": "Root the emotion in a recognizable situation (3 PM webcam shine, monsoon commute) instead of adjectives; drop the 'we're excited' announce voice for a peer confession.",
     "brand_fit": "Remove cliche hype lines; keep warm peer-level voice and at most one exclamation.",
 }
 
@@ -122,24 +134,33 @@ def _first_sentence(text: str) -> str:
 
 
 def score_dimensions(text: str) -> dict[str, int]:
-    """Deterministic 1-5 scores on the five craft dimensions."""
-    body = (text or "").strip()
+    """Deterministic 1-5 scores on the five craft dimensions.
+
+    Rubric v2 (copy-bar §B1/B2): first line over 8 words or 60 chars caps
+    hook_strength at 3; a first line that leads with the brand name or an
+    announcing word caps it at 2 (one_line_fix names it); "we're excited"
+    anywhere caps emotional_truth at 2, forcing REWRITE regardless of avg.
+    """
+    body = (text or "").strip().replace("\u2019", "'")  # curly-apostrophe norm
     lower = body.lower()
     sentences = [s.strip() for s in re.split(r"(?<=[.!?])\s+|\n+", lower) if s.strip()]
     hook = _first_sentence(body)
+    hook_lower = hook.lower()
     hook_words = len(hook.split())
 
-    # D1 hook strength
+    # D1 hook strength (B1)
     banned = any(lower.startswith(opener) for opener in BANNED_OPENERS)
-    brand_first = hook.lower().startswith(("hydro boost", "neutrogena"))
+    leads_with_brand_or_announce = hook_lower.startswith(
+        BRAND_HOOK_NAMES + ANNOUNCE_HOOK_WORDS
+    )
     if banned:
         hook_score = 1
-    elif brand_first:
+    elif leads_with_brand_or_announce:
         hook_score = 2
-    elif 0 < hook_words <= 8:
+    elif 0 < hook_words <= HOOK_MAX_WORDS and len(hook) <= HOOK_MAX_CHARS:
         hook_score = 5
     else:
-        hook_score = 3
+        hook_score = 3  # overlong first line: capped, never a 5 (B1)
 
     # D3 rhythm & economy
     fillers = sum(1 for w in FILLER_WORDS if f" {w}" in f" {lower}")
@@ -164,6 +185,8 @@ def score_dimensions(text: str) -> dict[str, int]:
     emotional = min(5, 3 + situations) if situations else 3
     if situations >= 2:
         emotional = 5
+    if any(p in lower for p in EXCITED_ANNOUNCE):
+        emotional = min(emotional, 2)  # B2 hard cap → min dim < 3 → REWRITE
 
     # D5 brand fit
     if find_cliches(body):

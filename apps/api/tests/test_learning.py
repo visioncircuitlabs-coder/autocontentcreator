@@ -76,3 +76,134 @@ def test_block_contains_winners_and_avoid_tags(desk_db):
     text, w, a = learning.learning_block()
     assert "<winners>" in text and "<avoid>" in text
     assert w >= 1 and a >= 1
+
+
+# --- Learning v2: hard-ban memory -------------------------------------------
+
+BANNED_CAPTION = "Night shift ends, gel goes on first. Dermatologist tested."
+
+
+def _concept(brief_id: str = "brf_x"):
+    from models import Concept
+
+    return Concept(
+        concept_id="con_learn",
+        brief_id=brief_id,
+        angle="humidity barrier",
+        persona="AC-commute millennial",
+        claim_safe_pain="post-AC tightness",
+        channel="instagram",
+        indic_register="hinglish",
+        idea="Monsoon commute tightness, not a disease story.",
+    )
+
+
+def _reject_twice(caption: str, reason_1: str, reason_2: str) -> None:
+    _record("dft_ban1", caption, "reject", "riya", reason_1)
+    _record("dft_ban2", caption, "reject", "arjun", reason_2)
+    learning.reset_learning_cache()
+
+
+def test_hard_bans_after_two_same_category_rejects(desk_db):
+    _reject_twice(BANNED_CAPTION, "off-brand: reads like an ad", "off-brand tone")
+    bans = learning.get_hard_bans()
+    match = [
+        b
+        for b in bans
+        if b["normalized"] == learning.normalize_text(BANNED_CAPTION)
+    ]
+    assert match, "two same-category rejections must hard-ban the caption"
+    assert match[0]["rejects"] == 2
+    assert match[0]["category"] == "off-brand"
+
+
+def test_single_or_mixed_category_rejects_do_not_ban(desk_db):
+    _record("dft_ban3", BANNED_CAPTION, "reject", "riya", "off-brand tone")
+    _record("dft_ban4", "Solo reject stays allowed.", "approve", "arjun", "fine")
+    learning.reset_learning_cache()
+    assert learning.get_hard_bans() == []
+
+    _reject_twice(BANNED_CAPTION, "too long for a post", "drug claim vibes")
+    assert learning.get_hard_bans() == [], "mixed categories must not hard-ban"
+
+
+def test_third_generation_filters_banned_chat_candidate(desk_db):
+    """Two rejects of the same caption -> the next generation attempt drops it."""
+    from boxes.copywriter import CopyOut, run_copywriter
+
+    _reject_twice(BANNED_CAPTION, "off-brand: reads like an ad", "off-brand tone")
+
+    class StubbornChat:
+        """Chat keeps returning the twice-rejected caption."""
+
+        def complete_json(self, system, user, schema):
+            assert schema is CopyOut
+            return CopyOut(captions=[BANNED_CAPTION, "A", "B"])
+
+    drafts = run_copywriter(_concept(), round=3, chat=StubbornChat())
+    banned_key = learning.normalize_text(BANNED_CAPTION)
+    produced = {learning.normalize_text(d.caption) for d in drafts}
+    assert banned_key not in produced, "banned caption must be filtered"
+    assert 2 <= len(drafts) <= 3, "templates must still fill the quota"
+
+
+def test_template_output_skips_hard_banned_caption(desk_db):
+    from boxes.copywriter import run_copywriter
+
+    first = run_copywriter(_concept(), round=1)
+    assert len(first) >= 2
+    victim = first[0].caption
+
+    _reject_twice(victim, "off-brand: reads like an ad", "off-brand again")
+    second = run_copywriter(_concept(), round=2)
+
+    produced = {learning.normalize_text(d.caption) for d in second}
+    assert learning.normalize_text(victim) not in produced
+    assert len(second) >= 2
+
+
+# --- Learning v2: degradation provenance ------------------------------------
+
+
+class _NoImpliedChat:
+    def complete_json(self, system, user, schema):
+        from boxes.judge import ImpliedClaimOut
+
+        return ImpliedClaimOut(implied=False)
+
+
+def test_judge_flags_missing_chat_as_degradation():
+    from boxes.judge import run_judge
+
+    result = run_judge(_draft("dft_deg1", "Gel first. Panic later."), [], chat=None)
+    assert result.produced_under_degradation is True
+    payload = result.model_dump()
+    assert payload["produced_under_degradation"] is True
+
+
+def test_judge_flags_open_breaker_as_degradation():
+    from harness.breaker import CHAT_BREAKER
+    from boxes.judge import run_judge
+
+    for _ in range(CHAT_BREAKER.threshold):
+        CHAT_BREAKER.record_failure()
+    try:
+        assert CHAT_BREAKER.state != "closed"
+        result = run_judge(
+            _draft("dft_deg2", "Gel first. Panic later."), [], chat=_NoImpliedChat()
+        )
+        assert result.produced_under_degradation is True
+    finally:
+        CHAT_BREAKER.reset()
+
+
+def test_judge_with_chat_and_closed_breaker_is_not_degraded():
+    from harness.breaker import CHAT_BREAKER
+    from boxes.judge import run_judge
+
+    CHAT_BREAKER.reset()
+    result = run_judge(
+        _draft("dft_deg3", "Gel first. Panic later."), [], chat=_NoImpliedChat()
+    )
+    assert CHAT_BREAKER.state == "closed"
+    assert result.produced_under_degradation is False

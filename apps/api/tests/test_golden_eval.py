@@ -29,6 +29,20 @@ def test_baseline_comparison_no_regression():
     assert cmp.get("delta", 0) >= 0, "deterministic scorer must never regress"
 
 
+def test_golden_set_includes_rubric_v2_cases():
+    """Rubric v2 golden additions: 3 new strong lines clear the bar; the B2
+    announce-voice weak line gets REWRITE with emotional_truth capped."""
+    report = evaluate()
+    names = {r["name"] for r in report["results"]}
+    v2_strong = ("strong-command-gym-metro", "strong-confession-webcam", "strong-numbered-restraint")
+    assert all(n in names for n in v2_strong), sorted(names)
+    assert len([n for n in names if not n.startswith("weak-")]) >= 9
+
+    excited = next(r for r in report["results"] if r["name"] == "weak-announce-excited")
+    assert excited["verdict"] == "REWRITE"
+    assert excited["dimensions"]["emotional_truth"] <= 2
+
+
 # --- chaos: one dead component must not take down neighbors ---
 
 def test_chaos_one_dead_source_does_not_kill_fetch():

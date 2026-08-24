@@ -228,6 +228,21 @@ def get_metrics() -> dict[str, object]:
     return collect_metrics()
 
 
+@app.get("/slo")
+def get_slo(hours: str | None = None):
+    """Per-step latency/error rollups + degraded-run gauge (bar G3 + E2).
+
+    Raw ?hours= is parsed by hand so bad input gets a friendly 400 JSON
+    instead of FastAPI's 422 wall of validation text.
+    """
+    try:
+        from harness.slo import slo_snapshot
+
+        return slo_snapshot(hours)
+    except ValueError as exc:
+        return _friendly(exc)
+
+
 class ClientEventIn(BaseModel):
     kind: str = Field(min_length=1, max_length=80)
     payload: dict[str, Any] = Field(default_factory=dict)
@@ -271,6 +286,11 @@ def radar_run(request: Request):
     cached, hit = idempotency.get_cached(key, "radar_run")
     if hit:
         return cached
+    from db import create_run, update_run
+    from harness.steps import new_run_id, set_run_id
+
+    run_row = create_run("radar", params={"trigger": "api"})
+    set_run_id(run_row["run_id"])
     try:
         with run_slot("interactive"):
             pack = run_radar(chat=build_chat())
@@ -282,10 +302,13 @@ def radar_run(request: Request):
         }
         emit("radar_end", n_reports=len(pack.reports))
         idempotency.store(key, "radar_run", payload)
+        update_run(run_row["run_id"], status="done")
         return payload
     except ValueError as exc:
+        update_run(run_row["run_id"], status="failed")
         return _friendly(exc)
     except Overloaded as exc:
+        update_run(run_row["run_id"], status="failed")
         return JSONResponse(
             status_code=503,
             headers={"Retry-After": str(exc.retry_after_s)},
@@ -293,6 +316,7 @@ def radar_run(request: Request):
         )
     except Exception:
         logger.exception("radar run failed")
+        update_run(run_row["run_id"], status="failed")
         return JSONResponse(
             status_code=500,
             content={"error": "Trend fetch hit a snag. Please try again."},
@@ -324,15 +348,23 @@ def factory_run(body: FactoryRunIn, request: Request):
     cached, hit = idempotency.get_cached(key, "factory_run")
     if hit:
         return cached
+    from db import create_run, update_run
+    from harness.steps import set_run_id
+
+    run_row = create_run("factory", params={"report_id": body.report_id})
+    set_run_id(run_row["run_id"])
     try:
         with run_slot("interactive"):
             result = run_factory(body.report_id, chat=build_chat())
         emit("factory_end", report_id=body.report_id)
         idempotency.store(key, "factory_run", result)
+        update_run(run_row["run_id"], status="done")
         return result
     except ValueError as exc:
+        update_run(run_row["run_id"], status="failed")
         return _friendly(exc)
     except Overloaded as exc:
+        update_run(run_row["run_id"], status="failed")
         return JSONResponse(
             status_code=503,
             headers={"Retry-After": str(exc.retry_after_s)},
@@ -340,6 +372,7 @@ def factory_run(body: FactoryRunIn, request: Request):
         )
     except Exception:
         logger.exception("factory run failed")
+        update_run(run_row["run_id"], status="failed")
         return JSONResponse(
             status_code=500,
             content={"error": "Could not build a post from that report. Please try again."},

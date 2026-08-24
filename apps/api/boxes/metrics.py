@@ -15,6 +15,7 @@ from datetime import datetime, timedelta, timezone
 from boxes.image_budget import budget_usd, spent_usd
 from db import connect, init_db
 from harness.breaker import CHAT_BREAKER
+from harness.slo import degraded_runs
 
 # Captured when this module first loads (≈ API process start).
 PROCESS_STARTED_AT = time.time()
@@ -114,4 +115,5 @@ def collect_metrics() -> dict:
         "breaker_state": CHAT_BREAKER.state,
         "chat_model": _chat_model(),
         "uptime_s": max(0, int(time.time() - PROCESS_STARTED_AT)),
+        "degraded_runs_24h": degraded_runs(),
     }

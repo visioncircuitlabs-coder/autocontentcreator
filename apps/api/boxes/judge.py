@@ -11,6 +11,7 @@ from pydantic import BaseModel, Field
 from boxes.hard_rules import has_disclaimer, load_disclaimer
 from boxes.product_facts import compare_claims
 from boxes.rubric import DIMENSIONS, find_cliches, score_dimensions, style_verdict
+from harness.breaker import CHAT_BREAKER
 from models import Claim, Draft
 from ports import ChatModel
 
@@ -43,6 +44,12 @@ class JudgeResult(BaseModel):
     rewrite: str | None = None
     implied_check: ImpliedCheck = "skipped"
     style: StyleScore | None = None
+    # Degradation provenance (competitive bar R7): True when this verdict was
+    # produced without full AI review capacity — no chat model at all, or the
+    # shared chat circuit breaker not closed (open / half-open). loop.py ships
+    # this field straight into draft.judge via model_dump(), so every stored
+    # payload records whether it was made under degraded conditions.
+    produced_under_degradation: bool = False
 
 
 def score_style(caption: str) -> StyleScore:
@@ -146,6 +153,18 @@ def _implied_pass(
         return ("skipped", None)
 
 
+def _degradation_active(chat: ChatModel | None) -> bool:
+    """True when this judging round runs without full AI review capacity.
+
+    Either no chat model was supplied (deterministic-only path — covers the
+    craft review too, which falls back to the same rubric) or the shared chat
+    circuit breaker is not closed, so chat passes are failing fast.
+    """
+    if chat is None:
+        return True
+    return CHAT_BREAKER.state != "closed"
+
+
 def run_judge(
     draft: Draft,
     claims: list[Claim],
@@ -212,4 +231,5 @@ def run_judge(
         rewrite=rewrite,
         implied_check=implied_check,
         style=style,
+        produced_under_degradation=_degradation_active(chat),
     )

@@ -119,6 +119,66 @@ def get_anti_patterns(limit: int = 5) -> list[str]:
     return _cached(("anti", ""), compute)
 
 
+def _reason_category(reason: str) -> str:
+    """Category = first word of the distilled (fallback raw) reason string.
+
+    'off-brand: reads like an ad' and 'OFF-BRAND tone' share a bucket;
+    punctuation on the token is ignored.
+    """
+    words = normalize_text(reason).split(" ")
+    if not words:
+        return ""
+    return words[0].strip(",:;.!?'\"()-—")
+
+
+def get_hard_bans(limit: int = 20) -> list[dict]:
+    """Captions whose normalized text was rejected 2+ times for one category.
+
+    Hard-ban memory (competitive bar R3): the prompt-level <avoid> block asks
+    nicely; this is the enforcement side. A caption that came back twice with
+    the same first-word rejection category must never be regenerated — callers
+    filter generated candidates against these normalized texts.
+    """
+    limit = max(1, int(limit))
+
+    def compute() -> list[dict]:
+        rejects: dict[str, dict] = {}
+        for row in list_track_record():
+            if (row.get("verdict") or "").strip().lower() != "reject":
+                continue
+            caption = (row.get("caption") or "").strip()
+            if not caption:
+                continue
+            reason = (row.get("distilled") or row.get("reason") or "").strip()
+            if not reason:
+                continue
+            key = normalize_text(caption)
+            entry = rejects.setdefault(
+                key, {"caption": caption[:_MAX_LINE], "categories": Counter()}
+            )
+            category = _reason_category(reason)
+            if not category:
+                continue
+            entry["categories"][category] += 1
+        bans: list[dict] = []
+        for key, entry in rejects.items():
+            top_category, count = entry["categories"].most_common(1)[0]
+            if count < 2:
+                continue
+            bans.append(
+                {
+                    "caption": entry["caption"],
+                    "normalized": key,
+                    "category": top_category,
+                    "rejects": count,
+                }
+            )
+        bans.sort(key=lambda b: (-b["rejects"], b["normalized"]))
+        return bans[:limit]
+
+    return _cached(("bans", ""), compute)
+
+
 def learning_block(
     sku: str | None = None,
     *,

@@ -31,6 +31,7 @@ METRIC_KEYS = {
     "last_radar_run_at",
     "last_factory_run_at",
     "uptime_s",
+    "degraded_runs_24h",
 }
 
 

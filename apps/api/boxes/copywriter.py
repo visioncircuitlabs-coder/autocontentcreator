@@ -17,7 +17,7 @@ from boxes.hard_rules import (
     without_disclaimer,
 )
 from boxes.product_facts import compare_claims
-from boxes.learning import learning_block
+from boxes.learning import get_hard_bans, learning_block, normalize_text
 from boxes.rubric import MODE_PROMPT_BLOCK, RUBRIC_VOICE, find_cliches, score_dimensions
 from boxes.strategist import contains_disease, make_concept
 from models import Brief, Concept, Draft
@@ -207,6 +207,20 @@ def _is_postable(text: str, disc: str) -> bool:
     return True
 
 
+def _hard_bans() -> set[str]:
+    """Normalized texts the ledger rejected 2+ times for one reason category.
+
+    Generation must never crash because the memory lookup failed, so any
+    error degrades to "no bans" with a warning.
+    """
+    try:
+        rows = get_hard_bans()
+    except Exception as exc:
+        logger.warning("hard-ban lookup failed; continuing without bans: %s", exc)
+        return set()
+    return {str(row.get("normalized") or "") for row in rows if row.get("normalized")}
+
+
 def _template_captions(
     concept: Concept,
     *,
@@ -214,6 +228,7 @@ def _template_captions(
     disc: str,
     product: str,
     reasons: list[str] | None = None,
+    banned: set[str] | None = None,
 ) -> list[str]:
     news = (concept.angle or "this skincare talk").split("\n")[0].strip()[:90]
     pain = concept.claim_safe_pain or "tight skin after AC"
@@ -223,11 +238,18 @@ def _template_captions(
         f"{pain} after a long AC day, na. {product} is {approved}. I keep it on the night shelf.",
         f"A night gel step after cleansing: {product}, {approved}. Absorbs before the lights go out.",
     ]
+    banned = banned or set()
     out: list[str] = []
     for caption in raw:
         finished = _finish_caption(caption, approved=approved, disc=disc, reasons=reasons)
-        if finished:
-            out.append(finished)
+        if not finished:
+            continue
+        # Hard-ban memory: a twice-rejected caption is never regenerated,
+        # not even from templates.
+        if normalize_text(finished) in banned:
+            logger.info("template output matches hard ban; dropped")
+            continue
+        out.append(finished)
     return out
 
 
@@ -442,8 +464,14 @@ def run_copywriter(
     approved = _approved_phrase(brief)
     disc = load_disclaimer()
     product = _product_label(brief.sku if brief else "DEMO-HYDRO-BOOST")
+    banned = _hard_bans()
     templates = _template_captions(
-        concept, approved=approved, disc=disc, product=product, reasons=reasons
+        concept,
+        approved=approved,
+        disc=disc,
+        product=product,
+        reasons=reasons,
+        banned=banned,
     )
 
     raw: list[str] = []
@@ -463,7 +491,10 @@ def run_copywriter(
     finished: list[str] = []
     for caption in raw:
         item = _finish_caption(caption, approved=approved, disc=disc, reasons=reasons)
-        if item and _is_postable(item, disc):
+        # Hard-ban check runs on the finished text (that is the space bans are
+        # recorded in) so chat candidates matching a twice-rejected caption
+        # are skipped too.
+        if item and _is_postable(item, disc) and normalize_text(item) not in banned:
             finished.append(item)
     templates = [row for row in templates if _is_postable(row, disc)]
 

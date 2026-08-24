@@ -41,12 +41,19 @@ def load_cases() -> list[EvalCase]:
         ("peer-voice", "skin freak-out season is here. mine too. gel first, panic later."),
         ("describe-dont-promise", "A water-gel that disappears in seconds. Matte finish, no residue."),
         ("contradiction-hook", "Driest day of the year. We sent our lightest cream."),
+        # Rubric v2 golden additions (copy-bar §2 modes, written to the bar):
+        # Nike-mode command / Glossier-mode confession-'I' / Aesop-mode restraint.
+        ("command-gym-metro", "Cleanse like you mean it. 2% salicylic survives the gym, the metro, the monsoon."),
+        ("confession-webcam", "i blamed my 3 pm webcam shine. it was my cleanser."),
+        ("numbered-restraint", "Seventy-two hours of hydration, tested in 90% humidity. Matte, never tight."),
     ]
     weak = [
         ("cliche-superlative", "Glow like never before with our revolutionary formula!"),
         ("brand-first", "Introducing new Hydro Boost, the best moisturizer for your skin."),
         ("vague-hype", "Elevate your skincare game with our amazing products today!"),
         ("empty-adjective", "Our incredible luxurious formula will transform your routine forever."),
+        # Rubric v2: B2 corporate announce register is a hard fail (anywhere).
+        ("announce-excited", "We're excited to announce our new moisturizer!"),
     ]
     cases = [
         EvalCase(

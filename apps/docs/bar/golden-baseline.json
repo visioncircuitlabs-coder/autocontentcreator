@@ -1,6 +1,6 @@
 {
-  "passed": 10,
-  "total": 10,
+  "passed": 14,
+  "total": 14,
   "rate": 1.0,
   "results": [
     {
@@ -130,6 +130,69 @@
       "caption": "Driest day of the year. We sent our lightest cream."
     },
     {
+      "name": "strong-command-gym-metro",
+      "ok": true,
+      "checks": {
+        "verdict": true,
+        "mean": true,
+        "no_cliche": true,
+        "clean": true
+      },
+      "mean": 5.0,
+      "verdict": "PASS",
+      "dimensions": {
+        "hook_strength": 5,
+        "rhythm_economy": 5,
+        "specificity": 5,
+        "emotional_truth": 5,
+        "brand_fit": 5
+      },
+      "cliches": [],
+      "caption": "Cleanse like you mean it. 2% salicylic survives the gym, the metro, the monsoon."
+    },
+    {
+      "name": "strong-confession-webcam",
+      "ok": true,
+      "checks": {
+        "verdict": true,
+        "mean": true,
+        "no_cliche": true,
+        "clean": true
+      },
+      "mean": 4.8,
+      "verdict": "PASS",
+      "dimensions": {
+        "hook_strength": 5,
+        "rhythm_economy": 5,
+        "specificity": 4,
+        "emotional_truth": 5,
+        "brand_fit": 5
+      },
+      "cliches": [],
+      "caption": "i blamed my 3 pm webcam shine. it was my cleanser."
+    },
+    {
+      "name": "strong-numbered-restraint",
+      "ok": true,
+      "checks": {
+        "verdict": true,
+        "mean": true,
+        "no_cliche": true,
+        "clean": true
+      },
+      "mean": 5.0,
+      "verdict": "PASS",
+      "dimensions": {
+        "hook_strength": 5,
+        "rhythm_economy": 5,
+        "specificity": 5,
+        "emotional_truth": 5,
+        "brand_fit": 5
+      },
+      "cliches": [],
+      "caption": "Seventy-two hours of hydration, tested in 90% humidity. Matte, never tight."
+    },
+    {
       "name": "weak-cliche-superlative",
       "ok": true,
       "checks": {
@@ -217,6 +280,27 @@
       },
       "cliches": [],
       "caption": "Our incredible luxurious formula will transform your routine forever."
+    },
+    {
+      "name": "weak-announce-excited",
+      "ok": true,
+      "checks": {
+        "verdict": true,
+        "mean": true,
+        "no_cliche": true,
+        "clean": true
+      },
+      "mean": 2.8,
+      "verdict": "REWRITE",
+      "dimensions": {
+        "hook_strength": 1,
+        "rhythm_economy": 4,
+        "specificity": 3,
+        "emotional_truth": 2,
+        "brand_fit": 4
+      },
+      "cliches": [],
+      "caption": "We're excited to announce our new moisturizer!"
     }
   ]
 }
