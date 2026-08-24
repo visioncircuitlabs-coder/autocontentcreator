@@ -124,8 +124,12 @@ def run_hard_rules(
     has_ad = bool(_AD_RE.search(caption))
     if organic and has_ad:
         reasons.append("organic demo forbids #ad")
-    if not organic and not has_ad:
-        reasons.append("paid placement requires #ad")
+    if not organic:
+        from boxes.disclosure import disclosure_violations
+
+        if not has_ad:
+            reasons.append("paid placement requires #ad")
+        reasons.extend(disclosure_violations(caption, market))
 
     if has_benefit_line(body) and not has_disclaimer(caption, disc):
         reasons.append("benefit line requires market disclaimer")

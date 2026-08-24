@@ -58,6 +58,14 @@ def run_loop(
     current = draft if draft.round >= 1 else draft.model_copy(update={"round": 1})
 
     while True:
+        if not organic:
+            # Paid posts: place the disclosure label deterministically before
+            # judging (G7). Idempotent — a compliant caption passes unchanged.
+            from boxes.disclosure import ensure_disclosure
+
+            fixed = ensure_disclosure(current.caption, market)
+            if fixed != current.caption:
+                current = current.model_copy(update={"caption": fixed})
         rules = run_hard_rules(current, organic=organic, market=market)
         if rules:
             # Deterministic failure — skip judge + craft (saves 2 chat calls
