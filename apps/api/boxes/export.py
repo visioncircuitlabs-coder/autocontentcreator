@@ -81,12 +81,50 @@ def export_pack(draft_id: str) -> Path:
         "note": "Paused preview pack. No autonomous publish.",
     }
     with zipfile.ZipFile(dest, "w", compression=zipfile.ZIP_DEFLATED) as zf:
-        zf.writestr("caption.txt", (draft.caption or "") + "\n")
-        zf.writestr("meta.json", json.dumps(meta, indent=2))
-        zf.writestr("preview.html", _preview_html(draft, image_name))
         audit = build_audit(draft.draft_id)
-        zf.writestr("audit.json", json.dumps(audit, indent=2, default=str))
-        zf.writestr("audit.html", render_audit_html(audit))
-        if draft.image_path and Path(draft.image_path).is_file():
+        # evidence chain: flatten audit sections into chained records, then
+        # re-emit audit.json with digests + a manifest over every file
+        chain_records = [
+            {"section": key, "content": value}
+            for key, value in sorted(audit.items())
+        ]
+        caption_bytes = ((draft.caption or "") + "\n").encode("utf-8")
+        meta_bytes = json.dumps(meta, indent=2).encode("utf-8")
+        preview_bytes = _preview_html(draft, image_name).encode("utf-8")
+        image_bytes = (
+            Path(draft.image_path).read_bytes()
+            if draft.image_path and Path(draft.image_path).is_file()
+            else None
+        )
+        files: dict[str, bytes] = {
+            "caption.txt": caption_bytes,
+            "meta.json": meta_bytes,
+            "preview.html": preview_bytes,
+        }
+        if image_bytes:
+            files[image_name] = image_bytes
+        from boxes.evidence import build_manifest, hash_chain_records, sign_manifest
+
+        chained = hash_chain_records(chain_records)
+        audit_chained = {**audit, "records": chained}
+        audit_bytes = json.dumps(audit_chained, indent=2, default=str).encode("utf-8")
+        files["audit.json"] = audit_bytes
+        manifest = sign_manifest(build_manifest(files, draft_id=draft.draft_id))
+        zf.writestr("caption.txt", caption_bytes)
+        zf.writestr("meta.json", meta_bytes)
+        zf.writestr("preview.html", preview_bytes)
+        zf.writestr("audit.json", audit_bytes)
+        zf.writestr(
+            "audit.html",
+            render_audit_html(audit)
+            + "<p class='meta'>Evidence chain head: "
+            + (chained[-1]["digest"] if chained else "n/a")
+            + "</p>",
+        )
+        if image_bytes:
             zf.write(str(draft.image_path), arcname=image_name)
+        zf.writestr(
+            "MANIFEST.json",
+            json.dumps(manifest, indent=2, default=str),
+        )
     return dest
