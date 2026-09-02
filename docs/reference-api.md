@@ -2,7 +2,7 @@
 
 FastAPI app: `apps/api/main.py`. Title `Content Machine`. CORS allows localhost/127.0.0.1 on ports **3000** and **3050**.
 
-Base URL for the walk: `http://localhost:3050/engine` (Next proxy, 300s). Direct: `http://127.0.0.1:8000`.
+Base URL for the walk: `http://localhost:3050/engine` (Next proxy, 660s). Direct: `http://127.0.0.1:8000`.
 
 Errors: JSON `{"error": "<friendly sentence>"}`. Typical status 400, 404, 429, 500, 502, 504. No stack traces.
 

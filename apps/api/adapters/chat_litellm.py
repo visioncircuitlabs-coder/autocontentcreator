@@ -8,12 +8,12 @@ import os
 
 from pydantic import BaseModel
 
-from adapters.resilience import is_transient, retry_call
+from adapters.resilience import is_timeout, is_transient, retry_call
 from harness.breaker import CHAT_BREAKER
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_CHAT_TIMEOUT_S = 90.0
+DEFAULT_CHAT_TIMEOUT_S = 180.0
 
 
 def chat_timeout_s() -> float:
@@ -24,20 +24,6 @@ def chat_timeout_s() -> float:
     except ValueError:
         value = DEFAULT_CHAT_TIMEOUT_S
     return max(1.0, value)
-
-
-def is_timeout(exc: Exception) -> bool:
-    """Slow completions. Copywriter retries these once; the adapter does not."""
-    if isinstance(exc, TimeoutError):
-        return True
-    try:
-        import httpx
-
-        if isinstance(exc, httpx.TimeoutException):
-            return True
-    except ImportError:
-        pass
-    return "timeout" in type(exc).__name__.lower()
 
 
 def _retry_chat(exc: Exception) -> bool:
@@ -88,7 +74,7 @@ class LiteLLMChat:
             )
 
         # One completion = one breaker trial. Timeouts are not retried here
-        # (copywriter retries once at 90s). 5xx still retries inside this call.
+        # (copywriter retries once at 180s). 5xx still retries inside this call.
         response = CHAT_BREAKER.call(lambda: retry_call(_call, retry_if=_retry_chat))
         from harness import chat_wallet
 

@@ -9,7 +9,7 @@ from pathlib import Path
 
 import httpx
 
-from adapters.resilience import retry_call
+from adapters.resilience import is_timeout, is_transient, retry_call
 from harness.breaker import IMAGE_BREAKER
 
 logger = logging.getLogger(__name__)
@@ -20,8 +20,27 @@ LEGACY_MODELS = frozenset({"grok-imagine-image"})
 ASPECT_RATIO = "3:4"  # xAI does not accept 4:5; art_director crop-covers to 1080×1350
 RESOLUTION = "2k"
 QUALITY = "medium"
-TIMEOUT_S = 90.0
+DEFAULT_IMAGE_TIMEOUT_S = 600.0
+TIMEOUT_S = DEFAULT_IMAGE_TIMEOUT_S  # default; live value is imagine_timeout_s()
+IMAGINE_RETRIES = 1  # one retry max; timeouts are not retried
 ERROR_BODY_LIMIT = 2000
+
+
+def imagine_timeout_s() -> float:
+    """Seconds for one Imagine HTTP call. Override with IMAGE_TIMEOUT_S."""
+    raw = (os.environ.get("IMAGE_TIMEOUT_S") or "").strip()
+    try:
+        value = float(raw) if raw else DEFAULT_IMAGE_TIMEOUT_S
+    except ValueError:
+        value = DEFAULT_IMAGE_TIMEOUT_S
+    return max(1.0, value)
+
+
+def _retry_imagine(exc: Exception) -> bool:
+    """5xx/connection only. A 10-minute timeout must not retry into a 20-minute wait."""
+    if is_timeout(exc):
+        return False
+    return is_transient(exc)
 
 
 def resolve_imagine_model(raw: str | None) -> str:
@@ -67,12 +86,15 @@ class ImagineImageGen:
             "quality": QUALITY,
             "response_format": "url",
         }
+        timeout = imagine_timeout_s()
         owns = self.client is None
-        client = self.client or httpx.Client(timeout=TIMEOUT_S, follow_redirects=True)
+        client = self.client or httpx.Client(timeout=timeout, follow_redirects=True)
         try:
 
             def _attempt():
-                response = client.post(IMAGINE_URL, json=payload, headers=headers)
+                response = client.post(
+                    IMAGINE_URL, json=payload, headers=headers, timeout=timeout
+                )
                 if response.status_code >= 400:
                     logger.warning(
                         "Imagine HTTP %s body=%s",
@@ -82,8 +104,19 @@ class ImagineImageGen:
                 response.raise_for_status()
                 return response.json()
 
-            body = retry_call(lambda: IMAGE_BREAKER.call(_attempt))
-            blob = _image_bytes(client, body)
+            # One generate = one breaker trial. Timeouts are not retried (10 min
+            # each). 5xx may retry once. Do not wrap retry around the breaker —
+            # that used to burn three strikes in one slow call.
+            body = IMAGE_BREAKER.call(
+                lambda: retry_call(
+                    _attempt,
+                    retries=IMAGINE_RETRIES,
+                    retry_if=_retry_imagine,
+                    jitter=False,
+                    sleep=lambda _s: None,
+                )
+            )
+            blob = _image_bytes(client, body, timeout=timeout)
             if not blob:
                 raise RuntimeError("Imagine returned no picture bytes.")
             dest.write_bytes(blob)
@@ -104,7 +137,9 @@ class ImagineImageGen:
                 client.close()
 
 
-def _image_bytes(client: httpx.Client, body: object) -> bytes:
+def _image_bytes(
+    client: httpx.Client, body: object, *, timeout: float | None = None
+) -> bytes:
     if not isinstance(body, dict):
         return b""
     rows = body.get("data")
@@ -118,7 +153,7 @@ def _image_bytes(client: httpx.Client, body: object) -> bytes:
         return base64.b64decode(raw_b64)
     url = first.get("url")
     if isinstance(url, str) and url.startswith("http"):
-        got = client.get(url)
+        got = client.get(url, timeout=timeout)
         got.raise_for_status()
         return got.content or b""
     return b""

@@ -36,7 +36,8 @@ Template: `.env.example`. Local: `.env` (gitignored).
 | `SQLITE_PATH` | SQLite file. Compose forces `/data/demo.db` |
 | `LOG_PATH` | JSONL. Compose `/data/logs/machine.jsonl` |
 | `CHAT_MODEL` | Default `xai/grok-4.6` |
-| `CHAT_TIMEOUT_S` | LiteLLM completion timeout. Default `90` |
+| `CHAT_TIMEOUT_S` | LiteLLM completion timeout. Default `180` |
+| `IMAGE_TIMEOUT_S` | Grok Imagine HTTP timeout. Default `600` (10 minutes) |
 | `XAI_API_KEY` | Grok chat + Imagine + optional Grok web fetch |
 | `GEMINI_API_KEY` / `GROQ_API_KEY` | Alternate chat |
 | `IMAGE_GEN_MODE` | `imagine` \| `stub` \| `http` |
@@ -89,9 +90,9 @@ Kill whatever already owns 8000 before restarting. Two uvicorns = stale overlay/
 
 ## Time budget
 
-The page waits **5 minutes** (`maxDuration = 300`, proxy abort 300s). Look + Make + Imagine all share that if they go through `/engine`.
+The page waits **11 minutes** (`maxDuration = 660`, proxy abort 660s) so a 10-minute Imagine call can finish. Look + Make + Imagine all share that if they go through `/engine`.
 
-What eats it: sequential Grok 20s timeouts, up to 5 scores, factory loop (writer + judge + craft × rounds), Imagine 90s. That is why photos are not made on Pick.
+What eats it: sequential Grok scores, factory loop (writer + judge + craft × rounds), Imagine up to 600s. That is why photos are not made on Pick.
 
 ## Data you must not commit
 

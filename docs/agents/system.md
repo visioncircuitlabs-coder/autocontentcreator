@@ -46,7 +46,7 @@ apps/api/                 FastAPI engine
   fixtures/lays/          unofficial Lay's pack (Chile Limón hero)
 apps/web/                 Next.js App Router
   app/page.tsx            WalkApp (the product)
-  app/engine/[...path]    300s proxy → API
+  app/engine/[...path]    660s proxy → API
   walk/                   five-beat UI
   desk/                   API client, words, ops strip, review helpers
 infra/docker-compose.yml  api :8000, web :3050→3000
@@ -77,7 +77,7 @@ paint_chosen         after a person picks a version
   compose            ImageGen then Pillow wordmark + disclaimer bar
 ```
 
-Caps: `MAX_DEEP_DIVES = 1`, `MAX_FACTORY_CONCEPTS = 1`, `MAX_CHAT_SCORES = 5`, chat timeout 20s, Imagine timeout 90s, Next proxy 300s, radar fetch rate 6/min/host.
+Caps: `MAX_DEEP_DIVES = 1`, `MAX_FACTORY_CONCEPTS = 1`, `MAX_CHAT_SCORES = 5`, chat timeout 180s, Imagine timeout 600s, Next proxy 660s, radar fetch rate 6/min/host.
 
 ## Ports
 

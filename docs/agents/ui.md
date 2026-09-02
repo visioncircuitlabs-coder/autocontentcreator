@@ -32,7 +32,7 @@ Words: `apps/web/desk/words.ts`. Map: `docs/conventions/words-we-use.md`.
 
 ## Why delaying the photo does not weaken Pick
 
-Pick and caption judges are **text**. Imagine is a later render. Do not “help” ranking by generating three photos up front (that is what blew the 5-minute page budget).
+Pick and caption judges are **text**. Imagine is a later render. Do not “help” ranking by generating three photos up front (that is what blew the page budget).
 
 ## Leftover desk routes
 

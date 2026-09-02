@@ -2,9 +2,9 @@ import { NextRequest } from "next/server";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
-export const maxDuration = 300;
+export const maxDuration = 660;
 
-const PROXY_MS = 300_000;
+const PROXY_MS = 660_000;
 const SKIP_REQ = new Set(["host", "connection", "content-length"]);
 const SKIP_RES = new Set(["connection", "transfer-encoding"]);
 

@@ -25,6 +25,20 @@ _TRANSIENT_NAMES = {
 }
 
 
+def is_timeout(exc: Exception) -> bool:
+    """Slow upstream. Callers may count these as one failure; do not retry them at a 10-minute budget."""
+    if isinstance(exc, TimeoutError):
+        return True
+    try:
+        import httpx
+
+        if isinstance(exc, httpx.TimeoutException):
+            return True
+    except ImportError:
+        pass
+    return "timeout" in type(exc).__name__.lower()
+
+
 def is_transient(exc: Exception) -> bool:
     """True only for timeouts, connection failures, and 5xx. Never 4xx."""
     if isinstance(exc, (TimeoutError, ConnectionError, OSError)):

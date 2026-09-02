@@ -11,7 +11,8 @@ services:
       SQLITE_PATH: /data/demo.db
       MEMORY_DIR: /data/memory
       CHAT_MODEL: ${CHAT_MODEL:-xai/grok-4.6}
-      CHAT_TIMEOUT_S: ${CHAT_TIMEOUT_S:-90}
+      CHAT_TIMEOUT_S: ${CHAT_TIMEOUT_S:-180}
+      IMAGE_TIMEOUT_S: ${IMAGE_TIMEOUT_S:-600}
       XAI_API_KEY: ${XAI_API_KEY:-}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       GROQ_API_KEY: ${GROQ_API_KEY:-}

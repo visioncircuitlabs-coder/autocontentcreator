@@ -60,7 +60,7 @@ SQLite lives at `./data/demo.db`. Compose mounts `./data` into the API as `/data
 | `GEMINI_API_KEY` / `GROQ_API_KEY` | Alternate chat. |
 | `IMAGE_GEN_MODE` | `imagine` (Grok Imagine), `stub` (Pillow card), or `http` (paste `IMAGE_GEN_URL`). Example file defaults to `imagine`. |
 | `IMAGE_GEN_MODEL` | `grok-imagine-image-2.0` when mode is imagine. |
-| `NEXT_PUBLIC_API_URL` | Browser → API. Walk uses `/engine` (Next proxy, 5 minutes). |
+| `NEXT_PUBLIC_API_URL` | Browser → API. Walk uses `/engine` (Next proxy, 11 minutes). |
 
 Paid trend/research/image vendors are **not** required. Do not put Firecrawl, Brandwatch, Recraft, or similar keys in `.env` for this demo.
 
