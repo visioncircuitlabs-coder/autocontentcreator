@@ -38,11 +38,12 @@ Model `grok-imagine-video-1.5`, `duration: 5` (API default is 8 if omitted), `as
 - Video is a dedicated step. `run_factory` does not film.
 - `POST /factory/video` requires a campaign still (`draft.image_path` on disk, not under `fixtures/`).
 - Happy path is image-to-video from that composed still as the first frame.
+- The still is a designed campaign ad (product hero, burst composition, graphic type). Wordmark and legal bar stay in the code overlay. Video freezes that layout and only adds product motion.
+- Neutrogena motion is the water-gel jar. Chile Limón (if that SKU appears) is lime + chilli chips, never jalapeño, never extra LAY'S wordmarks. Do not take the Lays PR.
 - Brand names, claims, and the disclaimer stay out of the **video prompt**.
 - Overlay after generate, always, so the legal line cannot warp away during motion.
 - Image spend and video spend are separate caps on the same `spend.jsonl`.
 - Stub + ffmpeg loops the campaign still into a walkable H.264 mp4 when Imagine is off.
-- Neutrogena motion is the water-gel jar. Do not bake Lay's chip-spill copy into this fixture.
 
 ## Files
 

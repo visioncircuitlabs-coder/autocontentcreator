@@ -25,8 +25,11 @@ def test_ad_prompt_is_bright_feed_not_night_film() -> None:
     assert "white" in lower and "lid" in lower
     assert "night window" not in lower
     assert "double cleanse after ac" not in lower
-    assert "no text" in lower
+    assert "campaign type" in lower or "headline" in lower
+    assert "burst" in lower
     assert "no logo" in lower
+    assert "disclaimer" in lower
+    assert "neutrogena" not in lower
     assert "bathroom" in lower or "air-con" in lower
 
 
@@ -38,7 +41,7 @@ def test_video_prompt_is_product_true_and_unlocked() -> None:
     )
     lower = prompt.lower()
     assert "five-second" in lower or "five second" in lower
-    assert "jar" in lower
+    assert "jar" in lower or "lid" in lower
     assert "water gel" in lower or "hyaluronic" in lower
     assert "first frame" in lower or "campaign still" in lower
     assert "frozen" in lower or "must not wander" in lower
@@ -51,6 +54,22 @@ def test_video_prompt_is_product_true_and_unlocked() -> None:
     assert "chip" not in lower
     assert "lays" not in lower
     assert "jalapeño" not in lower and "jalapeno" not in lower
+
+
+def test_chile_limon_video_is_lime_chilli_not_jalapeno() -> None:
+    from boxes.visual import video_prompt, visual_prompt
+
+    draft = _draft("Chile Limon crunch after the match.")
+    still = visual_prompt(draft).lower()
+    clip = video_prompt(draft).lower()
+    assert "lime" in still and "chilli" in still
+    assert "chip" in clip
+    assert "lime" in clip and "chilli" in clip
+    assert "jalapeño" not in still and "jalapeno" not in still
+    assert "jalapeño" not in clip and "jalapeno" not in clip
+    assert "lays" not in still
+    assert "lays" not in clip
+    assert "frozen" in clip
 
 
 def test_monsoon_caption_stays_bright() -> None:

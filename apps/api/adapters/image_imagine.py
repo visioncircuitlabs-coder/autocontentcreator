@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 IMAGINE_URL = "https://api.x.ai/v1/images/generations"
 DEFAULT_MODEL = "grok-imagine-image"
-TIMEOUT_S = 90.0
+TIMEOUT_S = 180.0
 
 
 class ImagineImageGen:

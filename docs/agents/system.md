@@ -84,7 +84,7 @@ film_chosen          after the still — refuses if there is no campaign still
   compose_video      image-to-video from the still, then ffmpeg overlay of the coded legal sheet
 ```
 
-Caps: `MAX_DEEP_DIVES = 1`, `MAX_FACTORY_CONCEPTS = 1`, `MAX_CHAT_SCORES = 5`, chat timeout 20s, Imagine still timeout 90s, Imagine video poll 900s every 5s, Next proxy 900s, radar fetch rate 6/min/host.
+Caps: `MAX_DEEP_DIVES = 1`, `MAX_FACTORY_CONCEPTS = 1`, `MAX_CHAT_SCORES = 5`, chat timeout 20s, Imagine still timeout 180s, Imagine video poll 900s every 5s, Next proxy 900s, radar fetch rate 6/min/host.
 
 ## Ports
 
