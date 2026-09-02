@@ -539,6 +539,7 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
                   muted
                   playsInline
                   loop
+                  aria-label="Short product video, not live"
                   onError={() => setVideoBroken(true)}
                 />
               ) : chosen.image_path && !imgBroken ? (
@@ -638,6 +639,7 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
                     playsInline
                     loop
                     autoPlay
+                    aria-label="Short product video, not live"
                     onError={() => setVideoBroken(true)}
                   />
                 ) : imgBroken ? (
