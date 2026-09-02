@@ -39,16 +39,18 @@ def test_video_prompt_is_product_true_and_unlocked() -> None:
     lower = prompt.lower()
     assert "five-second" in lower or "five second" in lower
     assert "jar" in lower
-    assert "water gel" in lower or "water-gel" in lower
+    assert "water gel" in lower or "hyaluronic" in lower
     assert "first frame" in lower or "campaign still" in lower
-    assert "no new text" in lower or "no text" in lower
-    assert "no extra logo" in lower or "no logo" in lower
-    assert "no new legal disclaimer" in lower or "no legal disclaimer" in lower
+    assert "frozen" in lower or "must not wander" in lower
+    assert "burst" in lower
+    assert "legal bar" in lower
+    assert "watermark" in lower
     assert "neutrogena" not in lower
     assert "double cleanse after ac" not in lower
     assert "dermatologist tested" not in lower
     assert "chip" not in lower
     assert "lays" not in lower
+    assert "jalapeño" not in lower and "jalapeno" not in lower
 
 
 def test_monsoon_caption_stays_bright() -> None:

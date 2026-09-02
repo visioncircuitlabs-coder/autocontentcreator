@@ -34,17 +34,15 @@ def visual_prompt(draft: Draft) -> str:
 
 
 def video_prompt(draft: Draft) -> str:
-    """Motion from the campaign still. Do not ask the model to paint marks or legal bars."""
+    """I2V from the finished still. Layout frozen. Product motion only. No legal bar from the model."""
     light = lighting_from_caption(draft.caption or "")
     return (
-        "Five-second Instagram beauty product video, vertical 3:4, "
-        "image-to-video from the campaign still as the first frame. "
-        "Keep that same clear jar of aqua-blue hyaluronic water gel with a white screw lid. "
-        "The lid eases a quarter turn, a slow ribbon of gel wells at the rim, "
-        "dew beads drift, a catch-light slides across the glass. No cuts. "
-        "Jar stays the hero, centered on pale wet marble. "
-        f"{light}. Sharp, clean, dewy, premium drugstore skincare. "
-        "No people, no hands, no new text, no letters, no numbers, no logo, "
-        "no claims on packaging, no brand name painted onto the lid, "
-        "no new legal disclaimer, no on-screen caption, no subtitle, no voiceover."
+        "Five-second image-to-video from the finished campaign still as the first frame, "
+        "vertical 3:4. Keep the layout frozen: the jar, empty margins, lighting, and any "
+        "type or marks already in the still must not wander, warp, or be redrawn. "
+        "Do not add new headlines, no logo, no watermarks including a Grok watermark, and no legal bar. "
+        "Motion only: the white lid unscrews, aqua hyaluronic water gel bursts and ribbons "
+        "toward the camera in slow appetizing motion, dew and light particles, slight camera push. "
+        "No cuts, no people, no hands, no voiceover, no subtitles. "
+        f"{light}."
     )

@@ -174,6 +174,7 @@ def test_imagine_video_is_image_to_video_from_still(
     from adapters.video_imagine import (
         POLL_BUDGET_S,
         POLL_INTERVAL_S,
+        POLL_TIMEOUT_S,
         SUBMIT_TIMEOUT_S,
         ImagineVideoGen,
     )
@@ -186,6 +187,7 @@ def test_imagine_video_is_image_to_video_from_still(
     assert POLL_BUDGET_S == 900.0
     assert POLL_INTERVAL_S == 5.0
     assert SUBMIT_TIMEOUT_S == 60.0
+    assert POLL_TIMEOUT_S == 60.0
 
     monkeypatch.setenv("XAI_API_KEY", "sk-test")
     monkeypatch.setenv("VIDEO_BUDGET_USD", "2.00")

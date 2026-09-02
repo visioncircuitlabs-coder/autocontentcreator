@@ -1,4 +1,13 @@
-"""Grok Imagine video. Async submit + poll. Image-to-video from the campaign still."""
+"""Grok Imagine video. Async submit + poll. Image-to-video from the campaign still.
+
+Official API (fetched 2026-09-02), not the 90s sync image adapter:
+- https://docs.x.ai/developers/model-capabilities/video/generation
+- https://docs.x.ai/developers/rest-api-reference/inference/videos
+- https://docs.x.ai/developers/models/grok-imagine-video-1.5
+
+POST /v1/videos/generations → {request_id}; poll GET /v1/videos/{request_id}
+every 5s for up to 900s. HTTP timeouts on submit/poll/download are 60s.
+"""
 
 from __future__ import annotations
 
