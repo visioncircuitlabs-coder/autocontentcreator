@@ -86,14 +86,16 @@ def video_prompt(draft: Draft) -> str:
     )
     if is_chile_limon_pack(draft):
         motion = (
-            "Motion only: the pack flexes, the top opens, chile-limon chips tumble toward "
-            "the camera with lime zest and chilli dust in slow appetizing burst. "
+            "Motion only: the bag flexes, the top opens or tears, chips tumble and spill "
+            "toward the camera in slow appetizing motion, lime zest and chilli dust. "
+            "Not a static bag-on-table loop. No extra wordmark. "
             "No cuts, no people, no hands, no voiceover, no subtitles. "
         )
     else:
         motion = (
-            "Motion only: the white lid unscrews, aqua hyaluronic water gel bursts and ribbons "
-            "toward the camera in slow appetizing motion, dew and light particles, slight camera push. "
-            "No cuts, no people, no hands, no voiceover, no subtitles. "
+            "Motion only: this pack is the jar — the white lid unscrews, aqua hyaluronic "
+            "water gel bursts and ribbons toward the camera in slow appetizing motion, "
+            "dew and light particles, slight camera push. Not a static product-on-table loop. "
+            "No extra wordmark. No cuts, no people, no hands, no voiceover, no subtitles. "
         )
     return freeze + motion + f"{light}."

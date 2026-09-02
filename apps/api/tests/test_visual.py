@@ -46,6 +46,7 @@ def test_video_prompt_is_product_true_and_unlocked() -> None:
     assert "first frame" in lower or "campaign still" in lower
     assert "frozen" in lower or "must not wander" in lower
     assert "burst" in lower
+    assert "static" in lower
     assert "legal bar" in lower
     assert "watermark" in lower
     assert "neutrogena" not in lower
@@ -64,6 +65,9 @@ def test_chile_limon_video_is_lime_chilli_not_jalapeno() -> None:
     clip = video_prompt(draft).lower()
     assert "lime" in still and "chilli" in still
     assert "chip" in clip
+    assert "tumble" in clip or "spill" in clip
+    assert "flex" in clip or "tear" in clip or "open" in clip
+    assert "static" in clip
     assert "lime" in clip and "chilli" in clip
     assert "jalapeño" not in still and "jalapeno" not in still
     assert "jalapeño" not in clip and "jalapeno" not in clip
