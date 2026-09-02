@@ -5,7 +5,14 @@ worktrees/
 # Local agent / scraper caches
 .claude/
 .firecrawl/
-.grok/
+.grok/*
+!.grok/skills/
+!.grok/skills/**
+!.grok/hooks/
+!.grok/hooks/**
+.hermes/
+.cache/
+.npm-cache/
 
 # Secrets and local env
 .env
