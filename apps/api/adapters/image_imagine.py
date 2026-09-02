@@ -15,8 +15,21 @@ from harness.breaker import IMAGE_BREAKER
 logger = logging.getLogger(__name__)
 
 IMAGINE_URL = "https://api.x.ai/v1/images/generations"
-DEFAULT_MODEL = "grok-imagine-image"
+DEFAULT_MODEL = "grok-imagine-image-2.0"
+LEGACY_MODELS = frozenset({"grok-imagine-image"})
+ASPECT_RATIO = "3:4"  # xAI does not accept 4:5; art_director crop-covers to 1080×1350
+RESOLUTION = "2k"
+QUALITY = "medium"
 TIMEOUT_S = 90.0
+ERROR_BODY_LIMIT = 2000
+
+
+def resolve_imagine_model(raw: str | None) -> str:
+    """Pin Imagine to 2.0. Stale IMAGE_GEN_MODEL=grok-imagine-image still works."""
+    token = (raw or "").strip()
+    if not token or token in LEGACY_MODELS:
+        return DEFAULT_MODEL
+    return token
 
 
 class ImagineImageGen:
@@ -29,7 +42,8 @@ class ImagineImageGen:
     ) -> None:
         self.client = client
         self.key = key if key is not None else os.environ.get("XAI_API_KEY", "")
-        self.model = (model or os.environ.get("IMAGE_GEN_MODEL") or DEFAULT_MODEL).strip()
+        env_model = os.environ.get("IMAGE_GEN_MODEL") if model is None else model
+        self.model = resolve_imagine_model(env_model)
 
     def generate(self, prompt: str, out_path: Path) -> Path:
         from boxes.image_budget import BudgetExceeded, record_spend, spend_gate
@@ -48,7 +62,9 @@ class ImagineImageGen:
             "model": self.model,
             "prompt": prompt,
             "n": 1,
-            "aspect_ratio": "4:5",
+            "aspect_ratio": ASPECT_RATIO,
+            "resolution": RESOLUTION,
+            "quality": QUALITY,
             "response_format": "url",
         }
         owns = self.client is None
@@ -57,6 +73,12 @@ class ImagineImageGen:
 
             def _attempt():
                 response = client.post(IMAGINE_URL, json=payload, headers=headers)
+                if response.status_code >= 400:
+                    logger.warning(
+                        "Imagine HTTP %s body=%s",
+                        response.status_code,
+                        (response.text or "")[:ERROR_BODY_LIMIT],
+                    )
                 response.raise_for_status()
                 return response.json()
 
@@ -68,7 +90,12 @@ class ImagineImageGen:
             record_spend(0.02)  # only successful images cost
             return dest
         except httpx.HTTPStatusError as exc:
-            logger.warning("Imagine HTTP failed: %s", exc)
+            extra = ""
+            try:
+                extra = (exc.response.text or "")[:ERROR_BODY_LIMIT]
+            except Exception:
+                extra = ""
+            logger.warning("Imagine HTTP failed: %s body=%s", exc, extra)
             raise RuntimeError(
                 "Grok Imagine did not return a picture. Check the key and try Make a post again."
             ) from exc

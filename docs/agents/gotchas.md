@@ -20,7 +20,7 @@ If they fight, **this worktree + `docs/agents/invariants.md` win.**
 
 ## Imagine vs stub
 
-`.env` can say `IMAGE_GEN_MODE=stub` while uvicorn was launched with `imagine`. Restart without the export → Pillow card, not Grok. `.env.example` is `imagine`. Imagine needs `XAI_API_KEY`. Failures fall back to stub; the user still sees *a* picture.
+`.env` can say `IMAGE_GEN_MODE=stub` while uvicorn was launched with `imagine`. Restart without the export → Pillow card, not Grok. `.env.example` is `imagine`. Imagine needs `XAI_API_KEY`. Failures fall back to stub; the user still sees *a* picture. **xAI Imagine 2.0 rejects `aspect_ratio: 4:5` (422).** Send `3:4`, `resolution: 2k`, `quality: medium`, model `grok-imagine-image-2.0`. Crop-cover to 1080×1350 in `apply_locks`. Stale `grok-imagine-image` is mapped in code.
 
 ## Make a post must not paint
 

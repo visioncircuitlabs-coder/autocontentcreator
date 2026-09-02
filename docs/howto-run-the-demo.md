@@ -51,7 +51,7 @@ To force Grok Imagine (if `.env` still says stub):
 
 ```text
 $env:IMAGE_GEN_MODE = "imagine"
-$env:IMAGE_GEN_MODEL = "grok-imagine-image"
+$env:IMAGE_GEN_MODEL = "grok-imagine-image-2.0"
 $env:CHAT_MODEL = "xai/grok-4.6"
 ```
 

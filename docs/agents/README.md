@@ -54,7 +54,7 @@ Code moves work. Models sit **inside** steps. No CrewAI.
 2 Pick     (UI only)                person picks the idea
 3 Make     POST /factory/run        2–3 captions, claims loop, NO photo
            then pick a version
-           POST /factory/image      Grok Imagine 4:5 + wordmark/disclaimer
+           POST /factory/image      Grok Imagine 3:4 → crop-cover 4:5 + overlay
 4 Your call POST /review/{id}       name + why required
 5 Preview  GET  /export/{id}        paused ZIP
 ```

@@ -93,7 +93,7 @@ ImageGen.generate(prompt, out_path) -> Path
 
 | `IMAGE_GEN_MODE` | Adapter |
 |---|---|
-| `imagine` / `grok-imagine` / `grok_imagine` | `ImagineImageGen` → `POST https://api.x.ai/v1/images/generations` model `grok-imagine-image`, `aspect_ratio: 4:5` |
+| `imagine` / `grok-imagine` / `grok_imagine` | `ImagineImageGen` → `POST https://api.x.ai/v1/images/generations` model `grok-imagine-image-2.0`, `aspect_ratio: 3:4`, `resolution: 2k`, `quality: medium`. Feed is crop-covered to 1080×1350. Stale `grok-imagine-image` maps to 2.0. |
 | `http` | `HttpImageGen` → `IMAGE_GEN_URL` |
 | `stub` or unknown | `StubImageGen` Pillow card |
 

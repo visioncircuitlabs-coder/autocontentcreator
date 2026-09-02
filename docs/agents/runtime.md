@@ -39,7 +39,7 @@ Template: `.env.example`. Local: `.env` (gitignored).
 | `XAI_API_KEY` | Grok chat + Imagine + optional Grok web fetch |
 | `GEMINI_API_KEY` / `GROQ_API_KEY` | Alternate chat |
 | `IMAGE_GEN_MODE` | `imagine` \| `stub` \| `http` |
-| `IMAGE_GEN_MODEL` | `grok-imagine-image` |
+| `IMAGE_GEN_MODEL` | `grok-imagine-image-2.0` (stale `grok-imagine-image` maps to 2.0) |
 | `IMAGE_GEN_URL` / `IMAGE_GEN_KEY` | Only for `http` mode |
 | `NEXT_PUBLIC_API_URL` | Browser origin. Walk uses `/engine` |
 | `ENGINE_URL` | Server-side proxy target (`http://127.0.0.1:8000` or `http://api:8000`) |
@@ -80,7 +80,7 @@ Force Imagine even if `.env` says stub:
 
 ```text
 $env:IMAGE_GEN_MODE = "imagine"
-$env:IMAGE_GEN_MODEL = "grok-imagine-image"
+$env:IMAGE_GEN_MODEL = "grok-imagine-image-2.0"
 $env:CHAT_MODEL = "xai/grok-4.6"
 ```
 

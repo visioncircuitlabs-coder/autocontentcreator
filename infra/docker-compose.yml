@@ -17,7 +17,7 @@ services:
       IMAGE_GEN_URL: ${IMAGE_GEN_URL:-}
       IMAGE_GEN_KEY: ${IMAGE_GEN_KEY:-}
       IMAGE_GEN_MODE: ${IMAGE_GEN_MODE:-imagine}
-      IMAGE_GEN_MODEL: ${IMAGE_GEN_MODEL:-grok-imagine-image}
+      IMAGE_GEN_MODEL: ${IMAGE_GEN_MODEL:-grok-imagine-image-2.0}
       BRAND_SLUG: ${BRAND_SLUG:-lays}
       LOG_PATH: /data/logs/machine.jsonl
     env_file:

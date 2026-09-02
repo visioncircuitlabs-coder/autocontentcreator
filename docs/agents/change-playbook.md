@@ -4,7 +4,7 @@ Do the smallest change. Tests with the change. User-facing strings through `word
 
 ## Restart so Imagine + overlay actually run
 
-1. Confirm `.env` or the process has `IMAGE_GEN_MODE=imagine`, `IMAGE_GEN_MODEL=grok-imagine-image`, `XAI_API_KEY` set.
+1. Confirm `.env` or the process has `IMAGE_GEN_MODE=imagine`, `IMAGE_GEN_MODEL=grok-imagine-image-2.0`, `XAI_API_KEY` set.
 2. Kill the process on port 8000. Stale uvicorn serves old `visual.py`.
 3. Start API from `apps/api` with those env vars.
 4. Keep Next on 3050 with `NEXT_PUBLIC_API_URL=/engine`.
@@ -14,7 +14,7 @@ Do the smallest change. Tests with the change. User-facing strings through `word
 
 - Prompt: `apps/api/boxes/visual.py` only. **Neutrogena:** keep “no text, no logo.” **Lays:** designed type belongs in the prompt (explosion ad); legal still overlays in code. Lighting from a **keyword list**, not the full caption.
 - Overlay: `boxes/art_director.py` (`rasterize_logo`, `apply_locks`, `_to_feed`).
-- Adapter: `adapters/image_imagine.py` (`aspect_ratio`, timeout, URL).
+- Adapter: `adapters/image_imagine.py` (`aspect_ratio` 3:4, `resolution` 2k, timeout, URL).
 - Tests: `apps/api/tests/test_visual.py`, `test_art_director.py`.
 - UI frame: `apps/web/app/globals.css` `.ig-photo`.
 
