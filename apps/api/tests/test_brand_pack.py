@@ -41,6 +41,9 @@ def test_neutrogena_pack_contents_match_fixtures():
     assert pack["banned_words"] == []
     assert "Neutrogena in India" in pack["locked_query"]
     assert pack["wordmark"] == "NEUTROGENA"
+    assert pack["overlay_wordmark"] is True
+    assert pack["overlay_disclaimer"] is True
+    assert pack["always_disclaimer"] is True
     for key in (
         "book_path",
         "claims_path",

@@ -14,7 +14,7 @@ Specs in `docs/superpowers/specs/` lock **intent**. This table is **what ships**
 | 8 | Brief Builder | `boxes/brief.py` | Deterministic pack: report + brand slice + claims + wins/losses | LLM |
 | 9 | Strategist | `boxes/strategist.py` | Angles / persona / claim-safe pain. Templates if chat down | Captions |
 | 10 | Copywriter | `boxes/copywriter.py` | Ask 8 captions, filter to 2–3 postable. Rewrite from numbered reasons | Image, go-live |
-| 11 | Art Director | `boxes/art_director.py` + `boxes/visual.py` + `boxes/video.py` | Unlocked photo and ~5s clip + coded overlay | Claims policy |
+| 11 | Art Director | `boxes/art_director.py` + `boxes/visual.py` + `boxes/video.py` + `boxes/pack_photo.py` | Campaign still + ~5s clip. Neutrogena overlay. Lays pack composite. | Claims policy |
 | 12 | Compliance Judge | `boxes/judge.py` | Sentence vs Product Facts, optional implied-claim chat | Hard-token gazette |
 | 13 | Hard Rules | `boxes/hard_rules.py` | Banned tokens, #ad, disclaimer presence. **No LLM** | Taste |
 | 14 | Improvement Loop | `boxes/loop.py` + `boxes/craft.py` | Rules + judge + craft. Max 3. Then `flag_human` | Human yes/no |
@@ -61,11 +61,13 @@ Craft review (`craft.py`) is a second Grok pass, writer ≠ this pass. Chat fail
 ## Image
 
 ```text
-visual_prompt(draft)     4:5 Instagram beauty ad, white lid, aqua gel, marble
-                         lighting_from_caption keywords only (no caption leak)
-ImagineImageGen          aspect_ratio 4:5, 90s
-apply_locks              Pillow wordmark NEUTROGENA + full disclaimer bar
-                         canvas 1080×1350
+visual_prompt(draft)     Neutrogena: 4:5 water-gel ad. Chile Limón: edit/composite
+                         FROM chile-limon.jpg, type in the art, keep this bag
+ImagineImageGen          T2I /v1/images/generations, or /v1/images/edits when a pack photo
+                         is the source. aspect_ratio 4:5, 180s
+apply_locks              Neutrogena: Pillow wordmark + disclaimer bar, 1080×1350
+                         Chile Limón: skip (overlay_disclaimer=false)
+composite_from_pack      Paste the real bag; burst + type around it. No second LAY'S.
 ```
 
 Do not send SVG text to Imagine (it vanished; we painted a blue blob). Do not `object-fit: cover` a square into the phone frame (it cropped the bar). CSS: `.ig-photo` `aspect-ratio: 4/5; object-fit: contain`.
@@ -73,15 +75,17 @@ Do not send SVG text to Imagine (it vanished; we painted a blue blob). Do not `o
 ## Video
 
 ```text
-video_prompt(draft)      ~5s motion of the same water-gel jar, from the still
+video_prompt(draft)      ~5s motion from the still; freeze layout + type
 ImagineVideoGen          POST /v1/videos/generations, duration 5, aspect 3:4
                          image.url = campaign still (data URL), generate_audio false
                          poll GET /v1/videos/{request_id} every 5s up to 900s
-compose_video            requires campaign still; overlay coded wordmark + disclaimer
+compose_video            requires campaign still (not a fixtures/ pack photo)
+                         Neutrogena: overlay coded wordmark + disclaimer
+                         Chile Limón: no Pillow overlay
 StubVideoGen             loop that still → real mp4 when the key is missing
 ```
 
-Do not film inside `POST /factory/run`. Do not text-to-video as the happy path. Do not I2V from `fixtures/` pack photos. ffmpeg is required for the stub and the overlay.
+Do not film inside `POST /factory/run`. Do not text-to-video as the happy path. Do not I2V from `fixtures/` pack photos. ffmpeg is required for the stub and (Neutrogena) overlay.
 
 ## Spec drift (known)
 

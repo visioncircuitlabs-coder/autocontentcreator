@@ -357,3 +357,80 @@ def test_stub_overlay_stamps_logo(
             break
     assert found, "coded wordmark missing from stamped clip"
     assert w == 1080 and h == 1350
+
+
+def test_campaign_still_refuses_real_chile_limon_fixture() -> None:
+    from boxes.pack_photo import chile_limon_pack_photo
+    from boxes.video import campaign_still
+
+    pack = chile_limon_pack_photo()
+    assert pack is not None
+    assert campaign_still(_draft(image_path=str(pack))) is None
+
+
+def test_chile_limon_video_skips_wordmark_and_disclaimer(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from boxes.art_director import LOGO_NAVY, compose
+    from boxes.video import compose_video
+    from boxes.visual import video_prompt, visual_prompt
+    from PIL import Image as PilImage
+
+    monkeypatch.setenv("IMAGE_GEN_MODE", "stub")
+    monkeypatch.setenv("VIDEO_GEN_MODE", "stub")
+    still_path = tmp_path / "images" / "dft_lays.png"
+    painted = compose(
+        _draft(
+            draft_id="dft_lays",
+            caption="Chile Limon crunch after the match.",
+        ),
+        visual_prompt(
+            _draft(caption="Chile Limon crunch after the match.")
+        ),
+        out_path=still_path,
+    )
+    assert "fixtures" not in {part.lower() for part in Path(painted.image_path).resolve().parts}
+    dest = tmp_path / "chile-clip.mp4"
+    result = compose_video(
+        painted,
+        video_prompt(painted),
+        out_path=dest,
+        source_image=painted.image_path,
+    )
+    assert Path(result.video_path).is_file()
+    import subprocess
+
+    frame = tmp_path / "chile-frame.png"
+    subprocess.run(
+        [
+            "ffmpeg",
+            "-y",
+            "-hide_banner",
+            "-loglevel",
+            "error",
+            "-i",
+            str(dest),
+            "-vframes",
+            "1",
+            str(frame),
+        ],
+        check=True,
+    )
+    img = PilImage.open(frame).convert("RGB")
+    w, h = img.size
+    assert w == 1080 and h == 1350
+    navy = 0
+    for y in range(0, max(1, int(h * 0.22)), 2):
+        for x in range(0, w, 3):
+            px = img.getpixel((x, y))
+            if all(abs(px[i] - LOGO_NAVY[i]) <= 12 for i in range(3)):
+                navy += 1
+    assert navy == 0, "Lays clip must not stamp a second LAY'S / Neutrogena wordmark"
+    dark = 0
+    samples = 0
+    for x in range(0, w, 6):
+        px = img.getpixel((x, h - 18))
+        samples += 1
+        if px[0] < 30 and px[1] < 32 and px[2] < 45:
+            dark += 1
+    assert dark < samples * 0.35, "Lays clip must not stamp the unofficial disclaimer bar"

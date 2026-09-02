@@ -40,6 +40,7 @@ Template: `.env.example`. Local: `.env` (gitignored).
 | `GEMINI_API_KEY` / `GROQ_API_KEY` | Alternate chat |
 | `IMAGE_GEN_MODE` | `imagine` \| `stub` \| `http` |
 | `IMAGE_GEN_MODEL` | `grok-imagine-image` |
+| `IMAGE_EDIT_MODEL` | `grok-imagine-image-2.0` (Chile Limón pack edits) |
 | `VIDEO_GEN_MODE` | `imagine` \| `stub` (unset follows `IMAGE_GEN_MODE`) |
 | `VIDEO_GEN_MODEL` | `grok-imagine-video-1.5` |
 | `VIDEO_BUDGET_USD` | Hard cap for Imagine clips. Default `2.00`. Separate from stills. |

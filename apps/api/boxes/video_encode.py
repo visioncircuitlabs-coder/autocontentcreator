@@ -112,6 +112,41 @@ def overlay_locks_on_video(
     return dest
 
 
+def scale_video_to_feed(
+    src: Path,
+    dest: Path,
+    *,
+    seconds: float = 5.0,
+) -> Path:
+    """Scale to 4:5 feed with no wordmark/disclaimer overlay (Chile Limón)."""
+    dest = Path(dest)
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    vf = (
+        f"scale={FEED_W}:{FEED_H}:force_original_aspect_ratio=increase,"
+        f"crop={FEED_W}:{FEED_H},format=yuv420p"
+    )
+    run_ffmpeg(
+        [
+            "-i",
+            str(src),
+            "-t",
+            f"{seconds:.3f}",
+            "-vf",
+            vf,
+            "-an",
+            "-c:v",
+            "libx264",
+            "-pix_fmt",
+            "yuv420p",
+            "-movflags",
+            "+faststart",
+            str(dest),
+        ],
+        friendly="Could not finish the short video. Try again.",
+    )
+    return dest
+
+
 def mp4_duration_s(path: Path) -> float:
     """Best-effort duration. Tests use this; missing ffprobe returns 0."""
     probe = ffprobe_bin()

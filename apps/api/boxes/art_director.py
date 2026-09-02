@@ -1,4 +1,9 @@
-"""Art Director — unlocked ImageGen + coded logo/disclaimer overlay."""
+"""Art Director — Imagine still, then optional Pillow logo/disclaimer overlay.
+
+Neutrogena: unlocked ImageGen, then coded navy wordmark + disclaimer bar.
+Chile Limón: edit/composite FROM the provided pack photo. Overlay skips
+(overlay_disclaimer=false, always_disclaimer=false). Do not stamp a second LAY'S.
+"""
 
 from __future__ import annotations
 
@@ -14,6 +19,7 @@ from adapters.image_imagine import ImagineImageGen
 from adapters.image_stub import StubImageGen, _font, _wrap
 from boxes.brand_pack import load_brand_pack
 from boxes.hard_rules import load_disclaimer
+from boxes.pack_photo import composite_from_pack, pack_photo_for
 from models import Draft
 from ports import ImageGen
 
@@ -105,6 +111,42 @@ def write_locks_overlay(path: Path, *, logo_path: Path | None = None) -> Path:
     return dest
 
 
+def stamp_locks(draft: Draft | None = None) -> bool:
+    """Pillow wordmark + disclaimer. Off for Chile Limón (founder override)."""
+    if draft is not None:
+        from boxes.visual import is_chile_limon_pack
+
+        if is_chile_limon_pack(draft):
+            return False
+    pack = load_brand_pack()
+    if pack.get("overlay_disclaimer") is False and pack.get("overlay_wordmark") is False:
+        return False
+    if pack.get("always_disclaimer") is False and pack.get("overlay_disclaimer") is False:
+        return bool(pack.get("overlay_wordmark"))
+    return True
+
+
+def _write_feed(image_path: Path) -> None:
+    dest = Path(image_path)
+    try:
+        raw = Image.open(dest)
+    except Exception as exc:
+        logger.warning("compose could not open generated image: %s", exc)
+        raise RuntimeError("The generated picture could not be opened. Try stub mode.") from exc
+    img = _to_feed(raw)
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    img.convert("RGB").save(dest, "PNG")
+
+
+def _call_generate(gen: ImageGen, prompt: str, dest: Path, source_image: Path | None) -> Path:
+    try:
+        if source_image is not None:
+            return gen.generate(prompt, dest, source_image=source_image)
+        return gen.generate(prompt, dest)
+    except TypeError:
+        return gen.generate(prompt, dest)
+
+
 def apply_locks(image_path: Path, *, logo_path: Path | None = None) -> None:
     """Paste wordmark and the full disclaimer as a thin legal line. Not in the model."""
     dest = Path(image_path)
@@ -153,18 +195,26 @@ def compose(
     out_path: Path | str | None = None,
     client: httpx.Client | None = None,
 ) -> Draft:
-    """Generate the unlocked picture, then overlay logo + disclaimer in code."""
+    """Make the campaign still. Chile Limón keeps the provided pack; Neutrogena overlays."""
     gen = image_gen or build_image_gen(client=client)
     dest = Path(out_path) if out_path is not None else _default_out_path(draft)
     dest.parent.mkdir(parents=True, exist_ok=True)
-    # Overlay logo/disclaimer in code. Never send them to ImageGen.
+    pack = pack_photo_for(draft)
+    if pack is not None and not pack.is_file():
+        raise RuntimeError("The Chile Limón pack photo is missing.")
     try:
-        gen.generate(prompt, dest)
+        _call_generate(gen, prompt, dest, pack)
     except Exception as exc:
         if type(gen).__name__ == "StubImageGen":
             raise
         logger.warning("image gen failed (%s); drawing a stub card", exc)
-        StubImageGen().generate(prompt, dest)
-    apply_locks(dest)
+        if pack is not None:
+            composite_from_pack(pack, dest)
+        else:
+            StubImageGen().generate(prompt, dest)
+    if stamp_locks(draft):
+        apply_locks(dest)
+    else:
+        _write_feed(dest)
     logger.info("art director wrote %s", dest)
     return draft.model_copy(update={"image_path": str(dest.resolve())})

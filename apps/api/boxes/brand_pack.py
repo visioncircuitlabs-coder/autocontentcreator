@@ -112,4 +112,18 @@ def load_brand_pack(slug: str | None = None) -> dict[str, Any]:
         "exclusion_path": directory / "exclusion.txt",
         "logo_path": directory / "logo.svg",
         "exclusion_rules": exclusion_rules,
+        # Neutrogena defaults True (Pillow navy + legal bar). Chile Limón
+        # stills skip both in compose regardless — overlay_disclaimer=false,
+        # always_disclaimer=false on that path (founder override).
+        "overlay_wordmark": _truthy(book.get("overlay_wordmark"), True),
+        "overlay_disclaimer": _truthy(book.get("overlay_disclaimer"), True),
+        "always_disclaimer": _truthy(book.get("always_disclaimer"), True),
     }
+
+
+def _truthy(value: object, default: bool) -> bool:
+    if value is None:
+        return default
+    if isinstance(value, str):
+        return value.strip().lower() not in {"", "0", "false", "no", "off"}
+    return bool(value)

@@ -1,4 +1,8 @@
-"""Art Director video — image-to-video from the campaign still + coded overlay."""
+"""Art Director video — image-to-video from the campaign still.
+
+Neutrogena: coded overlay after generate so the legal line cannot warp.
+Chile Limón: no Pillow wordmark/disclaimer (overlay_disclaimer=false).
+"""
 
 from __future__ import annotations
 
@@ -10,8 +14,8 @@ import httpx
 
 from adapters.video_imagine import ImagineVideoGen
 from adapters.video_stub import StubVideoGen
-from boxes.art_director import write_locks_overlay
-from boxes.video_encode import overlay_locks_on_video
+from boxes.art_director import stamp_locks, write_locks_overlay
+from boxes.video_encode import overlay_locks_on_video, scale_video_to_feed
 from models import Draft
 from ports import VideoGen
 
@@ -86,7 +90,7 @@ def compose_video(
     client: httpx.Client | None = None,
     source_image: Path | str | None = None,
 ) -> Draft:
-    """Animate the campaign still, then overlay logo + disclaimer in code."""
+    """Animate the campaign still. Overlay only when stamp_locks says so."""
     still = campaign_still(draft, source_image=source_image)
     if still is None or not still.is_file():
         raise ValueError(PICTURE_FIRST)
@@ -105,8 +109,11 @@ def compose_video(
                 raise
             logger.warning("video gen failed (%s); drawing a stub clip", exc)
             StubVideoGen().generate(prompt, unlocked, source_image=still)
-        write_locks_overlay(overlay)
-        overlay_locks_on_video(unlocked, overlay, dest, seconds=DURATION_S)
+        if stamp_locks(draft):
+            write_locks_overlay(overlay)
+            overlay_locks_on_video(unlocked, overlay, dest, seconds=DURATION_S)
+        else:
+            scale_video_to_feed(unlocked, dest, seconds=DURATION_S)
     finally:
         unlocked.unlink(missing_ok=True)
         overlay.unlink(missing_ok=True)

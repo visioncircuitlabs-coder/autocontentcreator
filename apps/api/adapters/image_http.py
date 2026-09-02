@@ -32,7 +32,14 @@ class HttpImageGen:
         self.key = key if key is not None else os.environ.get("IMAGE_GEN_KEY", "")
         self.size = size or DEFAULT_SIZE
 
-    def generate(self, prompt: str, out_path: Path) -> Path:
+    def generate(
+        self,
+        prompt: str,
+        out_path: Path,
+        *,
+        source_image: Path | None = None,
+    ) -> Path:
+        _ = source_image
         url = (self.url or "").strip()
         if not url:
             raise RuntimeError(

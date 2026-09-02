@@ -4,7 +4,7 @@
 
 ## What a person sees
 
-After they pick a caption version and tap **Make the picture**, they can tap **Make a short video**. That animates the picture they just made for about five seconds. Logo and the legal line stay stamped in code. Yes/No still needs a name and a reason. The ZIP stays paused. Nothing goes to Instagram.
+After they pick a caption version and tap **Make the picture**, they can tap **Make a short video**. That animates the picture they just made for about five seconds. Neutrogena stills/clips still get the coded wordmark + legal line. Chile Limón does not — type is in the art, and the bag is the provided pack photo. Yes/No still needs a name and a reason. The ZIP stays paused. Nothing goes to Instagram.
 
 ## Why this shape
 
@@ -27,7 +27,8 @@ Model `grok-imagine-video-1.5`, `duration: 5` (API default is 8 if omitted), `as
 - **Paint video during Make a post.** Same trap as the old three-photo factory. Lost.
 - **Text-to-video as the happy path.** Founder rejected a sample that animated a pack photo / generic clip. Lost.
 - **Image-to-video from a fixture pack PNG.** That is a catalog shot, not the ad. Lost.
-- **Let the model draw a new legal bar.** Same lock as stills. The prompt must not ask for one. Lost.
+- **Let Pillow stamp a second LAY'S wordmark or unofficial bar on Chile Limón.** Founder override 2026-09-02. Type belongs in the art. Lost.
+- **Redraw the Chile Limón bag in Imagine.** The pack in the ad must be `fixtures/lays/products/chile-limon.jpg` (composite or image-edit). Lost.
 - **Copy the 90s Imagine still timeout.** Docs say generation typically takes up to several minutes. Poll budget is 900s. Lost.
 - **Publish the clip.** No autonomous publish. Lost.
 - **A second content app / CrewAI belt.** The product already exists on this branch. Lost.
@@ -38,10 +39,11 @@ Model `grok-imagine-video-1.5`, `duration: 5` (API default is 8 if omitted), `as
 - Video is a dedicated step. `run_factory` does not film.
 - `POST /factory/video` requires a campaign still (`draft.image_path` on disk, not under `fixtures/`).
 - Happy path is image-to-video from that composed still as the first frame.
-- The still is a designed campaign ad (product hero, burst composition, graphic type). Wordmark and legal bar stay in the code overlay. Video freezes that layout and only adds product motion.
-- Neutrogena motion is the water-gel jar. Chile Limón (if that SKU appears) is lime + chilli chips, never jalapeño, never extra LAY'S wordmarks. Steal craft from the finished-poster I2V method (frozen type, burst only). Duration stays 5s, not the 15s reference clip. Do not take the Lays PR.
-- Brand names, claims, and the disclaimer stay out of the **video prompt**.
-- Overlay after generate, always, so the legal line cannot warp away during motion.
+- The still is a designed campaign ad (product hero, burst composition, graphic type).
+- Neutrogena: wordmark and legal bar stay in the code overlay. Video freezes that layout and only adds product motion.
+- Chile Limón: still composites or image-edits FROM `chile-limon.jpg` so the bag is that pack (logo, 25% MORE, Chile Limón Flavour, veg mark, lime/chilli/garlic). Burst + type around it (`TANGY LIME. SPICY HIT.` / `CRUNCH THE HEAT.` / `DARE A BITE?`). `overlay_disclaimer=false`, `always_disclaimer=false`. Logo MAY go into Grok Imagine because it is on the real pack. Do not stamp a second LAY'S wordmark. Lime + red chilli, not jalapeño, not Magic Masala. Duration stays 5s. Do not take Night Shift's Lays PR.
+- Video prompt: freeze the still's layout and type. No new headlines, no extra wordmark, no unofficial bar, no Grok watermark.
+- Neutrogena overlay after generate so the legal line cannot warp. Lays: skip that overlay.
 - Image spend and video spend are separate caps on the same `spend.jsonl`.
 - Stub + ffmpeg loops the campaign still into a walkable H.264 mp4 when Imagine is off.
 
@@ -52,6 +54,7 @@ Model `grok-imagine-video-1.5`, `duration: 5` (API default is 8 if omitted), `as
 | `POST /factory/video` | Dedicated step (`boxes/belt.py` `film_chosen`) |
 | `adapters/video_imagine.py` | xAI video generations + 900s poll + I2V data URL |
 | `adapters/video_stub.py` | Loop campaign still → mp4 |
-| `boxes/video.py` | `compose_video` then coded overlay |
+| `boxes/video.py` | `compose_video`; Neutrogena overlay, Lays skip |
+| `boxes/pack_photo.py` | Chile Limón JPEG + Pillow composite around the real bag |
 | `boxes/visual.py` `video_prompt` | Product-true motion from the still, no caption leak |
 | `boxes/video_budget.py` | `$2` default cap, `$0.40` per 5s clip |

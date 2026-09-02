@@ -1,4 +1,9 @@
-"""Instagram feed picture prompt. Unlocked zone only. Brand marks stay in code."""
+"""Instagram feed picture prompt.
+
+Neutrogena stills: unlocked zone; navy wordmark + disclaimer stay in Pillow.
+Chile Limón: the provided pack photo is the bag (logo already on it). Type lives
+in the art. Do not Pillow-stamp a second LAY'S wordmark or unofficial bar.
+"""
 
 from __future__ import annotations
 
@@ -6,6 +11,12 @@ from models import Draft
 
 # Real Hydro Boost / drugstore water-gel ads: 4:5 feed, bright, dewy, white lid,
 # aqua gel, centered jar, empty margins. Not a night-rain still life.
+
+CHILE_LIMON_TYPE = (
+    "TANGY LIME. SPICY HIT.",
+    "CRUNCH THE HEAT.",
+    "DARE A BITE?",
+)
 
 
 def lighting_from_caption(caption: str) -> str:
@@ -41,22 +52,25 @@ def is_chile_limon_pack(draft: Draft) -> bool:
 
 
 def visual_prompt(draft: Draft) -> str:
-    """World-class campaign still: product hero, burst composition, designed type.
-
-    Brand wordmark and the legal bar stay out of the model — overlay paints those.
-    """
+    """World-class campaign still: product hero, burst composition, designed type."""
     light = lighting_from_caption(draft.caption or "")
     if is_chile_limon_pack(draft):
+        type_line = " / ".join(CHILE_LIMON_TYPE)
         return (
             "World-class finished 4:5 vertical print and Instagram campaign poster, Super Bowl craft. "
-            "Hero: one unofficial chile-limon potato-chip bag, lime plus dried chilli, "
-            "centered pack hero, burst composition, center-lit explosion of lime zest, "
-            "chilli flakes, and chips on a lime-green field. "
+            "Image-edit FROM this exact product photograph of the green Lay's Chile Limón India pack. "
+            "Keep this bag identity: do not redraw, restyle, or replace the pack. "
+            "Keep the printed Lay's ribbon logo, 25% MORE, Chile Limón Flavour, veg mark, "
+            "lime, red chilli, garlic, and rippled chips that are already on the photo. "
+            "The pack is the hero. Open-bag energy: flavour exploding out of the OPEN bag — "
+            "lime zest, red chilli (not jalapeño), garlic, golden rippled chips — bursting "
+            "around the real pack on a lime-green field. "
             f"{light}. "
-            "Designed campaign type locked in the empty margins as graphic headlines, "
-            "bold condensed sans-serif: short punchy lines about tangy lime and chilli heat. "
-            "Do not write a brand name, no extra wordmark, no logo, no Grok watermark, "
-            "no legal disclaimer bar, no people, no hands, no packaging claims."
+            "Designed campaign type in the empty margins as graphic headlines, "
+            f"bold condensed sans-serif, locked in the art (not a legal bar): {type_line} "
+            "The logo on this pack may stay because it is printed on the real pack. "
+            "Do not add a second LAY'S wordmark. No unofficial disclaimer, no legal bar, "
+            "no Grok watermark, no people, no hands, no Magic Masala, no jalapeño."
         )
     return (
         "World-class finished 4:5 vertical print and Instagram campaign poster, Super Bowl craft. "
@@ -77,6 +91,23 @@ def visual_prompt(draft: Draft) -> str:
 def video_prompt(draft: Draft) -> str:
     """I2V from the finished still. Layout and type frozen. Product burst only."""
     light = lighting_from_caption(draft.caption or "")
+    if is_chile_limon_pack(draft):
+        type_line = " / ".join(CHILE_LIMON_TYPE)
+        freeze = (
+            "Five-second image-to-video of the finished campaign poster as the first frame, "
+            "vertical 3:4, 720p. Keep layout and type frozen: the real Chile Limón pack, "
+            f"headlines ({type_line}), and margins must not wander, warp, or be redrawn. "
+            "Motion is only the open-pack burst plus slight camera and particles. "
+            "Do not add a second LAY'S wordmark, no new headlines, no unofficial disclaimer, "
+            "no legal bar, no Grok watermark. "
+        )
+        motion = (
+            "Animate the pack opening: the bag flexes, the top opens or tears, chips and "
+            "lime-chilli garnish burst toward the camera in slow appetizing motion. "
+            "Not a static bag-on-table loop. Not jalapeño. "
+            "No cuts, no people, no hands, no voiceover, no subtitles. "
+        )
+        return freeze + motion + f"{light}."
     freeze = (
         "Five-second image-to-video of the finished campaign poster as the first frame, "
         "vertical 3:4, 720p. Keep layout and type frozen: headlines, the pack, margins, "
@@ -85,18 +116,10 @@ def video_prompt(draft: Draft) -> str:
         "Do not add new headlines, no logo, no watermarks including a Grok watermark, "
         "and no legal bar. "
     )
-    if is_chile_limon_pack(draft):
-        motion = (
-            "Animate the pack opening: the bag flexes, the top opens or tears, chips and "
-            "lime-chilli garnish burst toward the camera in slow appetizing motion. "
-            "Not a static bag-on-table loop. No extra wordmark. "
-            "No cuts, no people, no hands, no voiceover, no subtitles. "
-        )
-    else:
-        motion = (
-            "Animate the pack opening: this pack is the jar — the white lid unscrews, "
-            "aqua hyaluronic water gel and dew burst toward the camera, light particles, "
-            "slight camera push. Not a static product-on-table loop. No extra wordmark. "
-            "No cuts, no people, no hands, no voiceover, no subtitles. "
-        )
+    motion = (
+        "Animate the pack opening: this pack is the jar — the white lid unscrews, "
+        "aqua hyaluronic water gel and dew burst toward the camera, light particles, "
+        "slight camera push. Not a static product-on-table loop. No extra wordmark. "
+        "No cuts, no people, no hands, no voiceover, no subtitles. "
+    )
     return freeze + motion + f"{light}."

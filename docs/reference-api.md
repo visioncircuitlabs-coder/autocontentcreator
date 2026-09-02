@@ -75,7 +75,7 @@ Returns `Draft[]` (usually 2–3 caption variants). **`image_path` is null.** Lo
 { "draft_id": "dft_…" }
 ```
 
-Returns one `Draft` with `image_path` set. Always regenerates via `visual_prompt` then overlay.
+Returns one `Draft` with `image_path` set. Always regenerates via `visual_prompt`. Neutrogena then overlays wordmark + disclaimer. Chile Limón composites or image-edits the provided pack photo and does not stamp a second wordmark.
 
 500: `"Could not make that picture. Please try again."`
 
@@ -85,7 +85,7 @@ Returns one `Draft` with `image_path` set. Always regenerates via `visual_prompt
 { "draft_id": "dft_…" }
 ```
 
-Returns one `Draft` with `video_path` set. Requires a campaign still on the draft (make the picture first). Image-to-video from that still, then coded overlay. Does **not** publish.
+Returns one `Draft` with `video_path` set. Requires a campaign still on the draft (make the picture first). Image-to-video from that still. Neutrogena then applies the coded overlay; Chile Limón does not. Does **not** publish.
 
 400: `"Make the picture first. Then we can make a short video."`
 

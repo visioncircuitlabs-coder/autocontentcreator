@@ -40,7 +40,7 @@ Fixture used to replace `signals`. Keep this-run headlines. Practice is a labele
 
 ## Night-rain Hydro Boost
 
-Caption words like monsoon/humid leaked into a cinematic still. `visual_prompt` is a bright 4:5 water-gel ad. Lighting is a short keyword map, not the caption pasted into Imagine. No people, no letters in the model. Wordmark is Pillow, not SVG text (SVG text often vanished → navy rectangle).
+Caption words like monsoon/humid leaked into a cinematic still. `visual_prompt` is a bright 4:5 water-gel ad for Neutrogena. Chile Limón stills edit the real pack photo and put campaign type in the art. Lighting is a short keyword map, not the caption pasted into Imagine. Neutrogena wordmark is Pillow, not SVG text (SVG text often vanished → navy rectangle).
 
 ## Preview crop
 
@@ -68,7 +68,11 @@ No `npm` / pip / OpenCode caches on C:. XDG and npm cache on D: under `.cache/`.
 
 ## Overlay vs model
 
-Never put `NEUTROGENA`, claims, or the disclaimer in the Imagine **prompt** — still or video. They are stamped in code. If you “just add the logo to the prompt,” you will get misspelled packaging. Video **does** start from the campaign still (the overlaid ad) as the first frame. Do not start from a fixture pack photo. Stamp the coded overlay on the clip again so the legal line cannot warp away.
+Neutrogena: never put `NEUTROGENA`, claims, or the disclaimer in the Imagine **prompt**. They are stamped in Pillow. If you “just add the logo to the prompt,” you will get misspelled packaging.
+
+Chile Limón (founder override): the pack in the ad **is** `fixtures/lays/products/chile-limon.jpg`. Composite or image-edit FROM that JPEG. The Lay's mark already printed on the bag may stay in Imagine. Do **not** Pillow-stamp a second LAY'S wordmark. Do **not** stamp unofficial/disclaimer (`overlay_disclaimer=false`, `always_disclaimer=false`). Type belongs in the art (TANGY LIME. SPICY HIT. / CRUNCH THE HEAT. / DARE A BITE?), not a legal bar. Night Shift stills that redrew the bag were rejected.
+
+Video **does** start from the campaign still as the first frame. Do not start from a fixture pack photo. Neutrogena clips get the coded overlay again so the legal line cannot warp. Lays clips skip that overlay.
 
 ## Kenvue deck / Cerebras / gstack
 

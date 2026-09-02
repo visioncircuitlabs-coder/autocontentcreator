@@ -1,4 +1,8 @@
-"""Grok Imagine. Unlocked photo only. Logo and disclaimer overlay happen after."""
+"""Grok Imagine. Neutrogena is text-to-image. Chile Limón is image-edit from the pack.
+
+Logo on the real pack may stay in the edit. Pillow stamps the Neutrogena wordmark
+and disclaimer after generate; Lays skips that stamp.
+"""
 
 from __future__ import annotations
 
@@ -15,8 +19,11 @@ from harness.breaker import IMAGE_BREAKER
 logger = logging.getLogger(__name__)
 
 IMAGINE_URL = "https://api.x.ai/v1/images/generations"
+IMAGINE_EDIT_URL = "https://api.x.ai/v1/images/edits"
 DEFAULT_MODEL = "grok-imagine-image"
+DEFAULT_EDIT_MODEL = "grok-imagine-image-2.0"
 TIMEOUT_S = 180.0
+PNG_MAGIC = b"\x89PNG\r\n\x1a\n"
 
 
 class ImagineImageGen:
@@ -26,13 +33,23 @@ class ImagineImageGen:
         *,
         key: str | None = None,
         model: str | None = None,
+        edit_model: str | None = None,
     ) -> None:
         self.client = client
         self.key = key if key is not None else os.environ.get("XAI_API_KEY", "")
         self.model = (model or os.environ.get("IMAGE_GEN_MODEL") or DEFAULT_MODEL).strip()
+        self.edit_model = (
+            edit_model or os.environ.get("IMAGE_EDIT_MODEL") or DEFAULT_EDIT_MODEL
+        ).strip()
 
-    def generate(self, prompt: str, out_path: Path) -> Path:
-        from boxes.image_budget import BudgetExceeded, record_spend, spend_gate
+    def generate(
+        self,
+        prompt: str,
+        out_path: Path,
+        *,
+        source_image: Path | None = None,
+    ) -> Path:
+        from boxes.image_budget import record_spend, spend_gate
 
         key = (self.key or "").strip()
         if not key:
@@ -44,19 +61,32 @@ class ImagineImageGen:
             "Authorization": f"Bearer {key}",
             "Content-Type": "application/json",
         }
-        payload = {
-            "model": self.model,
-            "prompt": prompt,
-            "n": 1,
-            "aspect_ratio": "4:5",
-            "response_format": "url",
-        }
+        pack = Path(source_image) if source_image is not None else None
+        if pack is not None and pack.is_file():
+            url = IMAGINE_EDIT_URL
+            payload = {
+                "model": self.edit_model,
+                "prompt": prompt,
+                "n": 1,
+                "aspect_ratio": "4:5",
+                "response_format": "url",
+                "image": {"url": _image_data_url(pack), "type": "image_url"},
+            }
+        else:
+            url = IMAGINE_URL
+            payload = {
+                "model": self.model,
+                "prompt": prompt,
+                "n": 1,
+                "aspect_ratio": "4:5",
+                "response_format": "url",
+            }
         owns = self.client is None
         client = self.client or httpx.Client(timeout=TIMEOUT_S, follow_redirects=True)
         try:
 
             def _attempt():
-                response = client.post(IMAGINE_URL, json=payload, headers=headers)
+                response = client.post(url, json=payload, headers=headers)
                 response.raise_for_status()
                 return response.json()
 
@@ -75,6 +105,26 @@ class ImagineImageGen:
         finally:
             if owns:
                 client.close()
+
+
+def _image_data_url(path: Path) -> str:
+    raw = Path(path).read_bytes()
+    if raw.startswith(PNG_MAGIC):
+        mime = "image/png"
+    elif raw[:2] == b"\xff\xd8":
+        mime = "image/jpeg"
+    elif raw[:4] == b"RIFF" and raw[8:12] == b"WEBP":
+        mime = "image/webp"
+    else:
+        from io import BytesIO
+
+        from PIL import Image
+
+        buf = BytesIO()
+        Image.open(path).convert("RGB").save(buf, format="JPEG", quality=90)
+        raw = buf.getvalue()
+        mime = "image/jpeg"
+    return f"data:{mime};base64,{base64.b64encode(raw).decode('ascii')}"
 
 
 def _image_bytes(client: httpx.Client, body: object) -> bytes:

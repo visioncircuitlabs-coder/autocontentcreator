@@ -33,7 +33,8 @@ apps/api/                 FastAPI engine
     audit.py              provenance chain for a draft
     evidence.py           hash-chain + manifest (tamper-evident exports)
     image_budget.py       Grok $ cap gate (stills)
-    video.py              unlocked clip + coded overlay
+    pack_photo.py         Chile Limón JPEG + composite around the real bag
+    video.py              I2V from the campaign still; Neutrogena overlay, Lays skip
     video_budget.py       Grok $ cap gate (5s clips)
     metrics.py            /metrics aggregation
     learning.py           approval-memory → writer prompt
@@ -47,6 +48,7 @@ apps/api/                 FastAPI engine
     resumer.py            failed-run resume
     eval.py               golden-set evaluation
   fixtures/neutrogena/    unofficial brand pack
+  fixtures/lays/products/chile-limon.jpg   real Chile Limón India pack photo
 apps/web/                 Next.js App Router
   app/page.tsx            WalkApp (the product)
   app/engine/[...path]    900s proxy → API
@@ -76,12 +78,13 @@ run_factory          picture does NOT run here
   run_loop           hard rules + judge + craft; rewrite ≤3; else flag_human
 
 paint_chosen         after a person picks a version
-  visual_prompt      4:5 bright water-gel ad; lighting from caption keywords only
-  compose            ImageGen then Pillow wordmark + disclaimer bar
+  visual_prompt      Neutrogena water-gel ad, or Chile Limón pack-edit
+  compose            ImageGen (edits when a pack photo exists). Neutrogena overlay.
+                     Chile Limón keeps the provided bag; no second wordmark.
 
 film_chosen          after the still — refuses if there is no campaign still
-  video_prompt       motion from that still; no new text/logo/disclaimer in the prompt
-  compose_video      image-to-video from the still, then ffmpeg overlay of the coded legal sheet
+  video_prompt       freeze layout + type; open-pack / burst only
+  compose_video      image-to-video from the still. Neutrogena overlay. Lays skip.
 ```
 
 Caps: `MAX_DEEP_DIVES = 1`, `MAX_FACTORY_CONCEPTS = 1`, `MAX_CHAT_SCORES = 5`, chat timeout 20s, Imagine still timeout 180s, Imagine video poll 900s every 5s, Next proxy 900s, radar fetch rate 6/min/host.
@@ -101,11 +104,11 @@ VideoGen.generate(prompt, out_path, *, source_image=None) -> Path
 
 | `IMAGE_GEN_MODE` | Adapter |
 |---|---|
-| `imagine` / `grok-imagine` / `grok_imagine` | `ImagineImageGen` → `POST https://api.x.ai/v1/images/generations` model `grok-imagine-image`, `aspect_ratio: 4:5` |
+| `imagine` / `grok-imagine` / `grok_imagine` | `ImagineImageGen` → T2I `POST /v1/images/generations`, or `POST /v1/images/edits` when a pack photo is the source (`grok-imagine-image-2.0`) |
 | `http` | `HttpImageGen` → `IMAGE_GEN_URL` |
 | `stub` or unknown | `StubImageGen` Pillow card |
 
-Imagine failure falls back to stub (unless already stub). Overlay always runs.
+Imagine failure falls back to stub (unless already stub). Neutrogena overlay then runs. Chile Limón skips overlay and composites the pack photo if the edit failed.
 
 `build_video_gen()`:
 
@@ -114,7 +117,7 @@ Imagine failure falls back to stub (unless already stub). Overlay always runs.
 | `imagine` / `grok-imagine` / `grok-imagine-video` | `ImagineVideoGen` → `POST https://api.x.ai/v1/videos/generations` model `grok-imagine-video-1.5`, `duration: 5`, `image.url` = campaign still, `generate_audio: false`, poll `GET /v1/videos/{request_id}` every 5s up to 900s |
 | `stub` or unknown | `StubVideoGen` loops the campaign still → mp4 |
 
-Video failure falls back to stub (unless already stub), still looping the campaign still. Overlay always runs. ffmpeg is required to write the mp4. Text-to-video is not the happy path.
+Video failure falls back to stub (unless already stub), still looping the campaign still. Neutrogena overlay then runs. Chile Limón skips it. ffmpeg is required to write the mp4. Text-to-video is not the happy path.
 
 ## Data (SQLite)
 

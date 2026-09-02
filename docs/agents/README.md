@@ -54,8 +54,8 @@ Code moves work. Models sit **inside** steps. No CrewAI.
 2 Pick     (UI only)                person picks the idea
 3 Make     POST /factory/run        2–3 captions, claims loop, NO photo, NO video
            then pick a version
-           POST /factory/image      Grok Imagine 4:5 + wordmark/disclaimer
-           POST /factory/video      I2V from the campaign still (~5s) + same coded overlay
+           POST /factory/image      Grok Imagine 4:5 (pack-edit for Chile Limón)
+           POST /factory/video      I2V from the campaign still (~5s)
 4 Your call POST /review/{id}       name + why required
 5 Preview  GET  /export/{id}        paused ZIP (still + clip)
 ```

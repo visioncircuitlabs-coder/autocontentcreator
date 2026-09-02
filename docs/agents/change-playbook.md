@@ -12,9 +12,9 @@ Do the smallest change. Tests with the change. User-facing strings through `word
 
 ## Change the photo look
 
-- Prompt: `apps/api/boxes/visual.py` only. Keep “no text, no logo.” Lighting from a **keyword list**, not the full caption.
-- Overlay: `boxes/art_director.py` (`rasterize_logo`, `apply_locks`, `_to_feed`). Video overlay: `boxes/video.py` + `boxes/video_encode.py`.
-- Adapter: `adapters/image_imagine.py` (`aspect_ratio`, timeout, URL). Video: `adapters/video_imagine.py`.
+- Prompt: `apps/api/boxes/visual.py` only. Lighting from a **keyword list**, not the full caption. Chile Limón: keep the real pack; type in the art; no second LAY'S wordmark.
+- Overlay: `boxes/art_director.py` (`rasterize_logo`, `apply_locks`, `stamp_locks`). Skip for Chile Limón. Video: `boxes/video.py` + `boxes/video_encode.py`. Pack photo: `boxes/pack_photo.py`.
+- Adapter: `adapters/image_imagine.py` (generations **or** edits). Video: `adapters/video_imagine.py`.
 - Tests: `apps/api/tests/test_visual.py`, `test_art_director.py`, `test_factory_video.py`.
 - UI frame: `apps/web/app/globals.css` `.ig-photo`.
 

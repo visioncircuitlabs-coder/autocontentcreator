@@ -59,7 +59,7 @@ def test_video_prompt_is_product_true_and_unlocked() -> None:
 
 
 def test_chile_limon_video_is_lime_chilli_not_jalapeno() -> None:
-    from boxes.visual import video_prompt, visual_prompt
+    from boxes.visual import CHILE_LIMON_TYPE, video_prompt, visual_prompt
 
     draft = _draft("Chile Limon crunch after the match.")
     still = visual_prompt(draft).lower()
@@ -73,13 +73,17 @@ def test_chile_limon_video_is_lime_chilli_not_jalapeno() -> None:
     assert "wander" in clip
     assert "grok watermark" in clip
     assert "mind blown" not in still
-    assert "dare a bite" not in still
     assert "crunch the explosion" not in still
-    assert "jalapeño" not in still and "jalapeno" not in still
-    assert "jalapeño" not in clip and "jalapeno" not in clip
-    assert "lays" not in still
-    assert "lays" not in clip
+    for line in CHILE_LIMON_TYPE:
+        assert line.lower() in still
+        assert line.lower() in clip
+    assert "keep this bag" in still or "do not redraw" in still
+    assert "second" in still and "wordmark" in still
+    assert "not jalapeño" in still or "not jalapeno" in still
+    assert "magic masala" in still
+    assert "jalapeño lime" not in still and "jalapeno lime" not in still
     assert "frozen" in clip
+    assert "open" in clip
 
 
 def test_monsoon_caption_stays_bright() -> None:

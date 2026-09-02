@@ -49,7 +49,7 @@ Last commit on this worktree: `a324b70` (2026-08-24, **329 API tests collected**
 | Receipts | Tamper-evident audit chain + signed manifest inside every ZIP |
 | Copy craft | Scorer v2 for hook length and “we’re excited” voice |
 | Brand memory | Every yes/no → ledger + winners/anti-patterns/bans + human `lessons.md` |
-| Short product video | `POST /factory/video` after the still. Image-to-video from that campaign still (15 min poll). Stub loops the still into a real ~5s mp4. Overlay in code. ZIP stays paused. |
+| Short product video | `POST /factory/video` after the still. Image-to-video from that campaign still (15 min poll). Stub loops the still into a real ~5s mp4. Neutrogena overlay in code; Chile Limón skips it and keeps the provided pack in the still. ZIP stays paused. |
 
 Hermes IDs (untrusted history — re-read files): `20260824_015715_fd3d0f` (main), `20260824_204602_931fba` (memory wave). Store: `D:\Hermes agent\state.db`.
 
@@ -64,7 +64,7 @@ Do these next, in this order, unless the founder says otherwise:
 3. **Engagement read-back** — the machine does not learn from what happened after a post went live (and we still do not publish).
 4. Table stakes later: Postgres, SSO, Instagram publish. Publish stays off until a written decision.
 
-Video is **done enough to walk**: dedicated step, stub mp4, coded overlay, paused ZIP. Live Grok Imagine video is optional behind `XAI_API_KEY`. Do not fold it into `POST /factory/run`.
+Video is **done enough to walk**: dedicated step, stub mp4, Neutrogena overlay / Lays pack-true still, paused ZIP. Live Grok Imagine video is optional behind `XAI_API_KEY`. Do not fold it into `POST /factory/run`.
 
 Do **not** start a second app on `main`. Do **not** re-implement the 19 Aug demo plan.
 

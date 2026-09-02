@@ -10,7 +10,7 @@ The demo brand pack is an **unofficial Neutrogena** fixture for show — not a p
 
 - **Trend Radar** — Look for ideas pulls GDELT / Google News RSS / Reddit JSON (and optional Grok search), scores what fits, deep-dives one closer look.
 - **Brand Brain** — unofficial Neutrogena brand book, approved claims, disclaimer, exclusion list, past decisions.
-- **Content Factory** — a conveyor belt. Code moves work. Agents write captions. Hard rules + a locked judge catch claims. After you pick a version, **Grok Imagine** makes a 4:5 photo; code stamps the wordmark and disclaimer.
+- **Content Factory** — a conveyor belt. Code moves work. Agents write captions. Hard rules + a locked judge catch claims. After you pick a version, **Grok Imagine** makes a 4:5 photo (Chile Limón image-edits the real pack). Neutrogena stamps wordmark + disclaimer in code; Lays does not.
 - **Command Center** — you approve with a reason. The machine never publishes. Export is a paused ZIP.
 
 ## Look at the architecture
