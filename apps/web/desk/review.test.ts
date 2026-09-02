@@ -196,7 +196,7 @@ test("short video button is plain language", () => {
     "Make the picture first. Then we can make a short video.",
   );
   assert.match(VIDEO_HINT, /five seconds/i);
-  assert.match(VIDEO_HINT, /starts from the picture/i);
+  assert.match(VIDEO_HINT, /picture you just made/i);
   assert.match(VIDEO_HINT, /does not go live/i);
 });
 

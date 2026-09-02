@@ -69,6 +69,12 @@ class ImagineVideoGen:
         still = Path(source_image) if source_image is not None else None
         if still is None or not still.is_file():
             raise RuntimeError("Make the picture first. Then we can make a short video.")
+        try:
+            parts = {part.lower() for part in still.resolve().parts}
+        except OSError as exc:
+            raise RuntimeError("Make the picture first. Then we can make a short video.") from exc
+        if "fixtures" in parts:
+            raise RuntimeError("Make the picture first. Then we can make a short video.")
         spend_gate()
         dest = Path(out_path)
         dest.parent.mkdir(parents=True, exist_ok=True)

@@ -259,6 +259,33 @@ def test_imagine_video_refuses_text_to_video_without_still(
         ImagineVideoGen(key="sk-test").generate("move the jar", dest)
 
 
+def test_imagine_video_refuses_fixture_pack_photo(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from adapters.video_imagine import ImagineVideoGen
+
+    monkeypatch.setenv("XAI_API_KEY", "sk-test")
+    pack = _write_still(tmp_path / "fixtures" / "pack.png")
+    dest = tmp_path / "nope.mp4"
+    with pytest.raises(RuntimeError, match="picture first"):
+        ImagineVideoGen(key="sk-test").generate(
+            "animate the bag", dest, source_image=pack
+        )
+
+
+def test_compose_video_refuses_passed_fixture_pack(tmp_path: Path) -> None:
+    from boxes.video import compose_video
+
+    pack = _write_still(tmp_path / "fixtures" / "lays" / "pack.png")
+    with pytest.raises(ValueError, match="picture first"):
+        compose_video(
+            _draft(image_path=str(pack)),
+            "animate the bag",
+            source_image=pack,
+            out_path=tmp_path / "clip.mp4",
+        )
+
+
 def test_spent_budget_falls_back_to_stub(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

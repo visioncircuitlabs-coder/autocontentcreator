@@ -26,6 +26,7 @@ def test_ad_prompt_is_bright_feed_not_night_film() -> None:
     assert "night window" not in lower
     assert "double cleanse after ac" not in lower
     assert "campaign type" in lower or "headline" in lower
+    assert "super bowl" in lower or "campaign still" in lower
     assert "burst" in lower
     assert "no logo" in lower
     assert "disclaimer" in lower

@@ -31,9 +31,13 @@ def _default_out_path(draft: Draft) -> Path:
     return root / f"{draft.draft_id}.mp4"
 
 
-def campaign_still(draft: Draft) -> Path | None:
+def campaign_still(draft: Draft, *, source_image: Path | str | None = None) -> Path | None:
     """The composed campaign still only. Never a fixture pack photo."""
-    raw = (draft.image_path or "").strip()
+    raw = (
+        str(source_image).strip()
+        if source_image is not None
+        else (draft.image_path or "").strip()
+    )
     if not raw:
         return None
     path = Path(raw)
@@ -83,7 +87,7 @@ def compose_video(
     source_image: Path | str | None = None,
 ) -> Draft:
     """Animate the campaign still, then overlay logo + disclaimer in code."""
-    still = Path(source_image).resolve() if source_image is not None else campaign_still(draft)
+    still = campaign_still(draft, source_image=source_image)
     if still is None or not still.is_file():
         raise ValueError(PICTURE_FIRST)
     gen = video_gen or build_video_gen(client=client)
