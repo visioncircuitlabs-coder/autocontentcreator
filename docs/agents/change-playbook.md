@@ -12,7 +12,7 @@ Do the smallest change. Tests with the change. User-facing strings through `word
 
 ## Change the photo look
 
-- Prompt: `apps/api/boxes/visual.py` only. Keep “no text, no logo.” Lighting from a **keyword list**, not the full caption.
+- Prompt: `apps/api/boxes/visual.py` only. **Neutrogena:** keep “no text, no logo.” **Lays:** designed type belongs in the prompt (explosion ad); legal still overlays in code. Lighting from a **keyword list**, not the full caption.
 - Overlay: `boxes/art_director.py` (`rasterize_logo`, `apply_locks`, `_to_feed`).
 - Adapter: `adapters/image_imagine.py` (`aspect_ratio`, timeout, URL).
 - Tests: `apps/api/tests/test_visual.py`, `test_art_director.py`.

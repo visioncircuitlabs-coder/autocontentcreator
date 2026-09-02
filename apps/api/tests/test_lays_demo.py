@@ -127,7 +127,7 @@ def test_lays_factory_uses_chile_limon_sku(lays_brand) -> None:
     assert brief["sku"] == "DEMO-CHILE-LIMON"
 
 
-def test_lays_visual_is_campaign_and_logo_allowed(lays_brand) -> None:
+def test_lays_visual_is_explosion_ad_not_pack_shot(lays_brand) -> None:
     from boxes.visual import visual_prompt
 
     prompt = visual_prompt(_draft())
@@ -139,9 +139,36 @@ def test_lays_visual_is_campaign_and_logo_allowed(lays_brand) -> None:
     assert "no logo" not in lower
     assert "hydro boost" not in lower
     assert "white" not in lower or "lid" not in lower
+    assert "explosion" in lower
+    assert "open bag" in lower
+    assert "tangy lime" in lower
+    assert "spicy hit" in lower
+    assert "brush" in lower
+    assert "jalapeño" in lower or "jalapeno" in lower
+    assert "not jalap" in lower.replace("é", "e")
+    assert "shop now" not in lower
+    assert "sponsored" not in lower
+    assert "second" in lower and "wordmark" in lower
+    assert "disclaimer" in lower and "code" in lower
 
 
-def test_lays_compose_does_not_stamp_a_second_wordmark(
+def test_chile_limon_type_is_lime_and_chilli_not_generic(lays_brand) -> None:
+    from boxes.campaign_still import CHILE_CTA, CHILE_HEADLINE, CHILE_SLOGAN, flavour_art
+
+    art = flavour_art("DEMO-CHILE-LIMON")
+    blob = " ".join((*art["headline"], str(art["slogan"]), str(art["cta"]))).lower()
+    assert art["headline"] == CHILE_HEADLINE
+    assert art["slogan"] == CHILE_SLOGAN
+    assert art["cta"] == CHILE_CTA
+    assert "lime" in blob and "spicy" in blob
+    assert "delicious" not in blob
+    assert "shop now" not in blob
+    assert "sponsored" not in blob
+    assert "lay's" not in blob
+    assert "jalap" not in blob
+
+
+def test_lays_compose_is_campaign_frame_not_meta_chrome(
     lays_brand, tmp_path: Path
 ) -> None:
     from boxes.art_director import compose
@@ -151,10 +178,10 @@ def test_lays_compose_does_not_stamp_a_second_wordmark(
     assert path.read_bytes()[:8] == PNG_MAGIC
     img = Image.open(path).convert("RGB")
     assert img.size == (1080, 1350)
+    w, h = img.size
     # Neutrogena navy wordmark must not appear on a Lays still.
     navy = False
-    w, h = img.size
-    for y in range(0, int(h * 0.18), 3):
+    for y in range(0, int(h * 0.22), 3):
         for x in range(0, w, 4):
             px = img.getpixel((x, y))
             if all(abs(px[i] - LOGO_NAVY[i]) <= 18 for i in range(3)):
@@ -163,17 +190,41 @@ def test_lays_compose_does_not_stamp_a_second_wordmark(
         if navy:
             break
     assert navy is False
-    # Disclaimer bar stays (pale pixels at the bottom).
-    pale = False
-    for y in range(int(h * 0.9), h, 2):
-        for x in range(0, w, 6):
+    # Designed headline lives top-left (bright type, not a dark Sponsored chip).
+    white_type = 0
+    for y in range(40, 280, 2):
+        for x in range(20, 560, 2):
             px = img.getpixel((x, y))
+            if px[0] > 200 and px[1] > 200 and px[2] > 200:
+                white_type += 1
+    assert white_type > 400
+    # Burst carries lime + chilli + chip gold, not a flat pack shot.
+    gold = chilli = lime = 0
+    for y in range(int(h * 0.12), int(h * 0.48), 3):
+        for x in range(int(w * 0.12), int(w * 0.88), 3):
+            r, g, b = img.getpixel((x, y))
+            if r > 180 and 90 < g < 220 and b < 100:
+                gold += 1
+            if r > 150 and g < 90 and b < 90:
+                chilli += 1
+            if g > r + 15 and g > 110 and b < 130:
+                lime += 1
+    assert gold > 20
+    assert chilli > 15
+    assert lime > 15
+    # Tiny unofficial legal remains (pale pixels), but the bottom is not a fat grey-black bar.
+    pale = False
+    slab = total = 0
+    for y in range(int(h * 0.96), h, 1):
+        for x in range(0, w, 4):
+            px = img.getpixel((x, y))
+            total += 1
+            if max(px) < 34 and (max(px) - min(px)) < 12:
+                slab += 1
             if px[0] > 180 and px[1] > 180 and px[2] > 180:
                 pale = True
-                break
-        if pale:
-            break
     assert pale is True
+    assert total and (slab / total) < 0.35
 
 
 def test_neutrogena_preview_payload_stays_neutrogena() -> None:

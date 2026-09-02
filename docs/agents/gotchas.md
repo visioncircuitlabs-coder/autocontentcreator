@@ -68,7 +68,7 @@ No `npm` / pip / OpenCode caches on C:. XDG and npm cache on D: under `.cache/`.
 
 ## Overlay vs model
 
-Never put `NEUTROGENA`, claims, or the disclaimer in the Imagine prompt. They are stamped after. If you “just add the logo to the prompt,” you will get misspelled packaging and we lose the legal line.
+Never put `NEUTROGENA`, claims, or the disclaimer in the Imagine prompt. They are stamped after. If you “just add the logo to the prompt,” you will get misspelled packaging and we lose the legal line. **Lays exception:** designed headline/CTA may live in the Imagine prompt (print-ad craft); the unofficial disclaimer still overlays in code as a tiny legal line.
 
 ## Kenvue deck / Cerebras / gstack
 

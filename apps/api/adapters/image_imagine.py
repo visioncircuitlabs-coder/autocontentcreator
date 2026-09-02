@@ -1,4 +1,4 @@
-"""Grok Imagine. Unlocked photo only. Logo and disclaimer overlay happen after."""
+"""Grok Imagine. Unlocked photo; Lays designed type may be in the prompt. Legal overlay happens after."""
 
 from __future__ import annotations
 

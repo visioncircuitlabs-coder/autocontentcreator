@@ -25,7 +25,7 @@ A reviewer must be able to fail a PR from this file. Do not “improve” a lock
 | Disclaimer required on benefit lines | Fixture text in `fixtures/neutrogena/disclaimer.txt` |
 | Writer ≠ judge | `boxes/loop.py`: hard rules + claims judge + craft review. Max 3 rounds, then `flag_human`. |
 | Named human, non-empty reason | API `boxes/review.py` and UI both reject blanks. |
-| Brand marks not in the image model | **Neutrogena:** Imagine prompt has no text, no logo. `art_director.apply_locks` paints `NEUTROGENA` + disclaimer. **Lays (founder override, 2026-09-02):** Lay's logo may go into Imagine because it is on the real pack. Do not stamp a second wordmark. Disclaimer overlay stays in code. See `docs/decisions/024-lays-client-demo.md`. |
+| Brand marks not in the image model | **Neutrogena:** Imagine prompt has no text, no logo. `art_director.apply_locks` paints `NEUTROGENA` + disclaimer. **Lays (founder override, 2026-09-02):** Lay's logo may go into Imagine because it is on the real pack. Designed type (slanted headline, brush CTA) is part of the ad craft in the Imagine prompt and the fallback painter. Do not stamp a second wordmark. Do not glue Meta chrome (Sponsored / Shop now pills). Tiny unofficial disclaimer overlays in code. See `docs/decisions/024-lays-client-demo.md`. |
 
 ## Radar and factory shape
 

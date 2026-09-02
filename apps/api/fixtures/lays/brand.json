@@ -125,14 +125,16 @@
       "market": "IN",
       "channel": "*",
       "title": "IN visual kit (all channels)",
-      "voice": "Campaign-grade snack still. Emerald, lime, chilli. Pack is product truth. Lay's logo may appear because it is on the real bag.",
+      "voice": "Campaign-grade snack still. Open bag, lime-and-chilli explosion, designed type. Pack is product truth. Lay's logo may appear because it is on the real bag.",
       "do": [
-        "Ask Imagine for an Instagram/OOH campaign still, not a catalog JPEG",
-        "Let the real pack carry the Lay's mark; do not stamp a second wordmark in code"
+        "Ask Imagine for a print-ad explosion still: open Chile Limón bag, lime + red chilli (not jalapeño), slanted distressed headline, brush-stroke CTA",
+        "Let the real pack carry the Lay's mark; do not stamp a second wordmark in code",
+        "Keep the unofficial line as tiny legal in code, not a fat bar"
       ],
       "dont": [
         "Do not paste a raw pack JPEG as the ad",
-        "Do not invent a second floating LAY'S logo beside the bag"
+        "Do not invent a second floating LAY'S logo beside the bag",
+        "Do not glue rounded Sponsored chips or Shop-now pills on the still"
       ],
       "verify_state": "verified",
       "expires_at": "2027-09-02T00:00:00+05:30",

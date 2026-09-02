@@ -59,8 +59,45 @@ def _to_feed(img: Image.Image) -> Image.Image:
     return scaled.crop((left, top, left + tw, top + th))
 
 
+def _paint_legal(img: Image.Image, disc: str, *, tiny: bool) -> None:
+    """Stamp the fixture disclaimer. Lays: whisper line, not a fat black bar."""
+    draw = ImageDraw.Draw(img)
+    w, h = img.size
+    if tiny:
+        font = _font(13)
+        pad = 16
+        lines = _wrap(draw, disc, font, w - pad * 2) or [disc]
+        line_h = 0
+        for line in lines:
+            box = draw.textbbox((0, 0), line, font=font)
+            line_h = max(line_h, box[3] - box[1])
+        bar_h = 6 + len(lines) * (line_h + 2) + 6
+        bar = Image.new("RGBA", (w, bar_h), (8, 18, 12, 120))
+        img.alpha_composite(bar, (0, h - bar_h))
+        y = h - bar_h + 6
+        for line in lines:
+            draw.text((pad, y), line, font=font, fill=(220, 224, 210, 220))
+            y += line_h + 2
+        return
+    pad = max(20, w // 28)
+    font = _font(max(16, h // 54))
+    lines = _wrap(draw, disc, font, w - pad * 2) or [disc]
+    line_h = 0
+    for line in lines:
+        box = draw.textbbox((0, 0), line, font=font)
+        line_h = max(line_h, box[3] - box[1])
+    bar_h = pad + len(lines) * (line_h + 6) + pad
+    bar_h = min(max(bar_h, 56), h // 4)
+    bar = Image.new("RGBA", (w, bar_h), (12, 14, 22, 220))
+    img.alpha_composite(bar, (0, h - bar_h))
+    y = h - bar_h + pad
+    for line in lines:
+        draw.text((pad, y), line, font=font, fill=(232, 234, 240, 255))
+        y += line_h + 6
+
+
 def apply_locks(image_path: Path, *, logo_path: Path | None = None) -> None:
-    """Overlay brand locks in code. Lays: disclaimer only — pack already has the mark."""
+    """Overlay brand locks in code. Lays: tiny legal only — pack already has the mark."""
     pack = load_brand_pack()
     dest = Path(image_path)
     try:
@@ -85,22 +122,7 @@ def apply_locks(image_path: Path, *, logo_path: Path | None = None) -> None:
     if pack.get("overlay_disclaimer", True):
         disc = (load_disclaimer() or "").strip()
         if disc:
-            draw = ImageDraw.Draw(img)
-            font = _font(max(16, h // 54))
-            lines = _wrap(draw, disc, font, w - pad * 2) or [disc]
-            line_h = 0
-            for line in lines:
-                box = draw.textbbox((0, 0), line, font=font)
-                line_h = max(line_h, box[3] - box[1])
-            bar_h = pad + len(lines) * (line_h + 6) + pad
-            bar_h = min(max(bar_h, 56), h // 4)
-            bar = Image.new("RGBA", (w, bar_h), (12, 14, 22, 220))
-            img.alpha_composite(bar, (0, h - bar_h))
-            y = h - bar_h + pad
-            fill = (232, 234, 240, 255)
-            for line in lines:
-                draw.text((pad, y), line, font=font, fill=fill)
-                y += line_h + 6
+            _paint_legal(img, disc, tiny=pack.get("slug") == "lays")
 
     dest.parent.mkdir(parents=True, exist_ok=True)
     img.convert("RGB").save(dest, "PNG")
@@ -153,8 +175,8 @@ def compose(
 ) -> Draft:
     """Generate the picture, then overlay locks in code.
 
-    Lays stub/fallback paints a campaign still from the real pack photo so the
-    phone preview is never a raw catalog JPEG or a dark placeholder card.
+    Lays stub/fallback paints an explosion campaign still from the real pack
+    photo — designed type, no second wordmark, no Meta chrome.
     """
     pack = load_brand_pack()
     gen = image_gen or build_image_gen(client=client)
