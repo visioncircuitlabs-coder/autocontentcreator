@@ -18,7 +18,7 @@ from boxes.hard_rules import (
     without_disclaimer,
 )
 from boxes.product_facts import compare_claims
-from boxes.products import product_label
+from boxes.products import hero_sku, product_label
 from boxes.learning import get_hard_bans, learning_block, normalize_text
 from boxes.rubric import MODE_PROMPT_BLOCK, RUBRIC_VOICE, find_cliches, score_dimensions
 from boxes.strategist import contains_disease, make_concept
@@ -33,11 +33,18 @@ MAX_DRAFTS = 3
 # Best-of-N: ask for N candidates, ship only the top-scored few.
 CHAT_ASK = 6
 DEFAULT_APPROVED = "dermatologist tested"
+LAYS_DEFAULT_APPROVED = "lime and chilli flavour"
 DEFAULT_EXAMPLES = (
     "Double cleanse after a humid day. Hydro Boost after — dermatologist tested.",
     "AC all day, then monsoon air. Short night routine: cleanse, then Hydro Boost. Dermatologist tested.",
     "If skin feels tight after the commute, Hydro Boost at night. Dermatologist tested.",
 )
+LAYS_DEFAULT_EXAMPLES = (
+    "4pm, AC, then this: Chile Limón. Lime first, chilli after.",
+    "Ridged chips. Lime heat. One green pack on the desk.",
+    "Monsoon evening. Tear Chile Limón — lime and chilli flavour.",
+)
+COPY_CHAT_ATTEMPTS = 2
 
 COPY_SYSTEM = (
     "You write Instagram captions for a Neutrogena-like skincare brand in India. "
@@ -77,7 +84,11 @@ def copy_system() -> str:
             "Prefer the proven patterns of the posts inside <winners>, if present; never "
             "reuse any phrasing listed in <avoid>. "
             "Each caption is a post a person could paste. Tie it to <idea>. "
-            "Name the packet they picked. Use only approved claim phrases from <approved>. "
+            "Name the packet they picked from <packet>. Write Grok-original "
+            "Instagram lines — distinct openings, not three near-copies, not a "
+            "paraphrase of the <examples> fixture. Code appends the unofficial "
+            "disclaimer; do not name PepsiCo as the advertiser. "
+            "Use only approved claim phrases from <approved>. "
             f"Return JSON only: {{\\\"captions\\\": [string x {CHAT_ASK}]}} — each a distinct attempt. "
             "Never use disease names. Never use health claims. "
             "Never use: cures, heals, best, only, guaranteed, #1, healthy, nutritious. "
@@ -168,11 +179,12 @@ def _product_label(sku: str) -> str:
 
 
 def _approved_phrase(brief: Brief | None) -> str:
-    if brief is None:
-        return DEFAULT_APPROVED
-    for row in brief.claims:
-        if row.get("status") == "approved" and str(row.get("text") or "").strip():
-            return str(row["text"]).strip()
+    if brief is not None:
+        for row in brief.claims:
+            if row.get("status") == "approved" and str(row.get("text") or "").strip():
+                return str(row["text"]).strip()
+    if load_brand_pack().get("slug") == "lays":
+        return LAYS_DEFAULT_APPROVED
     return DEFAULT_APPROVED
 
 
@@ -327,7 +339,11 @@ def example_captions(brief: Brief | None) -> list[str]:
                 text = str(item).strip()
                 if text and text not in found:
                     found.append(text)
-    return found[:3] or list(DEFAULT_EXAMPLES)
+    return found[:3] or (
+        list(LAYS_DEFAULT_EXAMPLES)
+        if load_brand_pack().get("slug") == "lays"
+        else list(DEFAULT_EXAMPLES)
+    )
 
 
 def _idea_line(concept: Concept, brief: Brief | None) -> str:
@@ -364,6 +380,7 @@ def _from_chat(
         "<examples>\n"
         + "\n---\n".join(examples)
         + "\n</examples>\n"
+        f"<packet>\n{_product_label((brief.sku if brief else '') or hero_sku())}\n</packet>\n"
         f"<idea>\n{_idea_line(concept, brief)}\n</idea>\n"
         f"<approved>\n{approved}\n</approved>\n"
         f"<concept>\n{concept.model_dump_json()}\n</concept>\n"
@@ -371,14 +388,21 @@ def _from_chat(
         f"<reasons>\n{reasons}\n</reasons>"
         + (f"\n<learning>\n{learn_text}\n</learning>" if learn_text else "")
     )
-    try:
-        out = chat.complete_json(copy_system(), user, CopyOut)
-        if not isinstance(out, CopyOut):
-            out = CopyOut.model_validate(out)
-        return [item.strip() for item in out.captions if item and str(item).strip()]
-    except Exception as exc:
-        logger.warning("copywriter chat failed: %s", exc)
-        return []
+    last: list[str] = []
+    for attempt in range(1, COPY_CHAT_ATTEMPTS + 1):
+        try:
+            out = chat.complete_json(copy_system(), user, CopyOut)
+            if not isinstance(out, CopyOut):
+                out = CopyOut.model_validate(out)
+            return [item.strip() for item in out.captions if item and str(item).strip()]
+        except Exception as exc:
+            logger.warning(
+                "copywriter chat failed (attempt %s/%s): %s",
+                attempt,
+                COPY_CHAT_ATTEMPTS,
+                exc,
+            )
+    return last
 
 
 def _unique(captions: list[str]) -> list[str]:
@@ -496,20 +520,26 @@ def run_copywriter(
     chat: ChatModel | None = None,
     seed_caption: str | None = None,
 ) -> list[Draft]:
-    """2–3 variants. Chat optional; template fallback if no key or thin output."""
+    """2–3 variants. Chat writes when a model is passed; templates only if chat is None."""
     reasons = list(judge_reasons or [])
     brief = _optional_brief(concept.brief_id)
     approved = _approved_phrase(brief)
     disc = load_disclaimer()
-    product = _product_label(brief.sku if brief else "DEMO-HYDRO-BOOST")
+    sku = (brief.sku if brief else "") or hero_sku()
+    product = _product_label(sku)
     banned = _hard_bans()
-    templates = _template_captions(
-        concept,
-        approved=approved,
-        disc=disc,
-        product=product,
-        reasons=reasons,
-        banned=banned,
+    use_templates = chat is None
+    templates = (
+        _template_captions(
+            concept,
+            approved=approved,
+            disc=disc,
+            product=product,
+            reasons=reasons,
+            banned=banned,
+        )
+        if use_templates
+        else []
     )
 
     raw: list[str] = []
@@ -546,18 +576,25 @@ def run_copywriter(
         )
         seed_based = [row for row in seed_based if _is_postable(row, disc)]
         ordered = _unique(seed_based + finished)
-        if len(ordered) < MIN_DRAFTS:
+        if len(ordered) < MIN_DRAFTS and use_templates:
             ordered = _unique(ordered + templates)
         captions = ordered[:MAX_DRAFTS]
     elif len(finished) >= MIN_DRAFTS:
         captions = _unique(finished)[:MAX_DRAFTS]
-    else:
+    elif use_templates:
         ranked = _rank(_unique(finished + templates), approved=approved)
         captions = ranked[:MAX_DRAFTS]
+    else:
+        captions = _unique(finished)[:MAX_DRAFTS]
 
-    if len(captions) < MIN_DRAFTS:
+    if len(captions) < MIN_DRAFTS and use_templates:
         logger.warning("copywriter produced %s captions; padding from templates", len(captions))
         captions = _unique(captions + templates)[:MAX_DRAFTS]
+    elif chat is not None and len(captions) < MIN_DRAFTS:
+        logger.warning(
+            "copywriter produced %s captions from chat; not padding templates",
+            len(captions),
+        )
     return _to_drafts(captions, concept=concept, round_no=round)
 
 

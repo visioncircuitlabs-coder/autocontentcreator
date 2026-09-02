@@ -57,7 +57,7 @@ Do the smallest change. Tests with the change. User-facing strings through `word
 
 ## Lengthen timeouts
 
-You are trading Grok cost and a 5-minute spinner. Touch all of: LiteLLM 20s, Imagine 90s, researcher budget, Next `maxDuration` + `PROXY_MS`. Then walk Look and Make on `/engine`, not only pytest.
+You are trading Grok cost and a 5-minute spinner. Touch all of: LiteLLM `CHAT_TIMEOUT_S` (default 90), Imagine 90s, researcher budget, Next `maxDuration` + `PROXY_MS`. Then walk Look and Make on `/engine`, not only pytest.
 
 ## New box
 

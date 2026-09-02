@@ -8,10 +8,42 @@ import os
 
 from pydantic import BaseModel
 
-from adapters.resilience import retry_call
+from adapters.resilience import is_transient, retry_call
 from harness.breaker import CHAT_BREAKER
 
 logger = logging.getLogger(__name__)
+
+DEFAULT_CHAT_TIMEOUT_S = 90.0
+
+
+def chat_timeout_s() -> float:
+    """Seconds for one LiteLLM completion. Override with CHAT_TIMEOUT_S."""
+    raw = (os.environ.get("CHAT_TIMEOUT_S") or "").strip()
+    try:
+        value = float(raw) if raw else DEFAULT_CHAT_TIMEOUT_S
+    except ValueError:
+        value = DEFAULT_CHAT_TIMEOUT_S
+    return max(1.0, value)
+
+
+def is_timeout(exc: Exception) -> bool:
+    """Slow completions. Copywriter retries these once; the adapter does not."""
+    if isinstance(exc, TimeoutError):
+        return True
+    try:
+        import httpx
+
+        if isinstance(exc, httpx.TimeoutException):
+            return True
+    except ImportError:
+        pass
+    return "timeout" in type(exc).__name__.lower()
+
+
+def _retry_chat(exc: Exception) -> bool:
+    if is_timeout(exc):
+        return False
+    return is_transient(exc)
 
 
 def build_chat() -> "LiteLLMChat | None":
@@ -39,6 +71,7 @@ class LiteLLMChat:
         import litellm
 
         schema_hint = json.dumps(schema.model_json_schema())
+        timeout = chat_timeout_s()
 
         def _call():
             return litellm.completion(
@@ -51,10 +84,12 @@ class LiteLLMChat:
                     {"role": "user", "content": user},
                 ],
                 response_format={"type": "json_object"},
-                timeout=20,
+                timeout=timeout,
             )
 
-        response = retry_call(lambda: CHAT_BREAKER.call(_call))
+        # One completion = one breaker trial. Timeouts are not retried here
+        # (copywriter retries once at 90s). 5xx still retries inside this call.
+        response = CHAT_BREAKER.call(lambda: retry_call(_call, retry_if=_retry_chat))
         from harness import chat_wallet
 
         chat_wallet.record(self.model, getattr(response, "usage", None))

@@ -36,6 +36,7 @@ Template: `.env.example`. Local: `.env` (gitignored).
 | `SQLITE_PATH` | SQLite file. Compose forces `/data/demo.db` |
 | `LOG_PATH` | JSONL. Compose `/data/logs/machine.jsonl` |
 | `CHAT_MODEL` | Default `xai/grok-4.6` |
+| `CHAT_TIMEOUT_S` | LiteLLM completion timeout. Default `90` |
 | `XAI_API_KEY` | Grok chat + Imagine + optional Grok web fetch |
 | `GEMINI_API_KEY` / `GROQ_API_KEY` | Alternate chat |
 | `IMAGE_GEN_MODE` | `imagine` \| `stub` \| `http` |

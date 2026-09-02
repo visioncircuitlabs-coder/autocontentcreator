@@ -207,6 +207,51 @@ def test_copywriter_keeps_model_lines_and_drops_stage_notes() -> None:
     assert disc.split(".")[0].lower() in blob
 
 
+def test_copywriter_retries_once_then_keeps_model_lines() -> None:
+    from boxes.copywriter import COPY_CHAT_ATTEMPTS, CopyOut, run_copywriter
+    from boxes.hard_rules import load_disclaimer
+
+    calls = {"n": 0}
+    disc = load_disclaimer()
+
+    class Flaky:
+        def complete_json(self, system: str, user: str, schema: type) -> BaseModel:
+            calls["n"] += 1
+            if calls["n"] == 1:
+                raise TimeoutError("slow grok")
+            return CopyOut(
+                captions=[
+                    "Double cleanse at night. Hydro Boost after — dermatologist tested.",
+                    "Humid commute, then a short PM routine. Hydro Boost is dermatologist tested.",
+                    "Night shelf, one gel. Hydro Boost, dermatologist tested.",
+                ]
+            )
+
+    brief_id = _seed_report()
+    drafts = run_copywriter(_concept(brief_id), round=1, chat=Flaky())
+    assert calls["n"] == COPY_CHAT_ATTEMPTS
+    blob = _blob(drafts)
+    assert "double cleanse" in blob
+    assert "night gel step after cleansing" not in blob.lower()
+    assert disc.split(".")[0].lower() in blob
+
+
+def test_templates_only_when_there_is_no_chat() -> None:
+    from boxes.copywriter import run_copywriter
+
+    class Dead:
+        def complete_json(self, system: str, user: str, schema: type) -> BaseModel:
+            raise TimeoutError("slow grok")
+
+    brief_id = _seed_report()
+    with_chat = run_copywriter(_concept(brief_id), round=1, chat=Dead())
+    assert with_chat == []
+
+    no_chat = run_copywriter(_concept(brief_id), round=1, chat=None)
+    assert 2 <= len(no_chat) <= 3
+    assert any("hydro boost" in item.caption.lower() for item in no_chat)
+
+
 def test_copywriter_rewrite_uses_numbered_reasons() -> None:
     from boxes.copywriter import run_copywriter
 

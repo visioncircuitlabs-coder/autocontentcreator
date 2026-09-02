@@ -8,7 +8,7 @@ import pytest
 from fastapi.testclient import TestClient
 from PIL import Image
 
-from models import Draft
+from models import Concept, Draft
 
 PNG_MAGIC = b"\x89PNG\r\n\x1a\n"
 LOGO_NAVY = (11, 61, 145)
@@ -125,6 +125,51 @@ def test_lays_factory_uses_chile_limon_sku(lays_brand) -> None:
 
     brief = client.get(f"/briefs/{drafts[0]['brief_id']}").json()
     assert brief["sku"] == "DEMO-CHILE-LIMON"
+
+
+def test_lays_copy_is_grok_written_not_fixture(lays_brand) -> None:
+    from boxes.copywriter import CopyOut, run_copywriter
+    from boxes.hard_rules import load_disclaimer, without_disclaimer
+
+    disc = load_disclaimer()
+    calls = {"n": 0}
+
+    class Grok:
+        def complete_json(self, system: str, user: str, schema: type) -> CopyOut:
+            calls["n"] += 1
+            blob = f"{system}\n{user}".lower()
+            assert schema is CopyOut
+            assert "<packet>" in user
+            assert "chile" in blob or "limón" in blob or "limon" in blob
+            return CopyOut(
+                captions=[
+                    "4pm AC. Chile Limón — lime hit, then the chilli. Ridged potato chips.",
+                    "Train home. Tear Chile Limón. Lime and chilli flavour, then crunch.",
+                    "Monsoon desk. One green pack. Chile Limón, lime heat after the chilli.",
+                ]
+            )
+
+    concept = Concept(
+        concept_id="con_lays_copy",
+        brief_id="b1",
+        angle="4pm desk crunch",
+        persona="office 4pm snacker",
+        claim_safe_pain="4pm desk slump",
+        channel="instagram",
+        indic_register="hinglish",
+        idea="Chile Limón lime then chilli for India evenings.",
+    )
+    drafts = run_copywriter(concept, round=1, chat=Grok())
+    assert calls["n"] == 1
+    assert len(drafts) >= 2
+    bodies = [without_disclaimer(row.caption, disc).strip().lower() for row in drafts]
+    assert len(set(bodies)) >= 2
+    blob = " ".join(row.caption for row in drafts).lower()
+    assert "chile" in blob
+    assert "ridged crunch, lime first, chilli after" not in blob
+    assert "unofficial" in blob or "pepsico" in blob
+    assert "neutrogena" not in blob
+    assert "dermatologist" not in blob
 
 
 def test_lays_visual_is_explosion_ad_not_pack_shot(lays_brand) -> None:

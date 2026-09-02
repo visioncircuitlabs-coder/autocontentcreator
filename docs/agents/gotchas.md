@@ -46,9 +46,9 @@ Caption words like monsoon/humid leaked into a cinematic still. `visual_prompt` 
 
 Feed is 1080×1350. CSS `object-fit: contain` + `aspect-ratio: 4/5`. Cover on a square frame sliced the disclaimer.
 
-## Chat 20s timeout
+## Chat 90s timeout
 
-LiteLLM `timeout=20`. Craft/copy often fail open to templates or craft PASS. That is why you still get a walkable caption when Grok is slow. Do not raise this blindly without re-timing Look.
+LiteLLM default `timeout=90` (`CHAT_TIMEOUT_S`). Copywriter retries once at 90s before giving up. Templates only when there is no chat (empty keys). One slow Grok call must not open `CHAT_BREAKER` and dump fixture captions. Restart the API after changing the timeout.
 
 ## Only five Grok scores
 
