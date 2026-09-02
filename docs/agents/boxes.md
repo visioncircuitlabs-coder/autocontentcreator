@@ -66,7 +66,7 @@ visual_prompt(draft)     4:5 Instagram beauty ad, white lid, aqua gel, marble
 ImagineImageGen          grok-imagine-image-2.0, aspect_ratio 3:4, 2k, 90s
                          (crop-cover to 4:5 feed in apply_locks)
 apply_locks              Neutrogena: Pillow wordmark + disclaimer bar
-                         Lays: tiny unofficial legal only (no second wordmark)
+                         Lays: no overlay — pack mark + designed type only
                          canvas 1080×1350
 ```
 

@@ -25,7 +25,7 @@ A reviewer must be able to fail a PR from this file. Do not “improve” a lock
 | Disclaimer required on benefit lines | Fixture text in `fixtures/neutrogena/disclaimer.txt` |
 | Writer ≠ judge | `boxes/loop.py`: hard rules + claims judge + craft review. Max 3 rounds, then `flag_human`. |
 | Named human, non-empty reason | API `boxes/review.py` and UI both reject blanks. |
-| Brand marks not in the image model | **Neutrogena:** Imagine prompt has no text, no logo. `art_director.apply_locks` paints `NEUTROGENA` + disclaimer. **Lays (founder override, 2026-09-02):** Lay's logo may go into Imagine because it is on the real pack. Designed type (slanted headline, brush CTA) is part of the ad craft in the Imagine prompt and the fallback painter. Do not stamp a second wordmark. Do not glue Meta chrome (Sponsored / Shop now pills). Tiny unofficial disclaimer overlays in code. See `docs/decisions/024-lays-client-demo.md`. |
+| Brand marks not in the image model | **Neutrogena:** Imagine prompt has no text, no logo. `art_director.apply_locks` paints `NEUTROGENA` + disclaimer. **Lays (founder override, 2026-09-02):** Lay's logo may go into Imagine because it is on the real pack. Designed type (slanted headline TANGY LIME. / SPICY HIT., brush CTA DARE A BITE?) is required in the Imagine prompt and the fallback painter. Do not stamp a second wordmark. Do not glue Meta chrome. **Do not burn unofficial legal onto the Lays still** — unofficial stays in the walk, ZIP, and captions. See `docs/decisions/024-lays-client-demo.md`. |
 
 ## Radar and factory shape
 
@@ -65,7 +65,7 @@ Do not collapse these:
 - A second approval path
 - Publishing adapters (Meta, Buffer, later)
 - CrewAI / multi-agent orchestrators as the belt
-- Putting logo/disclaimer/claims into Imagine or any image prompt (**except unofficial Lay's**, where the pack logo may be in the Imagine prompt; disclaimer still overlays in code)
+- Putting logo/disclaimer/claims into Imagine or any image prompt (**except unofficial Lay's**, where the pack logo and designed headline/CTA may be in the Imagine prompt; no unofficial strip on the still)
 - Generating photos during Look or during `Make a post`
 - Auto-approve, including “80% auto-approve”
 - New paid vendors

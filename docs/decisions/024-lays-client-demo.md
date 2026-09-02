@@ -20,7 +20,7 @@ Older invariants said brand marks must not go into Imagine. The founder overrode
 - Ship a full unofficial Lay's pack next to `fixtures/lays/products/chile-limon.jpg`.
 - `GET /brand` and `GET /brand/products` drive the walk so Neutrogena cannot leak into a Lays preview.
 - Factory takes the chosen SKU. Five India flavours in the picker; Chile Limón is the hero. No sixth SKU.
-- Imagine may include the Lay's logo because it is on the real pack. Overlay stamps a **tiny** unofficial disclaimer only — never a second wordmark, never a fat black bar.
+- Imagine may include the Lay's logo because it is on the real pack. Designed type (TANGY LIME. / SPICY HIT., DARE A BITE?) is required in the still. **No unofficial strip on the picture.** Unofficial lives in the walk, ZIP, and captions. Never a second wordmark.
 - The still is a snack **ad**: open bag, lime + red chilli explosion, slanted distressed headline, brush-stroke CTA. Not a pack JPEG with Meta chrome (Sponsored chips, Shop-now pills). Chile Limón, not Jalapeño Lime.
 - Stub/Imagine-fail paints that same craft in `campaign_still.py` from the real pack photo.
 

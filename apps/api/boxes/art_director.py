@@ -59,26 +59,10 @@ def _to_feed(img: Image.Image) -> Image.Image:
     return scaled.crop((left, top, left + tw, top + th))
 
 
-def _paint_legal(img: Image.Image, disc: str, *, tiny: bool) -> None:
-    """Stamp the fixture disclaimer. Lays: whisper line, not a fat black bar."""
+def _paint_legal(img: Image.Image, disc: str) -> None:
+    """Stamp the fixture disclaimer bar. Not used on Lays stills."""
     draw = ImageDraw.Draw(img)
     w, h = img.size
-    if tiny:
-        font = _font(13)
-        pad = 16
-        lines = _wrap(draw, disc, font, w - pad * 2) or [disc]
-        line_h = 0
-        for line in lines:
-            box = draw.textbbox((0, 0), line, font=font)
-            line_h = max(line_h, box[3] - box[1])
-        bar_h = 6 + len(lines) * (line_h + 2) + 6
-        bar = Image.new("RGBA", (w, bar_h), (8, 18, 12, 120))
-        img.alpha_composite(bar, (0, h - bar_h))
-        y = h - bar_h + 6
-        for line in lines:
-            draw.text((pad, y), line, font=font, fill=(220, 224, 210, 220))
-            y += line_h + 2
-        return
     pad = max(20, w // 28)
     font = _font(max(16, h // 54))
     lines = _wrap(draw, disc, font, w - pad * 2) or [disc]
@@ -97,7 +81,7 @@ def _paint_legal(img: Image.Image, disc: str, *, tiny: bool) -> None:
 
 
 def apply_locks(image_path: Path, *, logo_path: Path | None = None) -> None:
-    """Overlay brand locks in code. Lays: tiny legal only — pack already has the mark."""
+    """Overlay brand locks in code. Lays: no wordmark, no unofficial strip on the still."""
     pack = load_brand_pack()
     dest = Path(image_path)
     try:
@@ -119,10 +103,12 @@ def apply_locks(image_path: Path, *, logo_path: Path | None = None) -> None:
         )
         img.alpha_composite(logo, (pad, pad))
 
-    if pack.get("overlay_disclaimer", True):
+    # Lays: founder — no legal strip on the ad image. Unofficial lives in the walk/ZIP.
+    paint_legal = pack.get("overlay_disclaimer", True) and pack.get("slug") != "lays"
+    if paint_legal:
         disc = (load_disclaimer() or "").strip()
         if disc:
-            _paint_legal(img, disc, tiny=pack.get("slug") == "lays")
+            _paint_legal(img, disc)
 
     dest.parent.mkdir(parents=True, exist_ok=True)
     img.convert("RGB").save(dest, "PNG")

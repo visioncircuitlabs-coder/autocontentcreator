@@ -37,6 +37,7 @@ def test_lays_pack_is_unofficial_and_complete(lays_brand) -> None:
     assert pack["hero_sku"] == "DEMO-CHILE-LIMON"
     assert pack["logo_in_imagine"] is True
     assert pack["overlay_wordmark"] is False
+    assert pack["overlay_disclaimer"] is False
     blob = " ".join(
         [
             pack["disclaimer"],
@@ -194,7 +195,11 @@ def test_lays_visual_is_explosion_ad_not_pack_shot(lays_brand) -> None:
     assert "shop now" not in lower
     assert "sponsored" not in lower
     assert "second" in lower and "wordmark" in lower
-    assert "disclaimer" in lower and "code" in lower
+    assert "dare a bite" in lower
+    assert "required" in lower and "type" in lower
+    assert "added in code" not in lower
+    assert "legal" in lower
+    assert "do not paint legal" in lower or "not legal" in lower
 
 
 def test_chile_limon_type_is_lime_and_chilli_not_generic(lays_brand) -> None:
@@ -257,8 +262,8 @@ def test_lays_compose_is_campaign_frame_not_meta_chrome(
     assert gold > 20
     assert chilli > 15
     assert lime > 15
-    # Tiny unofficial legal remains (pale pixels), but the bottom is not a fat grey-black bar.
-    pale = False
+    # Founder: no unofficial strip on the ad image.
+    pale_legal = 0
     slab = total = 0
     for y in range(int(h * 0.96), h, 1):
         for x in range(0, w, 4):
@@ -266,9 +271,9 @@ def test_lays_compose_is_campaign_frame_not_meta_chrome(
             total += 1
             if max(px) < 34 and (max(px) - min(px)) < 12:
                 slab += 1
-            if px[0] > 180 and px[1] > 180 and px[2] > 180:
-                pale = True
-    assert pale is True
+            if px[0] > 200 and px[1] > 200 and px[2] > 200:
+                pale_legal += 1
+    assert pale_legal < 40
     assert total and (slab / total) < 0.35
 
 

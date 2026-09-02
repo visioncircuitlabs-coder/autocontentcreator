@@ -31,7 +31,7 @@ For the Lays walk only:
 
 - Lay's logo **may** go into Grok Imagine. The pack photo is product truth.
 - Campaign-grade Instagram/OOH stills. Open bag + lime/chilli explosion + designed type. Do not use the raw pack JPEG as the ad. Do not glue Meta chrome on a pack shot.
-- Do not stamp a second LAY'S wordmark onto the pack. Tiny unofficial legal stays in code (not a fat bar).
+- Do not stamp a second LAY'S wordmark onto the pack. Do not burn unofficial legal onto the still.
 - Neutrogena must not appear on the Lays phone preview.
 
 ## What Hermes was asked to do

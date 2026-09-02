@@ -266,7 +266,13 @@ def _distress(layer: Image.Image, seed: int = 5) -> Image.Image:
     return layer
 
 
-def _text_layer(lines: tuple[str, ...] | str, size: int, *, angle: float) -> Image.Image:
+def _text_layer(
+    lines: tuple[str, ...] | str,
+    size: int,
+    *,
+    angle: float,
+    fills: tuple[tuple[int, int, int, int], ...] | None = None,
+) -> Image.Image:
     rows = lines if isinstance(lines, tuple) else (lines,)
     font = _typeface(size, bold=True)
     probe = ImageDraw.Draw(Image.new("RGBA", (8, 8)))
@@ -284,9 +290,12 @@ def _text_layer(lines: tuple[str, ...] | str, size: int, *, angle: float) -> Ima
     )
     d = ImageDraw.Draw(img, "RGBA")
     y = 8
-    for line, tw, th in zip(rows, widths, heights, strict=True):
+    for index, (line, tw, th) in enumerate(zip(rows, widths, heights, strict=True)):
+        fill = (255, 255, 255, 255)
+        if fills and index < len(fills):
+            fill = fills[index]
         d.text((10, y + 5), line, font=font, fill=(0, 0, 0, 150))
-        d.text((6, y), line, font=font, fill=(255, 255, 255, 255))
+        d.text((6, y), line, font=font, fill=fill)
         y += th + gap
     return _distress(img).rotate(angle, resample=Image.Resampling.BICUBIC, expand=True)
 
@@ -330,7 +339,12 @@ def _brush_banner(text: str) -> Image.Image:
 def _designed_type(canvas: Image.Image, art: dict[str, object]) -> None:
     headline = art["headline"]
     assert isinstance(headline, tuple)
-    lockup = _text_layer(headline, 76, angle=12)
+    lockup = _text_layer(
+        headline,
+        76,
+        angle=12,
+        fills=((255, 255, 255, 255), (*LIME, 255)),
+    )
     canvas.alpha_composite(lockup, (8, 36))
     slogan = _text_layer(str(art["slogan"]), 30, angle=-8)
     canvas.alpha_composite(slogan, (canvas.width - slogan.width - 18, 760))
