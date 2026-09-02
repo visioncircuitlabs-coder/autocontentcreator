@@ -322,15 +322,15 @@ def _brush_banner(text: str) -> Image.Image:
         ]
         d.polygon([*top, *bot], fill=fill)
 
-    _smear((70, 132, 32, 240), 14, 0)
+    _smear((132, 186, 36, 250), 14, 0)
     rng.seed(4)
-    _smear((118, 184, 48, 200), 18, 4)
+    _smear((*LIME, 235), 18, 4)
     rng.seed(2)
-    _smear((154, 48, 40, 70), 10, 8)
+    _smear((196, 40, 36, 40), 10, 8)
     tx = (w - tw) // 2 - box[0] + 8
     ty = (h - th) // 2 - box[1] - 2
-    d.text((tx + 2, ty + 2), text, font=font, fill=(20, 40, 16, 180))
-    d.text((tx, ty), text, font=font, fill=(255, 255, 255, 255))
+    d.text((tx + 2, ty + 2), text, font=font, fill=(8, 22, 8, 140))
+    d.text((tx, ty), text, font=font, fill=(18, 36, 14, 255))
     chilli = _chilli(28, 18)
     img.alpha_composite(chilli, (8, h // 2 - chilli.height // 2))
     return img.rotate(-11, resample=Image.Resampling.BICUBIC, expand=True)
