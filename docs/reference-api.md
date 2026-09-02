@@ -2,7 +2,7 @@
 
 FastAPI app: `apps/api/main.py`. Title `Content Machine`. CORS allows localhost/127.0.0.1 on ports **3000** and **3050**.
 
-Base URL for the walk: `http://localhost:3050/engine` (Next proxy, 300s). Direct: `http://127.0.0.1:8000`.
+Base URL for the walk: `http://localhost:3050/engine` (Next proxy, 900s). Direct: `http://127.0.0.1:8000`.
 
 Errors: JSON `{"error": "<friendly sentence>"}`. Typical status 400, 404, 429, 500, 502, 504. No stack traces.
 
@@ -85,7 +85,9 @@ Returns one `Draft` with `image_path` set. Always regenerates via `visual_prompt
 { "draft_id": "dft_…" }
 ```
 
-Returns one `Draft` with `video_path` set. Always regenerates via `video_prompt` then coded overlay. Does **not** publish.
+Returns one `Draft` with `video_path` set. Requires a campaign still on the draft (make the picture first). Image-to-video from that still, then coded overlay. Does **not** publish.
+
+400: `"Make the picture first. Then we can make a short video."`
 
 500: `"Could not make that short video. Please try again."`
 

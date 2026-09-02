@@ -17,7 +17,7 @@ import urllib.request
 from typing import Any
 
 BASE = "http://127.0.0.1:8000"
-TIMEOUT = 180
+TIMEOUT = 900
 
 
 def _req(

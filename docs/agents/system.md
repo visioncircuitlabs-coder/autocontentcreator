@@ -49,7 +49,7 @@ apps/api/                 FastAPI engine
   fixtures/neutrogena/    unofficial brand pack
 apps/web/                 Next.js App Router
   app/page.tsx            WalkApp (the product)
-  app/engine/[...path]    300s proxy → API
+  app/engine/[...path]    900s proxy → API
   walk/                   five-beat UI
   desk/                   API client, words, ops strip, review helpers
 infra/docker-compose.yml  api :8000, web :3050→3000
@@ -79,12 +79,12 @@ paint_chosen         after a person picks a version
   visual_prompt      4:5 bright water-gel ad; lighting from caption keywords only
   compose            ImageGen then Pillow wordmark + disclaimer bar
 
-film_chosen          after (or beside) the still — not inside run_factory
-  video_prompt       ~5s product clip of the same jar; no text/logo/disclaimer
-  compose_video      VideoGen then ffmpeg overlay of the coded legal sheet
+film_chosen          after the still — refuses if there is no campaign still
+  video_prompt       motion from that still; no new text/logo/disclaimer in the prompt
+  compose_video      image-to-video from the still, then ffmpeg overlay of the coded legal sheet
 ```
 
-Caps: `MAX_DEEP_DIVES = 1`, `MAX_FACTORY_CONCEPTS = 1`, `MAX_CHAT_SCORES = 5`, chat timeout 20s, Imagine timeout 90s, Imagine video poll 180s, Next proxy 300s, radar fetch rate 6/min/host.
+Caps: `MAX_DEEP_DIVES = 1`, `MAX_FACTORY_CONCEPTS = 1`, `MAX_CHAT_SCORES = 5`, chat timeout 20s, Imagine still timeout 90s, Imagine video poll 900s every 5s, Next proxy 900s, radar fetch rate 6/min/host.
 
 ## Ports
 
@@ -92,7 +92,7 @@ Caps: `MAX_DEEP_DIVES = 1`, `MAX_FACTORY_CONCEPTS = 1`, `MAX_CHAT_SCORES = 5`, c
 TrendSource.fetch(query_id) -> list[Signal]
 ChatModel.complete_json(system, user, schema) -> BaseModel
 ImageGen.generate(prompt, out_path) -> Path
-VideoGen.generate(prompt, out_path) -> Path
+VideoGen.generate(prompt, out_path, *, source_image=None) -> Path
 ```
 
 `build_chat()` returns `None` if `XAI_API_KEY`, `GEMINI_API_KEY`, and `GROQ_API_KEY` are all empty. Callers must still walk on templates.
@@ -111,10 +111,10 @@ Imagine failure falls back to stub (unless already stub). Overlay always runs.
 
 | `VIDEO_GEN_MODE` (falls back to `IMAGE_GEN_MODE`) | Adapter |
 |---|---|
-| `imagine` / `grok-imagine` / `grok-imagine-video` | `ImagineVideoGen` → `POST https://api.x.ai/v1/videos/generations` model `grok-imagine-video-1.5`, `duration: 5`, then poll |
-| `stub` or unknown | `StubVideoGen` looping Pillow card → mp4 |
+| `imagine` / `grok-imagine` / `grok-imagine-video` | `ImagineVideoGen` → `POST https://api.x.ai/v1/videos/generations` model `grok-imagine-video-1.5`, `duration: 5`, `image.url` = campaign still, `generate_audio: false`, poll `GET /v1/videos/{request_id}` every 5s up to 900s |
+| `stub` or unknown | `StubVideoGen` loops the campaign still → mp4 |
 
-Video failure falls back to stub (unless already stub). Overlay always runs. ffmpeg is required to write the mp4.
+Video failure falls back to stub (unless already stub), still looping the campaign still. Overlay always runs. ffmpeg is required to write the mp4. Text-to-video is not the happy path.
 
 ## Data (SQLite)
 

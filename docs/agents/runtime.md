@@ -91,9 +91,9 @@ Kill whatever already owns 8000 before restarting. Two uvicorns = stale overlay/
 
 ## Time budget
 
-The page waits **5 minutes** (`maxDuration = 300`, proxy abort 300s). Look + Make + Imagine all share that if they go through `/engine`.
+The page waits **15 minutes** (`maxDuration = 900`, proxy abort 900s) so a live Imagine clip can finish. Stub video is instant. Look + Make + Imagine all share that if they go through `/engine`.
 
-What eats it: sequential Grok 20s timeouts, up to 5 scores, factory loop (writer + judge + craft × rounds), Imagine 90s. That is why photos are not made on Pick.
+What eats it: sequential Grok 20s timeouts, up to 5 scores, factory loop (writer + judge + craft × rounds), Imagine still 90s, Imagine video poll up to 900s. That is why photos and clips are not made on Pick.
 
 ## Data you must not commit
 

@@ -28,7 +28,7 @@ Old belt composed three Imagine photos while Pick waited. That is why the page h
 
 ## “That took too long” is the proxy
 
-Next `/engine` aborts at 300s. The UI cannot tell Look from Make from Imagine. Do not special-case the string back to “that look.”
+Next `/engine` aborts at 900s so a live Imagine clip can finish. Stub video is instant. The UI cannot tell Look from Make from Imagine. Do not special-case the string back to “that look.”
 
 ## Junk sources
 
@@ -68,7 +68,7 @@ No `npm` / pip / OpenCode caches on C:. XDG and npm cache on D: under `.cache/`.
 
 ## Overlay vs model
 
-Never put `NEUTROGENA`, claims, or the disclaimer in the Imagine prompt — still **or** video. They are stamped after. If you “just add the logo to the prompt,” you will get misspelled packaging and we lose the legal line. Do not feed the overlaid PNG into image-to-video either.
+Never put `NEUTROGENA`, claims, or the disclaimer in the Imagine **prompt** — still or video. They are stamped in code. If you “just add the logo to the prompt,” you will get misspelled packaging. Video **does** start from the campaign still (the overlaid ad) as the first frame. Do not start from a fixture pack photo. Stamp the coded overlay on the clip again so the legal line cannot warp away.
 
 ## Kenvue deck / Cerebras / gstack
 

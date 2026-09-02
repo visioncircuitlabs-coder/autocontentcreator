@@ -73,15 +73,15 @@ Do not send SVG text to Imagine (it vanished; we painted a blue blob). Do not `o
 ## Video
 
 ```text
-video_prompt(draft)      ~5s product clip of the same water-gel jar
-                         lighting_from_caption keywords only (no caption leak)
+video_prompt(draft)      ~5s motion of the same water-gel jar, from the still
 ImagineVideoGen          POST /v1/videos/generations, duration 5, aspect 3:4
-                         poll GET /v1/videos/{request_id} up to 180s
-compose_video            overlay coded wordmark + disclaimer via ffmpeg
-StubVideoGen             looping stub card → real mp4 when the key is missing
+                         image.url = campaign still (data URL), generate_audio false
+                         poll GET /v1/videos/{request_id} every 5s up to 900s
+compose_video            requires campaign still; overlay coded wordmark + disclaimer
+StubVideoGen             loop that still → real mp4 when the key is missing
 ```
 
-Do not send the locked still into image-to-video (that feeds the legal bar to the model). Do not film inside `POST /factory/run`. ffmpeg is required for the stub and the overlay.
+Do not film inside `POST /factory/run`. Do not text-to-video as the happy path. Do not I2V from `fixtures/` pack photos. ffmpeg is required for the stub and the overlay.
 
 ## Spec drift (known)
 

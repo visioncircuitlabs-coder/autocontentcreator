@@ -1,4 +1,4 @@
-"""POST /factory/video — dedicated step, stub mp4, no publish."""
+"""POST /factory/video — dedicated step, stub mp4, no publish, picture first."""
 
 from __future__ import annotations
 
@@ -10,11 +10,19 @@ from zipfile import ZipFile
 import httpx
 import pytest
 from fastapi.testclient import TestClient
+from PIL import Image
 
 from models import Draft
 
 FTYP = b"ftyp"
 PNG_MAGIC = b"\x89PNG\r\n\x1a\n"
+PICTURE_FIRST = "Make the picture first. Then we can make a short video."
+
+
+def _write_still(path: Path) -> Path:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    Image.new("RGB", (1080, 1350), (18, 90, 140)).save(path, "PNG")
+    return path
 
 
 def _draft(**kwargs) -> Draft:
@@ -39,11 +47,45 @@ def test_factory_run_does_not_film(tmp_path: Path, monkeypatch: pytest.MonkeyPat
 
     monkeypatch.setenv("VIDEO_GEN_MODE", "stub")
     monkeypatch.setenv("VIDEO_OUT_DIR", str(tmp_path / "videos"))
-    upsert_draft(_draft())
+    still = _write_still(tmp_path / "images" / "dft_vid.png")
+    upsert_draft(_draft(image_path=str(still)))
     client = TestClient(app)
-    # factory/run on a missing report still must not invent a clip on this draft
     loaded = client.get("/drafts/dft_vid").json()
     assert loaded["video_path"] in (None, "")
+
+
+def test_factory_video_refuses_without_picture(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from db import init_db, upsert_draft
+    from main import app
+
+    monkeypatch.setenv("VIDEO_GEN_MODE", "stub")
+    monkeypatch.setenv("VIDEO_OUT_DIR", str(tmp_path / "videos"))
+    init_db()
+    upsert_draft(_draft())
+    client = TestClient(app)
+    res = client.post("/factory/video", json={"draft_id": "dft_vid"})
+    assert res.status_code == 400
+    assert res.json()["error"] == PICTURE_FIRST
+    assert "stack" not in str(res.json()).lower()
+
+
+def test_factory_video_refuses_fixture_pack_photo(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from db import init_db, upsert_draft
+    from main import app
+
+    monkeypatch.setenv("VIDEO_GEN_MODE", "stub")
+    monkeypatch.setenv("VIDEO_OUT_DIR", str(tmp_path / "videos"))
+    init_db()
+    pack = _write_still(tmp_path / "fixtures" / "lays" / "pack.png")
+    upsert_draft(_draft(image_path=str(pack)))
+    client = TestClient(app)
+    res = client.post("/factory/video", json={"draft_id": "dft_vid"})
+    assert res.status_code == 400
+    assert "picture first" in res.json()["error"].lower()
 
 
 def test_factory_video_stub_happy_path(
@@ -56,7 +98,8 @@ def test_factory_video_stub_happy_path(
     monkeypatch.setenv("IMAGE_GEN_MODE", "stub")
     monkeypatch.setenv("VIDEO_OUT_DIR", str(tmp_path / "videos"))
     init_db()
-    upsert_draft(_draft())
+    still = _write_still(tmp_path / "images" / "dft_vid.png")
+    upsert_draft(_draft(image_path=str(still)))
     client = TestClient(app)
     res = client.post("/factory/video", json={"draft_id": "dft_vid"})
     assert res.status_code == 200
@@ -94,7 +137,8 @@ def test_factory_video_refuses_to_publish(tmp_path: Path, monkeypatch: pytest.Mo
     monkeypatch.setenv("EXPORT_DIR", str(tmp_path / "exports"))
     from db import upsert_draft
 
-    upsert_draft(_draft(draft_id="dft_zip"))
+    still = _write_still(tmp_path / "images" / "dft_zip.png")
+    upsert_draft(_draft(draft_id="dft_zip", image_path=str(still)))
     client = TestClient(app)
     filmed = client.post("/factory/video", json={"draft_id": "dft_zip"})
     assert filmed.status_code == 200
@@ -124,21 +168,31 @@ def test_factory_video_refuses_to_publish(tmp_path: Path, monkeypatch: pytest.Mo
         assert "instagram" not in path.lower()
 
 
-def test_imagine_video_payload_has_no_brand_or_disclaimer(
+def test_imagine_video_is_image_to_video_from_still(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    from adapters.video_imagine import ImagineVideoGen
+    from adapters.video_imagine import (
+        POLL_BUDGET_S,
+        POLL_INTERVAL_S,
+        SUBMIT_TIMEOUT_S,
+        ImagineVideoGen,
+    )
     from adapters.video_stub import StubVideoGen
     from boxes.visual import video_prompt
     from harness.breaker import VIDEO_BREAKER
 
     VIDEO_BREAKER.reset()
 
+    assert POLL_BUDGET_S == 900.0
+    assert POLL_INTERVAL_S == 5.0
+    assert SUBMIT_TIMEOUT_S == 60.0
+
     monkeypatch.setenv("XAI_API_KEY", "sk-test")
     monkeypatch.setenv("VIDEO_BUDGET_USD", "2.00")
     posts: list[dict] = []
     stub_bytes = tmp_path / "seed.mp4"
-    StubVideoGen().generate("seed", stub_bytes)
+    still = _write_still(tmp_path / "campaign.png")
+    StubVideoGen().generate("seed", stub_bytes, source_image=still)
     blob = stub_bytes.read_bytes()
 
     def handler(request: httpx.Request) -> httpx.Response:
@@ -166,7 +220,9 @@ def test_imagine_video_payload_has_no_brand_or_disclaimer(
     client = httpx.Client(transport=httpx.MockTransport(handler))
     dest = tmp_path / "imagine.mp4"
     prompt = video_prompt(_draft())
-    ImagineVideoGen(client=client, key="sk-test").generate(prompt, dest)
+    ImagineVideoGen(client=client, key="sk-test").generate(
+        prompt, dest, source_image=still
+    )
     assert dest.is_file()
     assert dest.read_bytes()[4:8] == FTYP
     assert len(posts) == 1
@@ -174,11 +230,31 @@ def test_imagine_video_payload_has_no_brand_or_disclaimer(
     dumped = json.dumps(payload).lower()
     assert payload["duration"] == 5
     assert payload["prompt"] == prompt
+    assert payload["generate_audio"] is False
+    assert payload["aspect_ratio"] == "3:4"
+    assert payload["resolution"] == "720p"
+    assert "reference_images" not in payload
+    image = payload.get("image")
+    assert isinstance(image, dict)
+    url = image.get("url") or ""
+    assert url.startswith("data:image/png;base64,")
     assert "neutrogena" not in dumped
-    assert "disclaimer" not in dumped or "no legal disclaimer" in dumped
+    assert "disclaimer" not in dumped or "disclaimer" in prompt.lower()
     assert "<svg" not in dumped
     assert "always patch-test" not in dumped
     assert "dermatologist tested" not in dumped
+    assert "fixtures" not in url.lower()
+
+
+def test_imagine_video_refuses_text_to_video_without_still(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from adapters.video_imagine import ImagineVideoGen
+
+    monkeypatch.setenv("XAI_API_KEY", "sk-test")
+    dest = tmp_path / "nope.mp4"
+    with pytest.raises(RuntimeError, match="picture first"):
+        ImagineVideoGen(key="sk-test").generate("move the jar", dest)
 
 
 def test_spent_budget_falls_back_to_stub(
@@ -193,7 +269,8 @@ def test_spent_budget_falls_back_to_stub(
     monkeypatch.setenv("VIDEO_BUDGET_USD", "0.10")
     monkeypatch.setenv("VIDEO_OUT_DIR", str(tmp_path / "videos"))
     record_video_spend(0.40)
-    upsert_draft(_draft(draft_id="dft_broke"))
+    still = _write_still(tmp_path / "images" / "dft_broke.png")
+    upsert_draft(_draft(draft_id="dft_broke", image_path=str(still)))
     filmed = film_chosen("dft_broke")
     clip = Path(filmed.video_path)
     assert clip.is_file()
@@ -207,14 +284,19 @@ def test_stub_overlay_stamps_logo(
     from boxes.video import compose_video
     from boxes.visual import video_prompt
     from db import upsert_draft
-    from PIL import Image
+    from PIL import Image as PilImage
 
     monkeypatch.setenv("VIDEO_GEN_MODE", "stub")
-    upsert_draft(_draft(draft_id="dft_lock"))
+    still = _write_still(tmp_path / "images" / "dft_lock.png")
+    upsert_draft(_draft(draft_id="dft_lock", image_path=str(still)))
     dest = tmp_path / "locked.mp4"
-    result = compose_video(_draft(draft_id="dft_lock"), video_prompt(_draft()), out_path=dest)
+    result = compose_video(
+        _draft(draft_id="dft_lock", image_path=str(still)),
+        video_prompt(_draft()),
+        out_path=dest,
+        source_image=still,
+    )
     assert Path(result.video_path).is_file()
-    # grab one frame and look for navy wordmark
     import subprocess
 
     frame = tmp_path / "frame.png"
@@ -233,7 +315,7 @@ def test_stub_overlay_stamps_logo(
         ],
         check=True,
     )
-    img = Image.open(frame).convert("RGB")
+    img = PilImage.open(frame).convert("RGB")
     w, h = img.size
     found = False
     for y in range(0, max(1, int(h * 0.22)), 2):

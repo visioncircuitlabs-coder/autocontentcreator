@@ -49,7 +49,7 @@ Last commit on this worktree: `a324b70` (2026-08-24, **329 API tests collected**
 | Receipts | Tamper-evident audit chain + signed manifest inside every ZIP |
 | Copy craft | Scorer v2 for hook length and “we’re excited” voice |
 | Brand memory | Every yes/no → ledger + winners/anti-patterns/bans + human `lessons.md` |
-| Short product video | `POST /factory/video` after the still. Grok Imagine video when the key is on; stub still writes a real ~5s mp4. Overlay in code. ZIP stays paused. |
+| Short product video | `POST /factory/video` after the still. Image-to-video from that campaign still (15 min poll). Stub loops the still into a real ~5s mp4. Overlay in code. ZIP stays paused. |
 
 Hermes IDs (untrusted history — re-read files): `20260824_015715_fd3d0f` (main), `20260824_204602_931fba` (memory wave). Store: `D:\Hermes agent\state.db`.
 

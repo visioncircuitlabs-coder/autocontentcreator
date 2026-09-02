@@ -24,7 +24,7 @@ A reviewer must be able to fail a PR from this file. Do not “improve” a lock
 | Writer ≠ judge | `boxes/loop.py`: hard rules + claims judge + craft review. Max 3 rounds, then `flag_human`. |
 | Named human, non-empty reason | API `boxes/review.py` and UI both reject blanks. |
 | Brand marks not in the image model | Imagine prompt: no text, no logo. `art_director.apply_locks` paints `NEUTROGENA` + disclaimer. |
-| Brand marks not in the video model | Video prompt: no text, no logo, no disclaimer. `compose_video` stamps the same overlay after generate. |
+| Brand marks not in the video **prompt** | Video prompt: no new text, no extra logo, no new disclaimer. Happy path is image-to-video from the **campaign still** (already overlaid in code). Stamp the same overlay after generate so the legal line cannot warp. Never I2V from a fixture pack photo. |
 
 ## Radar and factory shape
 
@@ -36,7 +36,7 @@ A reviewer must be able to fail a PR from this file. Do not “improve” a lock
 | One closer look per Look | `MAX_DEEP_DIVES = 1` |
 | One concept into copy | `MAX_FACTORY_CONCEPTS = 1` then 2–3 caption variants |
 | Picture waits for a pick | `run_factory` does not compose. `paint_chosen` is `POST /factory/image` |
-| Video waits for a pick | `run_factory` does not film. `film_chosen` is `POST /factory/video` after the still |
+| Video waits for the picture | `film_chosen` refuses without a campaign still. Never text-to-video as the happy path. Never a fixture pack PNG. `POST /factory/video` after `POST /factory/image` |
 | Locked queries | Fetcher uses `skincare_in`. Grok web uses `LOCKED_QUERY`. Do not “search the whole web.” |
 
 ## Build / ops

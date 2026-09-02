@@ -8,6 +8,7 @@ from typing import NamedTuple
 import httpx
 
 from boxes.art_director import compose
+from boxes.video import PICTURE_FIRST, campaign_still, compose_video
 from boxes.brief import build_brief
 from boxes.copywriter import run_copywriter
 from boxes.fetcher import build_client, run_fetch
@@ -15,7 +16,6 @@ from boxes.loop import run_loop
 from boxes.researcher import run_research
 from boxes.scorer import run_score
 from boxes.strategist import run_strategist
-from boxes.video import compose_video
 from boxes.visual import video_prompt, visual_prompt
 from db import get_draft, upsert_concepts, upsert_draft, upsert_reports
 from models import Draft, Score, Signal, TrendReport
@@ -158,12 +158,20 @@ def film_chosen(
     *,
     video_gen: VideoGen | None = None,
 ) -> Draft:
-    """One ~5s product clip, after a person picks a caption version."""
+    """One ~5s product clip from the campaign still. Picture must exist first."""
     draft = get_draft(draft_id)
     if draft is None:
         raise ValueError("That draft is not in the queue.")
+    still = campaign_still(draft)
+    if still is None:
+        raise ValueError(PICTURE_FIRST)
     emit("film_start", draft_id=draft_id)
-    filmed = compose_video(draft, video_prompt(draft), video_gen=video_gen)
+    filmed = compose_video(
+        draft,
+        video_prompt(draft),
+        video_gen=video_gen,
+        source_image=still,
+    )
     upsert_draft(filmed)
     emit("film_end", draft_id=draft_id, video=bool(filmed.video_path))
     return filmed

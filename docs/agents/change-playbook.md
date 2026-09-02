@@ -47,7 +47,7 @@ Do the smallest change. Tests with the change. User-facing strings through `word
 
 ## Change Look ranking
 
-`boxes/scorer.py`: exclusion first, then keyword, then optional chat, then `decide_gate`. Closer look is `brand_fit >= 8`. Keep `MAX_CHAT_SCORES` unless you re-time the 300s proxy.
+`boxes/scorer.py`: exclusion first, then keyword, then optional chat, then `decide_gate`. Closer look is `brand_fit >= 8`. Keep `MAX_CHAT_SCORES` unless you re-time the 900s proxy.
 
 ## Change captions
 

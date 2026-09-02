@@ -17,7 +17,9 @@ export const PICTURE_WAIT = "Making the picture…";
 export const VIDEO_BUTTON = "Make a short video";
 export const VIDEO_WAIT = "Making a short video…";
 export const VIDEO_HINT =
-  "About five seconds. Same jar as the picture. This does not go live.";
+  "About five seconds. It starts from the picture. This does not go live.";
+export const PICTURE_FIRST_VIDEO =
+  "Make the picture first. Then we can make a short video.";
 
 export const SAMPLE_BUTTON = "Use a sample idea (practice)";
 export const SAMPLE_NOTE =

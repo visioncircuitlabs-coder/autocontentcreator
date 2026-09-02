@@ -54,6 +54,7 @@ import {
   NO_VIDEO_NOTE,
   PAUSED_NOTE,
   PICTURE_BUTTON,
+  PICTURE_FIRST_VIDEO,
   PICTURE_WAIT,
   VIDEO_BUTTON,
   VIDEO_HINT,
@@ -246,6 +247,10 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
 
   async function makeVideo() {
     if (!chosen) return;
+    if (!chosen.image_path) {
+      setError(PICTURE_FIRST_VIDEO);
+      return;
+    }
     setError(null);
     setFilming(true);
     setVideoBroken(false);

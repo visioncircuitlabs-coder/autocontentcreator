@@ -20,6 +20,7 @@ import {
   TODAY_HEADLINES,
   VIDEO_BUTTON,
   VIDEO_HINT,
+  PICTURE_FIRST_VIDEO,
   checkLines,
   emptySourceNote,
   gateLabel,
@@ -190,7 +191,12 @@ test("picture button waits until a version is picked", () => {
 
 test("short video button is plain language", () => {
   assert.equal(VIDEO_BUTTON, "Make a short video");
+  assert.equal(
+    PICTURE_FIRST_VIDEO,
+    "Make the picture first. Then we can make a short video.",
+  );
   assert.match(VIDEO_HINT, /five seconds/i);
+  assert.match(VIDEO_HINT, /starts from the picture/i);
   assert.match(VIDEO_HINT, /does not go live/i);
 });
 

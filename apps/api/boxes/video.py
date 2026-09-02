@@ -1,4 +1,4 @@
-"""Art Director video — unlocked VideoGen + coded logo/disclaimer overlay."""
+"""Art Director video — image-to-video from the campaign still + coded overlay."""
 
 from __future__ import annotations
 
@@ -18,6 +18,7 @@ from ports import VideoGen
 logger = logging.getLogger(__name__)
 
 DURATION_S = 5.0
+PICTURE_FIRST = "Make the picture first. Then we can make a short video."
 
 
 def _default_out_path(draft: Draft) -> Path:
@@ -28,6 +29,23 @@ def _default_out_path(draft: Draft) -> Path:
         sqlite = Path(os.environ.get("SQLITE_PATH") or "data/demo.db")
         root = sqlite.resolve().parent / "videos"
     return root / f"{draft.draft_id}.mp4"
+
+
+def campaign_still(draft: Draft) -> Path | None:
+    """The composed campaign still only. Never a fixture pack photo."""
+    raw = (draft.image_path or "").strip()
+    if not raw:
+        return None
+    path = Path(raw)
+    try:
+        resolved = path.resolve()
+    except OSError:
+        return None
+    if not resolved.is_file():
+        return None
+    if "fixtures" in {part.lower() for part in resolved.parts}:
+        return None
+    return resolved
 
 
 def build_video_gen(
@@ -62,8 +80,12 @@ def compose_video(
     video_gen: VideoGen | None = None,
     out_path: Path | str | None = None,
     client: httpx.Client | None = None,
+    source_image: Path | str | None = None,
 ) -> Draft:
-    """Generate the unlocked clip, then overlay logo + disclaimer in code."""
+    """Animate the campaign still, then overlay logo + disclaimer in code."""
+    still = Path(source_image).resolve() if source_image is not None else campaign_still(draft)
+    if still is None or not still.is_file():
+        raise ValueError(PICTURE_FIRST)
     gen = video_gen or build_video_gen(client=client)
     dest = Path(out_path) if out_path is not None else _default_out_path(draft)
     dest.parent.mkdir(parents=True, exist_ok=True)
@@ -71,12 +93,14 @@ def compose_video(
     overlay = dest.with_name(f"{dest.stem}.locks.png")
     try:
         try:
-            gen.generate(prompt, unlocked)
+            gen.generate(prompt, unlocked, source_image=still)
+        except ValueError:
+            raise
         except Exception as exc:
             if type(gen).__name__ == "StubVideoGen":
                 raise
             logger.warning("video gen failed (%s); drawing a stub clip", exc)
-            StubVideoGen().generate(prompt, unlocked)
+            StubVideoGen().generate(prompt, unlocked, source_image=still)
         write_locks_overlay(overlay)
         overlay_locks_on_video(unlocked, overlay, dest, seconds=DURATION_S)
     finally:

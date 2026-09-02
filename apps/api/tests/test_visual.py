@@ -40,13 +40,15 @@ def test_video_prompt_is_product_true_and_unlocked() -> None:
     assert "five-second" in lower or "five second" in lower
     assert "jar" in lower
     assert "water gel" in lower or "water-gel" in lower
-    assert "no text" in lower
-    assert "no logo" in lower
-    assert "disclaimer" in lower  # we tell the model NOT to paint one
-    assert "no legal disclaimer" in lower
+    assert "first frame" in lower or "campaign still" in lower
+    assert "no new text" in lower or "no text" in lower
+    assert "no extra logo" in lower or "no logo" in lower
+    assert "no new legal disclaimer" in lower or "no legal disclaimer" in lower
     assert "neutrogena" not in lower
     assert "double cleanse after ac" not in lower
     assert "dermatologist tested" not in lower
+    assert "chip" not in lower
+    assert "lays" not in lower
 
 
 def test_monsoon_caption_stays_bright() -> None:
