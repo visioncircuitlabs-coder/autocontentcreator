@@ -67,8 +67,9 @@ Set those on the **API** process, then restart uvicorn.
 |---|---|
 | News engine is not running | Start the API on 8000, keep Next on 3050 |
 | Too many searches | Wait a minute |
-| That took too long | Try again. Look + Make + picture share a 5-minute page wait |
+| That took too long | Try again. Look + Make + picture + short video share a 5-minute page wait |
 | Dark card instead of a photo | Imagine is off or the key failed. Check `IMAGE_GEN_MODE` on the API process |
+| Short video is a looping card | Video Imagine is off or the key failed. Check `VIDEO_GEN_MODE` and ffmpeg |
 | Nothing worth a closer look | Use **Use a sample idea (practice)** |
 
 Employee steps after it is up: [runbooks/make-a-post.md](runbooks/make-a-post.md).

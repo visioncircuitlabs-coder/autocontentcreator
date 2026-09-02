@@ -24,6 +24,7 @@ A reviewer must be able to fail a PR from this file. Do not “improve” a lock
 | Writer ≠ judge | `boxes/loop.py`: hard rules + claims judge + craft review. Max 3 rounds, then `flag_human`. |
 | Named human, non-empty reason | API `boxes/review.py` and UI both reject blanks. |
 | Brand marks not in the image model | Imagine prompt: no text, no logo. `art_director.apply_locks` paints `NEUTROGENA` + disclaimer. |
+| Brand marks not in the video model | Video prompt: no text, no logo, no disclaimer. `compose_video` stamps the same overlay after generate. |
 
 ## Radar and factory shape
 
@@ -35,6 +36,7 @@ A reviewer must be able to fail a PR from this file. Do not “improve” a lock
 | One closer look per Look | `MAX_DEEP_DIVES = 1` |
 | One concept into copy | `MAX_FACTORY_CONCEPTS = 1` then 2–3 caption variants |
 | Picture waits for a pick | `run_factory` does not compose. `paint_chosen` is `POST /factory/image` |
+| Video waits for a pick | `run_factory` does not film. `film_chosen` is `POST /factory/video` after the still |
 | Locked queries | Fetcher uses `skincare_in`. Grok web uses `LOCKED_QUERY`. Do not “search the whole web.” |
 
 ## Build / ops
@@ -63,8 +65,8 @@ Do not collapse these:
 - A second approval path
 - Publishing adapters (Meta, Buffer, later)
 - CrewAI / multi-agent orchestrators as the belt
-- Putting logo/disclaimer/claims into Imagine or any image prompt
-- Generating photos during Look or during `Make a post`
+- Putting logo/disclaimer/claims into Imagine or any image **or video** prompt
+- Generating photos **or video** during Look or during `Make a post`
 - Auto-approve, including “80% auto-approve”
 - New paid vendors
 - Changing on-screen jargon back to `radar`, `deep_dive`, `gate` on the default walk

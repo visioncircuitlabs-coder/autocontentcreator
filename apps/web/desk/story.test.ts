@@ -6,6 +6,7 @@ test("picture waits until a version is picked", () => {
   assert.match(BOX_STORY.art.takes, /version you picked/i);
   assert.match(BOX_STORY.loop.then, /pick a version/i);
   assert.match(BOX_STORY.art.does, /4:5/i);
+  assert.match(BOX_STORY.art.gives, /short video/i);
 });
 
 test("radar boxes tell a person what happens next", () => {

@@ -23,6 +23,7 @@ WRITE_ROLES: dict[str, str] = {
     "/radar/fetch": "viewer",
     "/factory/run": "viewer",
     "/factory/image": "approver",
+    "/factory/video": "approver",
     "/review": "approver",
     "/memory/rebuild": "admin",
     "/events": "viewer",

@@ -106,6 +106,7 @@ class Draft(BaseModel):
     caption: str
     variant: int
     image_path: str | None
+    video_path: str | None = None
     judge: dict | None
     rules: list[str]
     round: int

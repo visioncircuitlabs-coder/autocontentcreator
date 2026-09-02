@@ -22,9 +22,9 @@ If they fight, **this worktree + `docs/agents/invariants.md` win.**
 
 `.env` can say `IMAGE_GEN_MODE=stub` while uvicorn was launched with `imagine`. Restart without the export → Pillow card, not Grok. `.env.example` is `imagine`. Imagine needs `XAI_API_KEY`. Failures fall back to stub; the user still sees *a* picture.
 
-## Make a post must not paint
+## Make a post must not paint or film
 
-Old belt composed three Imagine photos while Pick waited. That is why the page hit 5 minutes and the banner blamed Look. `run_factory` is text. `paint_chosen` is the later button.
+Old belt composed three Imagine photos while Pick waited. That is why the page hit 5 minutes and the banner blamed Look. `run_factory` is text. `paint_chosen` is the later button. `film_chosen` is the button after that.
 
 ## “That took too long” is the proxy
 
@@ -68,7 +68,7 @@ No `npm` / pip / OpenCode caches on C:. XDG and npm cache on D: under `.cache/`.
 
 ## Overlay vs model
 
-Never put `NEUTROGENA`, claims, or the disclaimer in the Imagine prompt. They are stamped after. If you “just add the logo to the prompt,” you will get misspelled packaging and we lose the legal line.
+Never put `NEUTROGENA`, claims, or the disclaimer in the Imagine prompt — still **or** video. They are stamped after. If you “just add the logo to the prompt,” you will get misspelled packaging and we lose the legal line. Do not feed the overlaid PNG into image-to-video either.
 
 ## Kenvue deck / Cerebras / gstack
 

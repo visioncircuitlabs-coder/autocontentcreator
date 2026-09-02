@@ -10,7 +10,7 @@ Entry: `apps/web/app/page.tsx` → `walk/WalkApp.tsx`. Shell: `walk/WalkShell.ts
 |---|---|---|---|
 | 1 | look | **Look for ideas** | `POST /radar/run` then maybe `POST /radar/fixture` |
 | 2 | pick | Read the idea; optional sample | none |
-| 3 | make | **Make a post** → pick Version 1/2/3 → **Make the picture** | `POST /factory/run` then `POST /factory/image` |
+| 3 | make | **Make a post** → pick Version 1/2/3 → **Make the picture** → **Make a short video** | `POST /factory/run` then `POST /factory/image` then `POST /factory/video` |
 | 4 | call | name + why, **Yes, keep this** / **No, do not use this** | `POST /review/{draft_id}` |
 | 5 | preview | phone frame, **Download pack** | `GET /export/{draft_id}` |
 
@@ -23,7 +23,8 @@ Words: `apps/web/desk/words.ts`. Map: `docs/conventions/words-we-use.md`.
 - **Also in this look / Today’s headlines** even on practice, from this-run signals. Cap 8. Sorted closer-look first.
 - **Sources** is a `<details>` fold. Junk URLs never listed (`isJunkSourceUrl` in `desk/review.ts`).
 - **Make a post** = text factory only. Do not call Imagine here.
-- **Make the picture** after a version is selected. One photo for that `draft_id`. Then beat 4.
+- **Make the picture** after a version is selected. One photo for that `draft_id`.
+- **Make a short video** after the picture. One ~5s clip for that `draft_id`. Then beat 4.
 - Yes/No stay disabled until name and why are non-empty (`canSubmitReview`). API also rejects blanks.
 - Every yes/no lands in brand memory (`data/memory/`); Preview says so in one quiet line. See [memory.md](memory.md).
 - Quiet sources: `News wire sent nothing back` (etc.), keep going.

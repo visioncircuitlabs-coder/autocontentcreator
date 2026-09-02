@@ -18,6 +18,10 @@ services:
       IMAGE_GEN_KEY: ${IMAGE_GEN_KEY:-}
       IMAGE_GEN_MODE: ${IMAGE_GEN_MODE:-imagine}
       IMAGE_GEN_MODEL: ${IMAGE_GEN_MODEL:-grok-imagine-image}
+      IMAGE_BUDGET_USD: ${IMAGE_BUDGET_USD:-2.00}
+      VIDEO_GEN_MODE: ${VIDEO_GEN_MODE:-imagine}
+      VIDEO_GEN_MODEL: ${VIDEO_GEN_MODEL:-grok-imagine-video-1.5}
+      VIDEO_BUDGET_USD: ${VIDEO_BUDGET_USD:-2.00}
       LOG_PATH: /data/logs/machine.jsonl
     env_file:
       - path: ../.env

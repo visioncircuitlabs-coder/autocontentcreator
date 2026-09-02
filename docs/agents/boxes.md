@@ -14,12 +14,12 @@ Specs in `docs/superpowers/specs/` lock **intent**. This table is **what ships**
 | 8 | Brief Builder | `boxes/brief.py` | Deterministic pack: report + brand slice + claims + wins/losses | LLM |
 | 9 | Strategist | `boxes/strategist.py` | Angles / persona / claim-safe pain. Templates if chat down | Captions |
 | 10 | Copywriter | `boxes/copywriter.py` | Ask 8 captions, filter to 2–3 postable. Rewrite from numbered reasons | Image, go-live |
-| 11 | Art Director | `boxes/art_director.py` + `boxes/visual.py` | Unlocked photo + coded overlay | Claims policy |
+| 11 | Art Director | `boxes/art_director.py` + `boxes/visual.py` + `boxes/video.py` | Unlocked photo and ~5s clip + coded overlay | Claims policy |
 | 12 | Compliance Judge | `boxes/judge.py` | Sentence vs Product Facts, optional implied-claim chat | Hard-token gazette |
 | 13 | Hard Rules | `boxes/hard_rules.py` | Banned tokens, #ad, disclaimer presence. **No LLM** | Taste |
 | 14 | Improvement Loop | `boxes/loop.py` + `boxes/craft.py` | Rules + judge + craft. Max 3. Then `flag_human` | Human yes/no |
 | 15 | Review & Approve | `boxes/review.py` | Named person, reason, verdict. Not publish | Instagram |
-| 16 | Preview & Export | `boxes/export.py` | Paused ZIP (html + png + json). May paint if image missing | Go-live |
+| 16 | Preview & Export | `boxes/export.py` | Paused ZIP (html + png + mp4 + json). May paint/film if missing | Go-live |
 | 17 | Feedback Writer | `boxes/feedback.py` | Ledger row after decide | Radar |
 | — | Spine | `boxes/belt.py`, `ports.py`, `main.py` | Order of steps | Extra orchestrator |
 
@@ -69,6 +69,19 @@ apply_locks              Pillow wordmark NEUTROGENA + full disclaimer bar
 ```
 
 Do not send SVG text to Imagine (it vanished; we painted a blue blob). Do not `object-fit: cover` a square into the phone frame (it cropped the bar). CSS: `.ig-photo` `aspect-ratio: 4/5; object-fit: contain`.
+
+## Video
+
+```text
+video_prompt(draft)      ~5s product clip of the same water-gel jar
+                         lighting_from_caption keywords only (no caption leak)
+ImagineVideoGen          POST /v1/videos/generations, duration 5, aspect 3:4
+                         poll GET /v1/videos/{request_id} up to 180s
+compose_video            overlay coded wordmark + disclaimer via ffmpeg
+StubVideoGen             looping stub card → real mp4 when the key is missing
+```
+
+Do not send the locked still into image-to-video (that feeds the legal bar to the model). Do not film inside `POST /factory/run`. ffmpeg is required for the stub and the overlay.
 
 ## Spec drift (known)
 

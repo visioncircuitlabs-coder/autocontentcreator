@@ -1,6 +1,6 @@
 # Where we are
 
-**As of 2026-08-30.** Product is the walkable demo on `feat/foolproof-design`. It is not on `main`.
+**As of 2026-09-02.** Product is the walkable demo on `feat/foolproof-design` (this branch adds a short product video on top of that walk). It is not on `main`.
 
 ```text
 D:\PROJECTS\autocontentcreator\.worktrees\feat-foolproof-design
@@ -16,13 +16,15 @@ Every competitor helps brands make content faster. Almost nobody can prove a pos
 
 ```text
 Look for ideas  →  pick one  →  Make a post (captions only)
-    →  pick a version  →  Make the picture  →  Yes/No + why
-    →  download a paused ZIP
+    →  pick a version  →  Make the picture  →  Make a short video
+    →  Yes/No + why  →  download a paused ZIP (still + ~5s clip)
 ```
 
 Yes/No also writes brand memory: SQLite for the machine, Markdown files you can open and edit (`data/memory/`, especially `lessons.md`).
 
 Demo brand = unofficial Neutrogena fixture. Not a Kenvue partner build.
+
+Night Shift's unofficial Lay's Chile Limón walk lives on a **separate** branch / PR. Do not take that branch for Neutrogena work.
 
 ## What Hermes was asked to do
 
@@ -47,6 +49,7 @@ Last commit on this worktree: `a324b70` (2026-08-24, **329 API tests collected**
 | Receipts | Tamper-evident audit chain + signed manifest inside every ZIP |
 | Copy craft | Scorer v2 for hook length and “we’re excited” voice |
 | Brand memory | Every yes/no → ledger + winners/anti-patterns/bans + human `lessons.md` |
+| Short product video | `POST /factory/video` after the still. Grok Imagine video when the key is on; stub still writes a real ~5s mp4. Overlay in code. ZIP stays paused. |
 
 Hermes IDs (untrusted history — re-read files): `20260824_015715_fd3d0f` (main), `20260824_204602_931fba` (memory wave). Store: `D:\Hermes agent\state.db`.
 
@@ -60,6 +63,8 @@ Do these next, in this order, unless the founder says otherwise:
 2. **Judge calibration** — every human yes/no is a free label; we do not yet measure agreement with the LLM judge.
 3. **Engagement read-back** — the machine does not learn from what happened after a post went live (and we still do not publish).
 4. Table stakes later: Postgres, SSO, Instagram publish. Publish stays off until a written decision.
+
+Video is **done enough to walk**: dedicated step, stub mp4, coded overlay, paused ZIP. Live Grok Imagine video is optional behind `XAI_API_KEY`. Do not fold it into `POST /factory/run`.
 
 Do **not** start a second app on `main`. Do **not** re-implement the 19 Aug demo plan.
 

@@ -80,6 +80,7 @@ export type Draft = {
   caption: string;
   variant: number;
   image_path: string | null;
+  video_path?: string | null;
   judge: Record<string, unknown> | null;
   rules: string[];
   round: number;

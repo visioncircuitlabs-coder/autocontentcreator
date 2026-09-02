@@ -31,16 +31,22 @@ def budget_usd() -> float:
         return DEFAULT_BUDGET_USD
 
 
-def spent_usd() -> float:
+def spent_usd(adapter: str | None = "grok-imagine") -> float:
+    """Sum spend.jsonl. Default is stills only so video cannot eat IMAGE_BUDGET."""
     path = _spend_path()
     if not path.is_file():
         return 0.0
     total = 0.0
     for line in path.read_text(encoding="utf-8").splitlines():
         try:
-            total += float(json.loads(line).get("usd", 0.0))
+            row = json.loads(line)
+            usd = float(row.get("usd", 0.0))
         except (json.JSONDecodeError, TypeError, ValueError):
             continue
+        row_adapter = str(row.get("adapter") or "grok-imagine")
+        if adapter is not None and row_adapter != adapter:
+            continue
+        total += usd
     return round(total, 4)
 
 

@@ -79,6 +79,16 @@ Returns one `Draft` with `image_path` set. Always regenerates via `visual_prompt
 
 500: `"Could not make that picture. Please try again."`
 
+### `POST /factory/video`
+
+```json
+{ "draft_id": "dft_…" }
+```
+
+Returns one `Draft` with `video_path` set. Always regenerates via `video_prompt` then coded overlay. Does **not** publish.
+
+500: `"Could not make that short video. Please try again."`
+
 ## Review and export
 
 ### `POST /review/{draft_id}`
@@ -91,7 +101,7 @@ Returns one `Draft` with `image_path` set. Always regenerates via `visual_prompt
 
 ### `GET /export/{draft_id}`
 
-`application/zip` named `{draft_id}_paused.zip`. If the PNG is missing, export may compose one. Contents: preview HTML, PNG, JSON sidecar. Stamp: paused / does not go live.
+`application/zip` named `{draft_id}_paused.zip`. If the PNG or mp4 is missing, export may compose them. Contents: preview HTML, PNG, MP4, JSON sidecar, signed manifest. Stamp: paused / does not go live.
 
 ## Reads
 
@@ -105,6 +115,7 @@ Returns one `Draft` with `image_path` set. Always regenerates via `visual_prompt
 | GET | `/drafts` | All drafts |
 | GET | `/drafts/{draft_id}` | 404 `"That draft is not in the queue."` |
 | GET | `/drafts/{draft_id}/image` | `image/png` |
+| GET | `/drafts/{draft_id}/video` | `video/mp4` |
 | GET | `/queue` | Drafts waiting a human |
 
 ## Domain shapes (Python)

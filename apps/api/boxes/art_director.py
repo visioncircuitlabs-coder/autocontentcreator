@@ -60,17 +60,14 @@ def _to_feed(img: Image.Image) -> Image.Image:
     return scaled.crop((left, top, left + tw, top + th))
 
 
-def apply_locks(image_path: Path, *, logo_path: Path | None = None) -> None:
-    """Paste wordmark and the full disclaimer as a thin legal line. Not in the model."""
-    dest = Path(image_path)
-    try:
-        raw = Image.open(dest)
-    except Exception as exc:
-        logger.warning("compose could not open generated image: %s", exc)
-        raise RuntimeError("The generated picture could not be opened. Try stub mode.") from exc
-
-    img = _to_feed(raw)
-    w, h = img.size
+def locks_overlay_image(
+    *,
+    logo_path: Path | None = None,
+    size: tuple[int, int] = FEED_SIZE,
+) -> Image.Image:
+    """Transparent 4:5 sheet: wordmark + disclaimer bar. Never sent to a model."""
+    w, h = size
+    img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     pad = max(20, w // 28)
     logo = rasterize_logo(logo_path)
     target_w = max(120, int(w * 0.28))
@@ -98,7 +95,27 @@ def apply_locks(image_path: Path, *, logo_path: Path | None = None) -> None:
     for line in lines:
         draw.text((pad, y), line, font=font, fill=fill)
         y += line_h + 6
+    return img
 
+
+def write_locks_overlay(path: Path, *, logo_path: Path | None = None) -> Path:
+    dest = Path(path)
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    locks_overlay_image(logo_path=logo_path).save(dest, "PNG")
+    return dest
+
+
+def apply_locks(image_path: Path, *, logo_path: Path | None = None) -> None:
+    """Paste wordmark and the full disclaimer as a thin legal line. Not in the model."""
+    dest = Path(image_path)
+    try:
+        raw = Image.open(dest)
+    except Exception as exc:
+        logger.warning("compose could not open generated image: %s", exc)
+        raise RuntimeError("The generated picture could not be opened. Try stub mode.") from exc
+
+    img = _to_feed(raw)
+    img.alpha_composite(locks_overlay_image(logo_path=logo_path, size=img.size))
     dest.parent.mkdir(parents=True, exist_ok=True)
     img.convert("RGB").save(dest, "PNG")
 

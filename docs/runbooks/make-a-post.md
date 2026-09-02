@@ -16,14 +16,14 @@ This is a practice Neutrogena brand. It is not Kenvue. Nothing you approve here 
    If it says **Practice idea**, live news did not give us a closer look. That is normal. Continue.
 
 3. **Make a post**  
-   Tap **Make a post**. Wait while it writes and checks claims. Pick Version 1, 2, or 3. Read “We blocked this…” if it appears. Then tap **Make the picture**. One photo, for the version you picked.
+   Tap **Make a post**. Wait while it writes and checks claims. Pick Version 1, 2, or 3. Read “We blocked this…” if it appears. Then tap **Make the picture**. One photo, for the version you picked. Then tap **Make a short video**. About five seconds, same product. This still does not go live.
 
 4. **Your call**  
    Type your name. Type why you said yes or no. Both are required. The buttons stay off until you fill them.  
    **Yes, keep this** or **No, do not use this**.
 
 5. **Phone preview**  
-   Check the picture and caption. Tap **Download pack**. That ZIP is paused. Someone still has to post it in real life.
+   Check the picture, the short video, and the caption. Tap **Download pack**. That ZIP is paused. Someone still has to post it in real life.
 
 ## What good looks like
 

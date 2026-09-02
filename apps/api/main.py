@@ -18,7 +18,7 @@ import idempotency
 from adapters.chat_litellm import build_chat
 from boxes.audit import build_audit, render_audit_html
 from boxes.auth import create_key
-from boxes.belt import paint_chosen, run_factory, run_radar
+from boxes.belt import film_chosen, paint_chosen, run_factory, run_radar
 from boxes.fixture_dive import persist_unofficial_fixture
 from boxes.export import export_pack
 from boxes.fetcher import run_fetch
@@ -87,6 +87,10 @@ class FactoryRunIn(BaseModel):
 
 
 class FactoryImageIn(BaseModel):
+    draft_id: str = Field(min_length=1)
+
+
+class FactoryVideoIn(BaseModel):
     draft_id: str = Field(min_length=1)
 
 
@@ -204,6 +208,9 @@ def health_deep() -> dict[str, object]:
     chat_ok = build_chat() is not None
     image_mode = (os.environ.get("IMAGE_GEN_MODE", "").strip().lower()
                   or ("stub" if not os.environ.get("XAI_API_KEY", "").strip() else "imagine"))
+    video_mode = (os.environ.get("VIDEO_GEN_MODE") or os.environ.get("IMAGE_GEN_MODE", "")).strip().lower()
+    if not video_mode:
+        video_mode = "stub" if not os.environ.get("XAI_API_KEY", "").strip() else "imagine"
     path = Path(_db.get_sqlite_path())
     size = path.stat().st_size if path.is_file() else 0
     counts = {"signals": 0, "drafts": 0, "decisions": 0}
@@ -221,6 +228,7 @@ def health_deep() -> dict[str, object]:
         "ok": True,
         "chat_configured": chat_ok,
         "image_mode": image_mode,
+        "video_mode": video_mode,
         "db_path_bytes": size,
         "last_radar_run_at": _last_event_ts("radar_end"),
         "last_factory_run_at": _last_event_ts("factory_end"),
@@ -399,6 +407,20 @@ def factory_image(body: FactoryImageIn):
         )
 
 
+@app.post("/factory/video")
+def factory_video(body: FactoryVideoIn):
+    try:
+        return film_chosen(body.draft_id)
+    except ValueError as exc:
+        return _friendly(exc)
+    except Exception:
+        logger.exception("factory video failed")
+        return JSONResponse(
+            status_code=500,
+            content={"error": "Could not make that short video. Please try again."},
+        )
+
+
 @app.post("/review/{draft_id}")
 def review_draft(draft_id: str, body: ReviewIn):
     try:
@@ -559,6 +581,28 @@ def get_draft_image(draft_id: str):
             content={"error": "No picture on that ticket yet."},
         )
     return FileResponse(path, media_type="image/png")
+
+
+@app.get("/drafts/{draft_id}/video")
+def get_draft_video(draft_id: str):
+    draft = get_draft(draft_id)
+    if draft is None:
+        return JSONResponse(
+            status_code=404,
+            content={"error": "That draft is not in the queue."},
+        )
+    if not draft.video_path:
+        return JSONResponse(
+            status_code=404,
+            content={"error": "No short video on that ticket yet."},
+        )
+    path = Path(draft.video_path)
+    if not path.is_file():
+        return JSONResponse(
+            status_code=404,
+            content={"error": "No short video on that ticket yet."},
+        )
+    return FileResponse(path, media_type="video/mp4")
 
 
 @app.get("/queue")

@@ -31,3 +31,20 @@ def visual_prompt(draft: Draft) -> str:
         "No people, no hands, no text, no letters, no numbers, no logo, no watermark, "
         "no claims on packaging, no brand name on the lid."
     )
+
+
+def video_prompt(draft: Draft) -> str:
+    """Unlocked ~5s product clip. Same hero as the still. No brand marks in the model."""
+    light = lighting_from_caption(draft.caption or "")
+    return (
+        "Five-second Instagram beauty product video, vertical 3:4 then cropped to 4:5, "
+        "commercial water-gel moisturizer ad. "
+        "Hero object: one closed clear jar of aqua-blue hyaluronic water gel moisturizer "
+        "with a white screw lid, gel visible through the glass, fine dew on the jar. "
+        "Jar stays centered on pale wet marble for the whole clip. "
+        "Slow camera push-in, a catch-light slides across the gel, no cuts, no people. "
+        f"{light}. Sharp, clean, dewy, premium drugstore skincare. "
+        "No people, no hands, no text, no letters, no numbers, no logo, no watermark, "
+        "no claims on packaging, no brand name on the lid, no legal disclaimer, "
+        "no on-screen caption, no subtitle, no voiceover."
+    )

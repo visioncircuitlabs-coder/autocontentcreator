@@ -50,9 +50,13 @@ def test_role_ranking(fresh_keys):
     assert not ok_v
     assert ok_a
 
-    # factory/image needs approver too
+    # factory/image and factory/video need approver
     ok_img, _ = auth.authorize("/factory/image", viewer)
     assert not ok_img
+    ok_vid, _ = auth.authorize("/factory/video", viewer)
+    assert not ok_vid
+    ok_vid_a, _ = auth.authorize("/factory/video", approver)
+    assert ok_vid_a
 
     # reads are open to any role
     ok_read, _ = auth.authorize("/drafts", viewer)

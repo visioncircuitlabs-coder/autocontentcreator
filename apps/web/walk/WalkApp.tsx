@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 import {
   draftImageUrl,
+  draftVideoUrl,
   downloadZip,
   friendlyError,
   loadBrief,
   openFixtureDive,
   paintDraft,
+  filmDraft,
   runFactory,
   runRadar,
   decideDraft,
@@ -49,9 +51,13 @@ import {
   NAME_REQUIRED_NOTE,
   NO_BUTTON,
   NO_PICTURE_NOTE,
+  NO_VIDEO_NOTE,
   PAUSED_NOTE,
   PICTURE_BUTTON,
   PICTURE_WAIT,
+  VIDEO_BUTTON,
+  VIDEO_HINT,
+  VIDEO_WAIT,
   PREVIEW_TITLE,
   NEWS_TAG,
   PICK_TITLE,
@@ -109,6 +115,7 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
   const [looking, setLooking] = useState(false);
   const [making, setMaking] = useState(false);
   const [painting, setPainting] = useState(false);
+  const [filming, setFilming] = useState(false);
   const [sampleBusy, setSampleBusy] = useState(false);
   const lookText = useRotating(LOOKING_STEPS, looking);
   const makeText = useRotating(MAKING_STEPS, making);
@@ -130,6 +137,7 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
   const [busy, setBusy] = useState(false);
   const [decision, setDecision] = useState<Decision | null>(null);
   const [imgBroken, setImgBroken] = useState(false);
+  const [videoBroken, setVideoBroken] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -229,11 +237,29 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
       setDrafts((rows) =>
         rows.map((row) => (row.draft_id === painted.draft_id ? painted : row)),
       );
-      setBeat(4);
     } catch (err) {
       setError(friendlyError(err));
     } finally {
       setPainting(false);
+    }
+  }
+
+  async function makeVideo() {
+    if (!chosen) return;
+    setError(null);
+    setFilming(true);
+    setVideoBroken(false);
+    try {
+      const filmed = await filmDraft(chosen.draft_id);
+      setChosen(filmed);
+      setDrafts((rows) =>
+        rows.map((row) => (row.draft_id === filmed.draft_id ? filmed : row)),
+      );
+      setBeat(4);
+    } catch (err) {
+      setError(friendlyError(err));
+    } finally {
+      setFilming(false);
     }
   }
 
@@ -290,7 +316,10 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
     }
     if (beat === 1 && !looking && !sampleBusy) void look();
     else if (beat === 2 && picked && !making) void makePost();
-    else if (beat === 3 && chosen && !painting) void makePicture();
+    else if (beat === 3 && chosen && !painting && !filming) {
+      if (!chosen.image_path) void makePicture();
+      else if (!chosen.video_path) void makeVideo();
+    }
   }
 
   function onVariantKeys(event: ReactKeyboardEvent<HTMLElement>) {
@@ -320,7 +349,7 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
       onJump={(n) => setBeat(n)}
     >
       {showMachine ? (
-        <MachineGraph beat={beat} watching={looking || making || painting} />
+        <MachineGraph beat={beat} watching={looking || making || painting || filming} />
       ) : null}
       {error ? <Alert>{error}</Alert> : null}
 
@@ -401,6 +430,7 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
           <h2 id="make-title">{MAKE_TITLE}</h2>
           {making ? <LoadingDesk label={makeText || MAKING_STEPS[0]} /> : null}
           {painting ? <LoadingDesk label={PICTURE_WAIT} /> : null}
+          {filming ? <LoadingDesk label={VIDEO_WAIT} /> : null}
           {brief?.concepts?.length ? (
             <p className="quiet">
               {ANGLE_PREFIX} {brief.concepts[0].angle}. {VOICE_PREFIX}{" "}
@@ -430,7 +460,7 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
                     tabIndex={chosen?.draft_id === draft.draft_id || index === 0 ? 0 : -1}
                     aria-checked={chosen?.draft_id === draft.draft_id}
                     data-sel={chosen?.draft_id === draft.draft_id ? "true" : "false"}
-                    disabled={painting}
+                    disabled={painting || filming}
                     onClick={() => setChosen(draft)}
                   >
                     <span className="variant-top">
@@ -457,11 +487,35 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
                   <button
                     className="btn"
                     type="button"
-                    disabled={painting}
+                    disabled={painting || filming}
                     onClick={() => void makePicture()}
                   >
                     {painting ? PICTURE_WAIT : PICTURE_BUTTON}
                   </button>
+                  {chosen.image_path ? (
+                    <>
+                      <div className="make-still">
+                        {imgBroken ? (
+                          <p className="quiet">{NO_PICTURE_NOTE}</p>
+                        ) : (
+                          <img
+                            src={draftImageUrl(chosen.draft_id)}
+                            alt="Post picture"
+                            onError={() => setImgBroken(true)}
+                          />
+                        )}
+                      </div>
+                      <p className="hint-line">{VIDEO_HINT}</p>
+                      <button
+                        className="btn"
+                        type="button"
+                        disabled={filming}
+                        onClick={() => void makeVideo()}
+                      >
+                        {filming ? VIDEO_WAIT : VIDEO_BUTTON}
+                      </button>
+                    </>
+                  ) : null}
                 </>
               ) : null}
             </>
@@ -475,6 +529,29 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
         <section className="panel" aria-labelledby="call-title">
           <h2 id="call-title">{CALL_TITLE}</h2>
           {chosen ? <p className="caption-block">{chosen.caption}</p> : null}
+          {chosen?.image_path || chosen?.video_path ? (
+            <div className="review-media">
+              {chosen.video_path && !videoBroken ? (
+                <video
+                  src={draftVideoUrl(chosen.draft_id)}
+                  poster={chosen.image_path ? draftImageUrl(chosen.draft_id) : undefined}
+                  controls
+                  muted
+                  playsInline
+                  loop
+                  onError={() => setVideoBroken(true)}
+                />
+              ) : chosen.image_path && !imgBroken ? (
+                <img
+                  src={draftImageUrl(chosen.draft_id)}
+                  alt="Post picture"
+                  onError={() => setImgBroken(true)}
+                />
+              ) : (
+                <p className="quiet">{videoBroken ? NO_VIDEO_NOTE : NO_PICTURE_NOTE}</p>
+              )}
+            </div>
+          ) : null}
           <form
             className="review-form"
             aria-label={REVIEW_FORM_TITLE}
@@ -552,7 +629,18 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
                 </div>
               </div>
               <div className="ig-photo">
-                {imgBroken ? (
+                {chosen.video_path && !videoBroken ? (
+                  <video
+                    src={draftVideoUrl(chosen.draft_id)}
+                    poster={chosen.image_path ? draftImageUrl(chosen.draft_id) : undefined}
+                    controls
+                    muted
+                    playsInline
+                    loop
+                    autoPlay
+                    onError={() => setVideoBroken(true)}
+                  />
+                ) : imgBroken ? (
                   <div className="missing">{NO_PICTURE_NOTE}</div>
                 ) : (
                   <img

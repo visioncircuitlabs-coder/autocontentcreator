@@ -40,13 +40,16 @@ Template: `.env.example`. Local: `.env` (gitignored).
 | `GEMINI_API_KEY` / `GROQ_API_KEY` | Alternate chat |
 | `IMAGE_GEN_MODE` | `imagine` \| `stub` \| `http` |
 | `IMAGE_GEN_MODEL` | `grok-imagine-image` |
+| `VIDEO_GEN_MODE` | `imagine` \| `stub` (unset follows `IMAGE_GEN_MODE`) |
+| `VIDEO_GEN_MODEL` | `grok-imagine-video-1.5` |
+| `VIDEO_BUDGET_USD` | Hard cap for Imagine clips. Default `2.00`. Separate from stills. |
 | `IMAGE_GEN_URL` / `IMAGE_GEN_KEY` | Only for `http` mode |
 | `NEXT_PUBLIC_API_URL` | Browser origin. Walk uses `/engine` |
 | `ENGINE_URL` | Server-side proxy target (`http://127.0.0.1:8000` or `http://api:8000`) |
 
 **Mismatch trap:** `.env` may still say `IMAGE_GEN_MODE=stub` while a manual uvicorn was started with `imagine` in the process env. The **process** wins. After a naive restart, you silently get the Pillow card. Set the file *or* export the var every launch. `.env.example` is `imagine`.
 
-Empty chat keys → templates. Missing Imagine key → stub card after a warning, not a blank preview.
+Empty chat keys → templates. Missing Imagine key → stub card after a warning, not a blank preview. Missing video key → stub ~5s mp4. ffmpeg must be on the API machine (Compose image installs it).
 
 ## Docker
 
@@ -94,7 +97,7 @@ What eats it: sequential Grok 20s timeouts, up to 5 scores, factory loop (writer
 
 ## Data you must not commit
 
-`data/demo.db`, `data/images/*.png`, `data/exports/*.zip`, `data/logs/machine.jsonl`, `.env`, `.cache/`, `.venv/`, `node_modules/`.
+`data/demo.db`, `data/images/*.png`, `data/videos/*.mp4`, `data/exports/*.zip`, `data/logs/machine.jsonl`, `.env`, `.cache/`, `.venv/`, `node_modules/`.
 
 ## Telegram
 

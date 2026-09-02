@@ -150,7 +150,9 @@ def test_belt_on_fixtures_produces_queued_draft(
     from db import get_draft, list_concepts, list_queue
 
     monkeypatch.setenv("IMAGE_GEN_MODE", "stub")
+    monkeypatch.setenv("VIDEO_GEN_MODE", "stub")
     monkeypatch.setenv("IMAGE_OUT_DIR", str(tmp_path / "images"))
+    monkeypatch.setenv("VIDEO_OUT_DIR", str(tmp_path / "videos"))
 
     reports = run_radar(
         sources=[FixtureSource([_dive_signal(), _kill_signal()])],
@@ -163,6 +165,7 @@ def test_belt_on_fixtures_produces_queued_draft(
     assert drafts
     assert all(isinstance(item, Draft) for item in drafts)
     assert all(not item.image_path for item in drafts)
+    assert all(not item.video_path for item in drafts)
     queued = list_queue()
     assert queued, "factory must park at least one draft on the review queue"
     assert {item.draft_id for item in queued} == {item.draft_id for item in drafts}
@@ -184,6 +187,17 @@ def test_belt_on_fixtures_produces_queued_draft(
     image = Path(loaded.image_path)
     assert image.is_file()
     assert image.read_bytes()[:8] == PNG_MAGIC
+    assert not loaded.video_path
+
+    from boxes.belt import film_chosen
+
+    filmed = film_chosen(sample.draft_id)
+    loaded = get_draft(sample.draft_id)
+    assert loaded is not None
+    assert loaded.video_path == filmed.video_path
+    clip = Path(loaded.video_path)
+    assert clip.is_file()
+    assert clip.read_bytes()[4:8] == b"ftyp"
     assert loaded.flag_human is False or loaded.flag_human is True
     assert "flag_human" in (loaded.judge or {})
     assert "cures" not in loaded.caption.lower()

@@ -8,6 +8,7 @@ Four layers. One belt. One walk. Ports at the edges.
 │ fetch/score │   │ fixtures +  │   │ Factory      │   │ Center       │
 │ 1 deep dive │   │ track record│   │ text then    │   │ five beats   │
 │             │   │             │   │ one picture  │   │ paused ZIP   │
+│             │   │             │   │ then ~5s clip│   │              │
 └─────────────┘   └─────────────┘   └──────────────┘   └──────────────┘
 ```
 
@@ -17,26 +18,29 @@ Four layers. One belt. One walk. Ports at the edges.
 apps/api/                 FastAPI engine
   main.py                 HTTP surface
   models.py               Signal, Score, TrendReport, Brief, Concept, Draft, Decision
-  ports.py                TrendSource, ChatModel, ImageGen
+  ports.py                TrendSource, ChatModel, ImageGen, VideoGen
   db.py                   SQLite (signals, scores, reports, claims, briefs,
                           concepts, drafts, decisions, events, track_record,
                           api_keys, runs, claims_registry, idempotency_keys)
   obs.py                  JSONL events
   adapters/               gdelt, news_rss, reddit_json, grok_web, chat_litellm,
-                          image_imagine, image_http, image_stub, resilience
+                          image_imagine, image_http, image_stub,
+                          video_imagine, video_stub, resilience
   boxes/                  one module per box + belt.py
     auth.py               API keys + roles (viewer/approver/admin)
     brand_pack.py         BRAND_SLUG → fixture pack loader
     claims_registry.py    evidence-bound benefit claims
     audit.py              provenance chain for a draft
     evidence.py           hash-chain + manifest (tamper-evident exports)
-    image_budget.py       Grok $ cap gate
+    image_budget.py       Grok $ cap gate (stills)
+    video.py              unlocked clip + coded overlay
+    video_budget.py       Grok $ cap gate (5s clips)
     metrics.py            /metrics aggregation
     learning.py           approval-memory → writer prompt
     rubric.py             deterministic craft scorer v2
     strategist/copywriter/judge/craft/loop/hard_rules/review/export/...
   harness/                agent-harness primitives (no frameworks)
-    breaker.py            circuit breakers (chat + image)
+    breaker.py            circuit breakers (chat + image + video)
     steps.py              StepResult envelope, run-id contextvar
     admission.py          bounded concurrency + 503 shedding
     chat_wallet.py        token/$ accounting
@@ -74,9 +78,13 @@ run_factory          picture does NOT run here
 paint_chosen         after a person picks a version
   visual_prompt      4:5 bright water-gel ad; lighting from caption keywords only
   compose            ImageGen then Pillow wordmark + disclaimer bar
+
+film_chosen          after (or beside) the still — not inside run_factory
+  video_prompt       ~5s product clip of the same jar; no text/logo/disclaimer
+  compose_video      VideoGen then ffmpeg overlay of the coded legal sheet
 ```
 
-Caps: `MAX_DEEP_DIVES = 1`, `MAX_FACTORY_CONCEPTS = 1`, `MAX_CHAT_SCORES = 5`, chat timeout 20s, Imagine timeout 90s, Next proxy 300s, radar fetch rate 6/min/host.
+Caps: `MAX_DEEP_DIVES = 1`, `MAX_FACTORY_CONCEPTS = 1`, `MAX_CHAT_SCORES = 5`, chat timeout 20s, Imagine timeout 90s, Imagine video poll 180s, Next proxy 300s, radar fetch rate 6/min/host.
 
 ## Ports
 
@@ -84,6 +92,7 @@ Caps: `MAX_DEEP_DIVES = 1`, `MAX_FACTORY_CONCEPTS = 1`, `MAX_CHAT_SCORES = 5`, c
 TrendSource.fetch(query_id) -> list[Signal]
 ChatModel.complete_json(system, user, schema) -> BaseModel
 ImageGen.generate(prompt, out_path) -> Path
+VideoGen.generate(prompt, out_path) -> Path
 ```
 
 `build_chat()` returns `None` if `XAI_API_KEY`, `GEMINI_API_KEY`, and `GROQ_API_KEY` are all empty. Callers must still walk on templates.
@@ -98,6 +107,15 @@ ImageGen.generate(prompt, out_path) -> Path
 
 Imagine failure falls back to stub (unless already stub). Overlay always runs.
 
+`build_video_gen()`:
+
+| `VIDEO_GEN_MODE` (falls back to `IMAGE_GEN_MODE`) | Adapter |
+|---|---|
+| `imagine` / `grok-imagine` / `grok-imagine-video` | `ImagineVideoGen` → `POST https://api.x.ai/v1/videos/generations` model `grok-imagine-video-1.5`, `duration: 5`, then poll |
+| `stub` or unknown | `StubVideoGen` looping Pillow card → mp4 |
+
+Video failure falls back to stub (unless already stub). Overlay always runs. ffmpeg is required to write the mp4.
+
 ## Data (SQLite)
 
 Default `SQLITE_PATH=data/demo.db` (Compose: `/data/demo.db`).
@@ -108,7 +126,7 @@ Brand memory (dual store): SQLite is the machine truth; `MEMORY_DIR=data/memory`
 mirrors it into human-editable Markdown — see [memory.md](memory.md). Only
 `lessons.md` survives rebuilds; the rest regenerates from SQLite.
 
-IDs: `signal_id` = sha256(url). Drafts: `dft_…`. Images: `data/images/{draft_id}.png`. ZIPs: `data/exports/{draft_id}_paused.zip`.
+IDs: `signal_id` = sha256(url). Drafts: `dft_…`. Images: `data/images/{draft_id}.png`. Videos: `data/videos/{draft_id}.mp4`. ZIPs: `data/exports/{draft_id}_paused.zip`.
 
 Datetimes ISO-8601, timezone-aware.
 
@@ -127,7 +145,7 @@ On-screen copy lives in `apps/web/desk/words.ts`. Internal names stay in code.
 - `X-Request-Id` on HTTP
 - User never sees a stack trace
 
-Kinds: `api_start`, `http`, `fetch_source`, `radar_start`, `radar_scored`, `radar_end`, `radar_fail`, `paint_start`, `paint_end`, `ui.look_click`, `ui.look_fail`, `ui.fetch_fail`.
+Kinds: `api_start`, `http`, `fetch_source`, `radar_start`, `radar_scored`, `radar_end`, `radar_fail`, `paint_start`, `paint_end`, `film_start`, `film_end`, `ui.look_click`, `ui.look_fail`, `ui.fetch_fail`.
 
 ## Tests
 

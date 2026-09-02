@@ -18,6 +18,8 @@ import {
   SAMPLE_BUTTON,
   SOURCES_BUTTON,
   TODAY_HEADLINES,
+  VIDEO_BUTTON,
+  VIDEO_HINT,
   checkLines,
   emptySourceNote,
   gateLabel,
@@ -184,6 +186,12 @@ test("sources control is one short word", () => {
 
 test("picture button waits until a version is picked", () => {
   assert.equal(PICTURE_BUTTON, "Make the picture");
+});
+
+test("short video button is plain language", () => {
+  assert.equal(VIDEO_BUTTON, "Make a short video");
+  assert.match(VIDEO_HINT, /five seconds/i);
+  assert.match(VIDEO_HINT, /does not go live/i);
 });
 
 test("google news urls get a short name", () => {

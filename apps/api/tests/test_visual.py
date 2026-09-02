@@ -30,6 +30,25 @@ def test_ad_prompt_is_bright_feed_not_night_film() -> None:
     assert "bathroom" in lower or "air-con" in lower
 
 
+def test_video_prompt_is_product_true_and_unlocked() -> None:
+    from boxes.visual import video_prompt
+
+    prompt = video_prompt(
+        _draft("Double cleanse after AC all day. Hydro Boost at night. Dermatologist tested.")
+    )
+    lower = prompt.lower()
+    assert "five-second" in lower or "five second" in lower
+    assert "jar" in lower
+    assert "water gel" in lower or "water-gel" in lower
+    assert "no text" in lower
+    assert "no logo" in lower
+    assert "disclaimer" in lower  # we tell the model NOT to paint one
+    assert "no legal disclaimer" in lower
+    assert "neutrogena" not in lower
+    assert "double cleanse after ac" not in lower
+    assert "dermatologist tested" not in lower
+
+
 def test_monsoon_caption_stays_bright() -> None:
     from boxes.visual import visual_prompt
 

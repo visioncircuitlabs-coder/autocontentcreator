@@ -15,11 +15,12 @@ from boxes.loop import run_loop
 from boxes.researcher import run_research
 from boxes.scorer import run_score
 from boxes.strategist import run_strategist
-from boxes.visual import visual_prompt
+from boxes.video import compose_video
+from boxes.visual import video_prompt, visual_prompt
 from db import get_draft, upsert_concepts, upsert_draft, upsert_reports
 from models import Draft, Score, Signal, TrendReport
 from obs import emit, emit_error
-from ports import ChatModel, ImageGen, TrendSource
+from ports import ChatModel, ImageGen, TrendSource, VideoGen
 
 logger = logging.getLogger(__name__)
 
@@ -113,9 +114,11 @@ def run_factory(
     *,
     chat: ChatModel | None = None,
     image_gen: ImageGen | None = None,
+    video_gen: VideoGen | None = None,
 ) -> list[Draft]:
-    """brief → strategist → copywriter → loop. Picture waits until a version is picked."""
+    """brief → strategist → copywriter → loop. Picture and video wait until a version is picked."""
     _ = image_gen
+    _ = video_gen
     brief_id = build_brief(report_id)
     concepts = run_strategist(brief_id, chat=chat)
     upsert_concepts(concepts)
@@ -148,3 +151,19 @@ def paint_chosen(
     upsert_draft(composed)
     emit("paint_end", draft_id=draft_id, image=bool(composed.image_path))
     return composed
+
+
+def film_chosen(
+    draft_id: str,
+    *,
+    video_gen: VideoGen | None = None,
+) -> Draft:
+    """One ~5s product clip, after a person picks a caption version."""
+    draft = get_draft(draft_id)
+    if draft is None:
+        raise ValueError("That draft is not in the queue.")
+    emit("film_start", draft_id=draft_id)
+    filmed = compose_video(draft, video_prompt(draft), video_gen=video_gen)
+    upsert_draft(filmed)
+    emit("film_end", draft_id=draft_id, video=bool(filmed.video_path))
+    return filmed
