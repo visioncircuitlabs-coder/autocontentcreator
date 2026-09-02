@@ -48,28 +48,28 @@ def visual_prompt(draft: Draft) -> str:
     light = lighting_from_caption(draft.caption or "")
     if is_chile_limon_pack(draft):
         return (
-            "World-class vertical 4:5 print and Instagram campaign still, Super Bowl craft. "
+            "World-class finished 4:5 vertical print and Instagram campaign poster, Super Bowl craft. "
             "Hero: one unofficial chile-limon potato-chip bag, lime plus dried chilli, "
-            "centered, pack hero, burst composition with frozen lime zest, chilli flakes, "
-            "and chips exploding around the bag on a lime-green field. "
+            "centered pack hero, burst composition, center-lit explosion of lime zest, "
+            "chilli flakes, and chips on a lime-green field. "
             f"{light}. "
-            "Designed campaign type in the empty margins as graphic headlines, "
-            "bold condensed sans-serif: short punchy lines about tangy lime and chilli dust. "
-            "Do not write a brand name, no extra wordmark, no logo, no watermark, "
+            "Designed campaign type locked in the empty margins as graphic headlines, "
+            "bold condensed sans-serif: short punchy lines about tangy lime and chilli heat. "
+            "Do not write a brand name, no extra wordmark, no logo, no Grok watermark, "
             "no legal disclaimer bar, no people, no hands, no packaging claims."
         )
     return (
-        "World-class vertical 4:5 print and Instagram campaign still, Super Bowl craft. "
+        "World-class finished 4:5 vertical print and Instagram campaign poster, Super Bowl craft. "
         "Hero: one closed clear jar of aqua-blue hyaluronic water gel moisturizer "
         "with a white screw lid, gel visible through the glass, fine dew on the jar. "
         "Jar sits centered on pale wet marble. Burst composition: frozen water-gel splash "
-        "and droplets around the jar, large empty margins for type. "
+        "and droplets around the jar, large empty margins for locked type. "
         f"{light}. Sharp, clean, dewy, premium drugstore skincare. "
         "Fresh and bright like a water-gel moisturizer ad. "
-        "Designed campaign type in the empty margins as graphic headlines, "
+        "Designed campaign type locked in the empty margins as graphic headlines, "
         "bold condensed sans-serif: two or three short punchy lines about cool water "
         "and after-commute skin. "
-        "Do not write a brand name, no logo, no watermark, no legal disclaimer bar, "
+        "Do not write a brand name, no logo, no Grok watermark, no legal disclaimer bar, "
         "no medical claims, no cures, no heals, no people, no hands, no packaging text."
     )
 
@@ -78,24 +78,25 @@ def video_prompt(draft: Draft) -> str:
     """I2V from the finished still. Layout and type frozen. Product burst only."""
     light = lighting_from_caption(draft.caption or "")
     freeze = (
-        "Five-second image-to-video from the finished campaign still as the first frame, "
-        "vertical 3:4, 720p. Keep the layout and type frozen: headlines, product hero, "
-        "margins, and any marks already in the still must not wander, warp, or be redrawn. "
+        "Five-second image-to-video of the finished campaign poster as the first frame, "
+        "vertical 3:4, 720p. Keep layout and type frozen: headlines, the pack, margins, "
+        "and any marks already in the still must not wander, warp, or be redrawn. "
+        "Motion is only the burst plus slight camera and particles. "
         "Do not add new headlines, no logo, no watermarks including a Grok watermark, "
         "and no legal bar. "
     )
     if is_chile_limon_pack(draft):
         motion = (
-            "Motion only: the bag flexes, the top opens or tears, chips tumble and spill "
-            "toward the camera in slow appetizing motion, lime zest and chilli dust. "
+            "Animate the pack opening: the bag flexes, the top opens or tears, chips and "
+            "lime-chilli garnish burst toward the camera in slow appetizing motion. "
             "Not a static bag-on-table loop. No extra wordmark. "
             "No cuts, no people, no hands, no voiceover, no subtitles. "
         )
     else:
         motion = (
-            "Motion only: this pack is the jar — the white lid unscrews, aqua hyaluronic "
-            "water gel bursts and ribbons toward the camera in slow appetizing motion, "
-            "dew and light particles, slight camera push. Not a static product-on-table loop. "
-            "No extra wordmark. No cuts, no people, no hands, no voiceover, no subtitles. "
+            "Animate the pack opening: this pack is the jar — the white lid unscrews, "
+            "aqua hyaluronic water gel and dew burst toward the camera, light particles, "
+            "slight camera push. Not a static product-on-table loop. No extra wordmark. "
+            "No cuts, no people, no hands, no voiceover, no subtitles. "
         )
     return freeze + motion + f"{light}."

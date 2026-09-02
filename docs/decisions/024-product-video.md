@@ -39,7 +39,7 @@ Model `grok-imagine-video-1.5`, `duration: 5` (API default is 8 if omitted), `as
 - `POST /factory/video` requires a campaign still (`draft.image_path` on disk, not under `fixtures/`).
 - Happy path is image-to-video from that composed still as the first frame.
 - The still is a designed campaign ad (product hero, burst composition, graphic type). Wordmark and legal bar stay in the code overlay. Video freezes that layout and only adds product motion.
-- Neutrogena motion is the water-gel jar. Chile Limón (if that SKU appears) is lime + chilli chips, never jalapeño, never extra LAY'S wordmarks. Do not take the Lays PR.
+- Neutrogena motion is the water-gel jar. Chile Limón (if that SKU appears) is lime + chilli chips, never jalapeño, never extra LAY'S wordmarks. Steal craft from the finished-poster I2V method (frozen type, burst only). Duration stays 5s, not the 15s reference clip. Do not take the Lays PR.
 - Brand names, claims, and the disclaimer stay out of the **video prompt**.
 - Overlay after generate, always, so the legal line cannot warp away during motion.
 - Image spend and video spend are separate caps on the same `spend.jsonl`.
