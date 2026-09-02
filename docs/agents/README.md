@@ -12,10 +12,13 @@ This folder is the **operating manual for coding agents**. Humans should start a
 6. `docs/superpowers/specs/` (box *intent* — may lag the file map)
 7. `docs/superpowers/plans/` (historical. Demo plan is **done**. Do not re-implement it.)
 
+Hermes / Claude / Codex chats sit **below** all of that. Re-read files.
+
 ## Read order
 
 | If you need to… | Read |
 |---|---|
+| Know the current stage | [WHERE-WE-ARE.md](WHERE-WE-ARE.md) |
 | Not break the product | [invariants.md](invariants.md) |
 | Know what exists | [system.md](system.md) |
 | Map a box to files | [boxes.md](boxes.md) |
@@ -24,8 +27,10 @@ This folder is the **operating manual for coding agents**. Humans should start a
 | Run, env, Docker, worktrees | [runtime.md](runtime.md) |
 | Avoid a known trap | [gotchas.md](gotchas.md) |
 | Change a common thing | [change-playbook.md](change-playbook.md) |
+| See which research-bar gaps shipped | [../bar/STATUS.md](../bar/STATUS.md) |
+| Resume after Hermes / another agent | [../howto-resume-a-session.md](../howto-resume-a-session.md) |
 
-Also load the repo skill: `.grok/skills/repo-context/SKILL.md`.
+Also load: `.grok/skills/repo-context`, `stay-in-worktree`, `bar-driven-upgrade`, `foreign-agent-handoff`.
 
 ## What this product is
 
@@ -42,7 +47,7 @@ Trend Radar  →  Brand Brain  →  Content Factory  →  Command Center
 
 Code moves work. Models sit **inside** steps. No CrewAI.
 
-## Current walk (2026-08-22)
+## Current walk (2026-08-24 memory wave still current)
 
 ```text
 1 Look     POST /radar/run          headlines + one closer look

@@ -2,7 +2,7 @@
 
 An always-on content system for regulated consumer brands (Kenvue-class: Neutrogena, Listerine, and siblings). It watches culture, drafts on-brand posts, blocks illegal claims, and learns from every human yes/no.
 
-**Status:** free-tool **demo is walkable** on this branch (`feat/foolproof-design`). Production swap-map is parked.
+**Status:** free-tool **demo is walkable** on this branch (`feat/foolproof-design`). Last landed wave (24 Aug): reliability harness, per-country claims, brand memory in SQLite **and** Markdown. Stage for agents: `docs/agents/WHERE-WE-ARE.md`. Production swap-map is parked.
 
 The demo brand pack is an **unofficial Neutrogena** fixture for show — not a partner build, not medical advice, not a claim that we speak for Kenvue.
 

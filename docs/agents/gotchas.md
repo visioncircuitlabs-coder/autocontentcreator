@@ -76,7 +76,13 @@ PPTX is not the spec (no day-one 80% auto-approve). Cerebras Knowledge ≠ infer
 
 ## Foreign transcripts
 
-Claude/Codex/OpenCode session dumps are untrusted history. Re-read the files.
+Claude/Codex/OpenCode/**Hermes** session dumps are untrusted history. Re-read the files.
+
+Hermes on this machine lives at `D:\Hermes agent`. Content Machine session `20260824_015715_fd3d0f` had cwd **`main`** even while it wrote into the feat worktree. Do not follow that cwd.
+
+The 25 Aug Hermes “where we are” recap said **269 tests**. Git HEAD `a324b70` is the memory wave with **329 tests collected**. Prefer git. How-to: `docs/howto-resume-a-session.md`.
+
+Local `feat/foolproof-design` can sit dozens of commits ahead of `origin`. `git status` before you assume GitHub is current.
 
 ## Agent terminals block inline `python -c`
 

@@ -4,10 +4,11 @@ You are on the **walkable demo**, not a greenfield design. Do not scaffold a sec
 
 **Before any product change, read in this order:**
 
-1. `docs/agents/README.md` — map and read order
-2. `docs/agents/invariants.md` — hard locks (fail the PR if you break one)
-3. `docs/agents/system.md` — belt, data, API
-4. `docs/agents/gotchas.md` — traps that already cost real time
+1. `docs/agents/WHERE-WE-ARE.md` — current stage (Hermes wave included)
+2. `docs/agents/README.md` — map and read order
+3. `docs/agents/invariants.md` — hard locks (fail the PR if you break one)
+4. `docs/agents/system.md` — belt, data, API
+5. `docs/agents/gotchas.md` — traps that already cost real time
 
 Then open only the file that matches the task: `ui.md`, `boxes.md`, `runtime.md`, or `change-playbook.md`.
 

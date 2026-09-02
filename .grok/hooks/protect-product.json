@@ -1,0 +1,27 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "py -3 session-start.py",
+            "timeout": 8
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|search_replace|run_terminal_command|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "py -3 protect.py",
+            "timeout": 8
+          }
+        ]
+      }
+    ]
+  }
+}

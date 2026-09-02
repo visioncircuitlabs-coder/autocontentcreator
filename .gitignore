@@ -8,6 +8,9 @@ worktrees/
 .grok/*
 !.grok/skills/
 !.grok/skills/**
+!.grok/hooks/
+!.grok/hooks/**
+.hermes/
 .superpowers/
 .npm-cache/
 .pip-cache/

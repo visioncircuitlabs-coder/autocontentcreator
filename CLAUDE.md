@@ -6,6 +6,8 @@ CEO/product owner is not a developer. Explain what changed and why, not the plum
 
 **Walkable demo** on this worktree (`feat/foolproof-design`). FastAPI belt + Next.js five-step walk. Unofficial Neutrogena fixture.
 
+Stage: `docs/agents/WHERE-WE-ARE.md`. Bar gaps: `docs/bar/STATUS.md`. Resume: `docs/howto-resume-a-session.md`.
+
 - Empty chat keys still walk on templates.
 - Pictures: `IMAGE_GEN_MODE=imagine` (Grok Imagine) with Pillow overlay. `.env` may still say `stub` — the **process** wins. See `docs/agents/runtime.md`.
 - **Make a post** writes captions only. **Make the picture** runs after a version pick.
@@ -109,3 +111,6 @@ Key routing rules:
 - Author a backlog-ready spec/issue → invoke /spec
 - Load this repo before UI/API changes → `.grok/skills/repo-context`
 - On-screen copy → `.grok/skills/plain-english`
+- Starting work / cwd is main → `.grok/skills/stay-in-worktree`
+- “Make it better” / enterprise iterate → `.grok/skills/bar-driven-upgrade`
+- “Where are we” / resume Hermes → `.grok/skills/foreign-agent-handoff`

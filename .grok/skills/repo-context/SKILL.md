@@ -9,12 +9,14 @@ Do not build a wiki. Read the files that already exist.
 
 | Kind | File | Use it for |
 |---|---|---|
-| Agent start | `AGENTS.md` then `docs/agents/README.md` | Read order. Do not re-scaffold. |
+| Agent start | `AGENTS.md` then `docs/agents/WHERE-WE-ARE.md` | Current stage. Do not re-scaffold. |
 | Hard locks | `docs/agents/invariants.md` | Fail the PR from this file |
 | Live system | `docs/agents/system.md` | Belt, data, ports |
 | Box → file | `docs/agents/boxes.md` | Spec vs code. Code wins. |
+| Memory | `docs/agents/memory.md` | SQLite + markdown dual store |
 | Walk | `docs/agents/ui.md` | Five beats. Picture after caption pick. |
-| Traps | `docs/agents/gotchas.md` | Junk URLs, timeouts, Imagine vs stub |
+| Traps | `docs/agents/gotchas.md` | Junk URLs, timeouts, Imagine vs stub, Hermes cwd |
+| Bar gaps | `docs/bar/STATUS.md` | What shipped vs still missing |
 | Change X | `docs/agents/change-playbook.md` | Smallest patch |
 | Whole product (intent) | `docs/superpowers/specs/2026-08-19-ALL-BOXES.md` | What each box owns |
 | This screen | `docs/architecture/command-center.md` | Who owns policy |
