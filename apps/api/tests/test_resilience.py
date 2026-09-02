@@ -188,7 +188,7 @@ def test_radar_run_replays_same_idempotency_key(monkeypatch) -> None:
 def test_factory_run_accepts_idempotency_key(monkeypatch) -> None:
     calls = {"n": 0}
 
-    def fake_factory(report_id, chat=None):
+    def fake_factory(report_id, chat=None, sku=None, **kwargs):
         calls["n"] += 1
         return {"drafts": [{"caption": "hi"}], "brief_id": "b1"}
 

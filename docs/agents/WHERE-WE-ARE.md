@@ -48,7 +48,7 @@ Hermes treated those as one job: raise the product to an enterprise bar, then la
 
 ## What actually landed (verified in git, not from chat)
 
-Last product commit before this Lays wave: `0ecb3c9` (Chile Limón pack photo). Memory wave still sits at `a324b70` (329 API tests).
+Last product commit before this Lays wave: `0ecb3c9` (Chile Limón pack photo). Memory wave still sits at `a324b70`. This Lays wave: **337 API tests collected**.
 
 | Wave | What you get |
 |---|---|
