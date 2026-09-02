@@ -1,6 +1,8 @@
 # How to run the demo
 
-You will open **Make today’s post** on http://localhost:3050 and walk Look → Pick → Make → Your call → Preview.
+You will open **Make today’s post** on http://localhost:3050 and walk Look → Pick the moment → Pick the packet → Make → Your call → Preview.
+
+The client demo uses unofficial Lay's (`BRAND_SLUG=lays` in `.env.example`). Neutrogena still ships as a fixture.
 
 ## Prerequisites
 

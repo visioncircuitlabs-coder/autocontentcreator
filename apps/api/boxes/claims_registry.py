@@ -12,16 +12,13 @@ import json
 from datetime import date, datetime, timezone
 from pathlib import Path
 
+from boxes.brand_pack import load_brand_pack
 from models import RegistryClaim
-
-DEFAULT_REGISTRY_PATH = (
-    Path(__file__).resolve().parent.parent / "fixtures" / "neutrogena" / "claims.json"
-)
 
 
 def load_registry(path: Path | None = None) -> list[RegistryClaim]:
     """Load registry rows from the fixture's 'registry' key."""
-    path = path or DEFAULT_REGISTRY_PATH
+    path = path or load_brand_pack()["claims_path"]
     raw = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(raw, dict):
         raise ValueError("registry fixture must be an object")
@@ -102,7 +99,7 @@ def usable(
 
 def registry_phrases(path: Path | None = None) -> dict[str, list[str]]:
     """claim_id -> matchable phrases (text + fixture lookalikes)."""
-    path = path or DEFAULT_REGISTRY_PATH
+    path = path or load_brand_pack()["claims_path"]
     raw = json.loads(path.read_text(encoding="utf-8"))
     phrases: dict[str, list[str]] = {}
     for row in raw.get("registry") or []:

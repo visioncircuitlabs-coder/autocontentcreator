@@ -1,4 +1,4 @@
-import type { BriefPack, Decision, Draft, RadarRun, Signal, Score, TrendReport } from "./types";
+import type { BriefPack, BrandInfo, BrandProduct, Decision, Draft, RadarRun, Signal, Score, TrendReport } from "./types";
 
 export type FixtureDive = {
   fixture: true;
@@ -121,10 +121,10 @@ export function openFixtureDive() {
   return api<FixtureDive>("/radar/fixture", { method: "POST" });
 }
 
-export function runFactory(reportId: string) {
+export function runFactory(reportId: string, sku?: string) {
   return api<Draft[]>("/factory/run", {
     method: "POST",
-    body: JSON.stringify({ report_id: reportId }),
+    body: JSON.stringify(sku ? { report_id: reportId, sku } : { report_id: reportId }),
   });
 }
 
@@ -133,6 +133,18 @@ export function paintDraft(draftId: string) {
     method: "POST",
     body: JSON.stringify({ draft_id: draftId }),
   });
+}
+
+export function loadBrand() {
+  return api<BrandInfo>("/brand");
+}
+
+export function loadProducts() {
+  return api<{ products: BrandProduct[]; hero_sku: string }>("/brand/products");
+}
+
+export function productImageUrl(sku: string): string {
+  return `${API_URL}/brand/products/${encodeURIComponent(sku)}/image`;
 }
 
 export function loadBrief(briefId: string) {

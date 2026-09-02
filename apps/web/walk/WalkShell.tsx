@@ -8,22 +8,34 @@ export function WalkShell({
   showMachine,
   onToggleMachine,
   onJump,
+  brandSlug,
+  brandName,
+  unofficialLine,
   children,
 }: {
   beat: number;
   showMachine: boolean;
   onToggleMachine: () => void;
   onJump: (n: number) => void;
+  brandSlug?: string;
+  brandName?: string;
+  unofficialLine?: string;
   children: ReactNode;
 }) {
   return (
-    <div className="walk-app">
+    <div className="walk-app" data-brand={brandSlug || undefined}>
       <a className="skip" href="#walk-main">
         Skip to the walk
       </a>
       <header className="walk-top">
         <div className="walk-brand">
           <h1>Make today’s post</h1>
+          {brandName ? (
+            <p className="walk-brand-meta">
+              {brandName}
+              {unofficialLine ? ` · ${unofficialLine}` : ""}
+            </p>
+          ) : null}
         </div>
         <ol className="beats" aria-label="Steps">
           {BEATS.map((item) => {

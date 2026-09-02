@@ -26,6 +26,7 @@
 | [021-task-12-ci-docs.md](021-task-12-ci-docs.md) | CI + demo README | filled (chore 32b37fa + docs pack 9a2d705; $5 unspent; remote Actions not seen here) |
 | [022-walk-ui.md](022-walk-ui.md) | Five-step App Mode walk | filled |
 | [023-agent-and-human-docs.md](023-agent-and-human-docs.md) | Agent handbook + doc refresh | filled |
+| [024-lays-client-demo.md](024-lays-client-demo.md) | Unofficial Lay's Chile Limón walk | filled |
 
 ## One-line rulings a reviewer must not miss
 

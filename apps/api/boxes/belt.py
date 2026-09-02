@@ -111,12 +111,13 @@ def run_radar(
 def run_factory(
     report_id: str,
     *,
+    sku: str | None = None,
     chat: ChatModel | None = None,
     image_gen: ImageGen | None = None,
 ) -> list[Draft]:
     """brief → strategist → copywriter → loop. Picture waits until a version is picked."""
     _ = image_gen
-    brief_id = build_brief(report_id)
+    brief_id = build_brief(report_id, sku=sku)
     concepts = run_strategist(brief_id, chat=chat)
     upsert_concepts(concepts)
     queued: list[Draft] = []

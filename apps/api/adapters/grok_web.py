@@ -133,7 +133,7 @@ class GrokWebSource:
             "model": native_model(),
             "input": [
                 {"role": "system", "content": SYSTEM},
-                {"role": "user", "content": LOCKED_QUERY},
+                {"role": "user", "content": load_brand_pack()["locked_query"]},
             ],
             "tools": [{"type": "web_search"}],
         }

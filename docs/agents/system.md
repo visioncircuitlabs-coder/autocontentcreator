@@ -42,7 +42,8 @@ apps/api/                 FastAPI engine
     chat_wallet.py        token/$ accounting
     resumer.py            failed-run resume
     eval.py               golden-set evaluation
-  fixtures/neutrogena/    unofficial brand pack
+  fixtures/neutrogena/    unofficial Neutrogena pack
+  fixtures/lays/          unofficial Lay's pack (Chile Limón hero)
 apps/web/                 Next.js App Router
   app/page.tsx            WalkApp (the product)
   app/engine/[...path]    300s proxy → API

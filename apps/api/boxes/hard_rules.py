@@ -10,9 +10,12 @@ from boxes.brand_pack import load_brand_pack
 from boxes.claims_registry import list_registry, usable
 from models import Draft
 
-DEFAULT_DISCLAIMER_PATH = load_brand_pack()["disclaimer_path"]
-
 BANNED_TOKENS = ("cures", "heals", "best", "only", "guaranteed")
+
+
+def load_disclaimer(path: Path | None = None) -> str:
+    path = path or load_brand_pack()["disclaimer_path"]
+    return path.read_text(encoding="utf-8").strip()
 
 
 def strip_banned_tokens(text: str) -> str:
@@ -56,11 +59,6 @@ BENEFIT_MARKERS = (
 
 _AD_RE = re.compile(r"(?i)#ad\b")
 _WS_RE = re.compile(r"\s+")
-
-
-def load_disclaimer(path: Path | None = None) -> str:
-    path = path or DEFAULT_DISCLAIMER_PATH
-    return path.read_text(encoding="utf-8").strip()
 
 
 def _norm_ws(text: str) -> str:

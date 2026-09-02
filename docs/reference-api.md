@@ -57,12 +57,26 @@ Unofficial canned closer look. Not this Fetch.
 { "fixture": true, "signal": {}, "score": {}, "report": {} }
 ```
 
+## Brand
+
+### `GET /brand`
+
+Active fixture from `BRAND_SLUG` (default Neutrogena). Name, unofficial line, handle, hero SKU, walk copy.
+
+### `GET /brand/products`
+
+SKU list for the packet picker. Chile Limón includes `image_url` when `BRAND_SLUG=lays`.
+
+### `GET /brand/products/{sku}/image`
+
+Pack photo bytes. 404 if that flavour has no file.
+
 ## Factory
 
 ### `POST /factory/run`
 
 ```json
-{ "report_id": "rpt_…" }
+{ "report_id": "rpt_…", "sku": "DEMO-CHILE-LIMON" }
 ```
 
 Returns `Draft[]` (usually 2–3 caption variants). **`image_path` is null.** Loop fields: `caption`, `variant`, `rules`, `round`, `flag_human`, `judge`.

@@ -11,6 +11,7 @@ from adapters.common import (
     request_headers,
 )
 from models import Signal
+from boxes.brand_pack import load_brand_pack
 
 logger = logging.getLogger(__name__)
 
@@ -42,10 +43,12 @@ class GdeltSource:
         self.client = client
 
     def fetch(self, query_id: str) -> list[Signal]:
+        radar = load_brand_pack().get("radar") or {}
+        query = str(radar.get("gdelt") or GDELT_QUERY)
         response = self.client.get(
             GDELT_DOC_URL,
             params={
-                "query": GDELT_QUERY,
+                "query": query,
                 "mode": "ArtList",
                 "maxrecords": "20",
                 "format": "json",

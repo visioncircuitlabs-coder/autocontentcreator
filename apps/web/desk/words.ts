@@ -36,7 +36,9 @@ export const LOOK_SUB =
 export const MAKE_TITLE = "Make a post";
 export const CALL_TITLE = "Your call";
 export const PREVIEW_TITLE = "Phone preview";
-export const PICK_TITLE = "This idea";
+export const PICK_TITLE = "Pick the moment";
+export const PACKET_TITLE = "Pick the packet";
+export const PACKET_HINT = "Captions and the picture follow this flavour.";
 export const PRACTICE_TITLE = "Practice idea";
 export const PRACTICE_TAG = "Practice idea";
 export const NEWS_TAG = "From today's news";
@@ -55,6 +57,11 @@ export const REVIEW_FORM_TITLE = "Who made this call";
 export const NAME_REQUIRED_NOTE = "Add your name and a reason to unlock Yes or No.";
 export const ANGLE_PREFIX = "Angle:";
 export const VOICE_PREFIX = "Voice:";
+
+export function makePostFor(flavour: string): string {
+  const name = flavour.trim();
+  return name ? `Make a post for ${name}` : MAKE_BUTTON;
+}
 
 export function radarCountNote(seen: number, scored: number): string {
   const noun = seen === 1 ? "headline" : "headlines";

@@ -6,7 +6,9 @@ A reviewer must be able to fail a PR from this file. Do not “improve” a lock
 
 | Lock | Meaning |
 |---|---|
-| Unofficial Neutrogena fixture | Not a Kenvue partner build. Not medical advice. |
+| Unofficial Neutrogena fixture | Not a Kenvue partner build. Not medical advice. Still the default when `BRAND_SLUG` is unset. |
+| Unofficial Lay's demo | `BRAND_SLUG=lays`. Not PepsiCo. Not a real Lay's ad. Chile Limón is the hero SKU. |
+| India Instagram first | Market `IN`, timezone `Asia/Kolkata`, currency INR if money appears. |
 | India Instagram first | Market `IN`, timezone `Asia/Kolkata`, currency INR if money appears. |
 | Same 17 boxes as production | Demo uses cheaper guts. Do not collapse to “analyze + one image.” |
 | Loops win | Plain-code belt. Agents only inside steps. **No CrewAI.** |
@@ -23,7 +25,7 @@ A reviewer must be able to fail a PR from this file. Do not “improve” a lock
 | Disclaimer required on benefit lines | Fixture text in `fixtures/neutrogena/disclaimer.txt` |
 | Writer ≠ judge | `boxes/loop.py`: hard rules + claims judge + craft review. Max 3 rounds, then `flag_human`. |
 | Named human, non-empty reason | API `boxes/review.py` and UI both reject blanks. |
-| Brand marks not in the image model | Imagine prompt: no text, no logo. `art_director.apply_locks` paints `NEUTROGENA` + disclaimer. |
+| Brand marks not in the image model | **Neutrogena:** Imagine prompt has no text, no logo. `art_director.apply_locks` paints `NEUTROGENA` + disclaimer. **Lays (founder override, 2026-09-02):** Lay's logo may go into Imagine because it is on the real pack. Do not stamp a second wordmark. Disclaimer overlay stays in code. See `docs/decisions/024-lays-client-demo.md`. |
 
 ## Radar and factory shape
 
@@ -63,7 +65,7 @@ Do not collapse these:
 - A second approval path
 - Publishing adapters (Meta, Buffer, later)
 - CrewAI / multi-agent orchestrators as the belt
-- Putting logo/disclaimer/claims into Imagine or any image prompt
+- Putting logo/disclaimer/claims into Imagine or any image prompt (**except unofficial Lay's**, where the pack logo may be in the Imagine prompt; disclaimer still overlays in code)
 - Generating photos during Look or during `Make a post`
 - Auto-approve, including “80% auto-approve”
 - New paid vendors

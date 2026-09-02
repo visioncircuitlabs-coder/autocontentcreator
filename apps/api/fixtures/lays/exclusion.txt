@@ -1,0 +1,25 @@
+# Unofficial Lay's demo exclusion brief (we own this text).
+# Format: category|pattern  — case-insensitive substring on title + snippet + url
+# Any match → safety=kill, gate=discard. Velocity never overrides.
+
+kill|product recall
+kill|adverse event
+kill|class action
+kill|lawsuit
+kill|fda warning
+kill|fssai ban
+kill|boycott
+kill|died after
+kill|hospitalized
+
+job|we're hiring
+job|job opening
+job|now hiring
+job|careers at
+job|apply now
+job|hiring for
+
+spam|u/lays
+spam|/user/lays
+spam|@laysindia
+spam|@lays
