@@ -32,7 +32,7 @@ BANNED_OPENERS = ("introducing", "say hello to", "we're excited", "we are excite
 # at 2, and the one_line_fix names it.
 HOOK_MAX_WORDS = 8
 HOOK_MAX_CHARS = 60
-BRAND_HOOK_NAMES = ("hydro boost", "neutrogena")
+BRAND_HOOK_NAMES = ("hydro boost", "neutrogena", "lay's", "lays", "chile limón", "chile limon")
 ANNOUNCE_HOOK_WORDS = ("introducing", "say hello")
 # B2 — voice physics: corporate announce register fails ANYWHERE in the copy,
 # not just as an opener; caps emotional_truth at 2 (forces REWRITE).

@@ -63,8 +63,10 @@ Craft review (`craft.py`) is a second Grok pass, writer ≠ this pass. Chat fail
 ```text
 visual_prompt(draft)     4:5 Instagram beauty ad, white lid, aqua gel, marble
                          lighting_from_caption keywords only (no caption leak)
-ImagineImageGen          aspect_ratio 4:5, 90s
-apply_locks              Pillow wordmark NEUTROGENA + full disclaimer bar
+ImagineImageGen          grok-imagine-image-2.0, aspect_ratio 3:4, 2k, 600s
+                         (crop-cover to 4:5 feed in apply_locks)
+apply_locks              Neutrogena: Pillow wordmark + disclaimer bar
+                         Lays: no overlay — pack mark + designed type only
                          canvas 1080×1350
 ```
 

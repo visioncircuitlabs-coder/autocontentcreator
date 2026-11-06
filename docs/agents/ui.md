@@ -9,8 +9,8 @@ Entry: `apps/web/app/page.tsx` → `walk/WalkApp.tsx`. Shell: `walk/WalkShell.ts
 | n | id | Button / act | API |
 |---|---|---|---|
 | 1 | look | **Look for ideas** | `POST /radar/run` then maybe `POST /radar/fixture` |
-| 2 | pick | Read the idea; optional sample | none |
-| 3 | make | **Make a post** → pick Version 1/2/3 → **Make the picture** | `POST /factory/run` then `POST /factory/image` |
+| 2 | pick | Read the idea; pick the packet | `GET /brand/products` |
+| 3 | make | **Make a post** → pick Version 1/2/3 → **Make the picture** | `POST /factory/run` (with `sku`) then `POST /factory/image` |
 | 4 | call | name + why, **Yes, keep this** / **No, do not use this** | `POST /review/{draft_id}` |
 | 5 | preview | phone frame, **Download pack** | `GET /export/{draft_id}` |
 
@@ -32,7 +32,7 @@ Words: `apps/web/desk/words.ts`. Map: `docs/conventions/words-we-use.md`.
 
 ## Why delaying the photo does not weaken Pick
 
-Pick and caption judges are **text**. Imagine is a later render. Do not “help” ranking by generating three photos up front (that is what blew the 5-minute page budget).
+Pick and caption judges are **text**. Imagine is a later render. Do not “help” ranking by generating three photos up front (that is what blew the page budget).
 
 ## Leftover desk routes
 

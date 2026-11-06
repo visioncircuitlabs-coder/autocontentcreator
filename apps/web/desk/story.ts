@@ -29,11 +29,11 @@ export const LAYER_BLURB: Record<string, string> = {
 
 export const BOX_STORY: Record<string, BoxStory> = {
   fetcher: {
-    does: "Looks at today's open web for skincare talk in India.",
+    does: "Looks at today's open web for brand talk in India.",
     takes: "You tap Look for ideas.",
     gives: "A pile of headlines from Google News, a news wire, Reddit, and Grok search when a key is on.",
     then: "Those headlines go to the scorer.",
-    grok: "Only as search. Locked India skincare query. Real article URLs. No scores.",
+    grok: "Only as search. Locked India query. Real article URLs. No scores.",
   },
   scorer: {
     does: "Drops unsafe stories. Scores the rest for brand-fit.",
@@ -57,7 +57,7 @@ export const BOX_STORY: Record<string, BoxStory> = {
     grok: "No. This is storage.",
   },
   brand: {
-    does: "Keeps the unofficial Neutrogena voice for India Instagram.",
+    does: "Keeps the unofficial brand voice for India Instagram.",
     takes: "The brand book on disk.",
     gives: "Tone and examples for the writer.",
     then: "The brief builder copies a slice, not the whole book.",
@@ -103,7 +103,7 @@ export const BOX_STORY: Record<string, BoxStory> = {
     takes: "The caption version you picked.",
     gives: "One Instagram-shaped still for the phone preview.",
     then: "The pack is ready for your call.",
-    grok: "Yes, after you pick a version. One picture.",
+    grok: "Yes, after you pick a version. Campaign still. One picture.",
   },
   judge: {
     does: "Checks every sentence against Product Facts.",

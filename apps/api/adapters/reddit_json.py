@@ -11,6 +11,7 @@ from adapters.common import (
     parse_unix,
     request_headers,
 )
+from boxes.brand_pack import load_brand_pack
 from models import Signal
 
 logger = logging.getLogger(__name__)
@@ -28,15 +29,17 @@ class RedditJsonSource:
         self.client = client
 
     def fetch(self, query_id: str) -> list[Signal]:
+        radar = load_brand_pack().get("radar") or {}
+        feeds = tuple(radar.get("reddit") or SUBREDDIT_URLS)
         signals: list[Signal] = []
         errors = 0
-        for url in SUBREDDIT_URLS:
+        for url in feeds:
             try:
                 signals.extend(self._fetch_one(url, query_id))
             except Exception as exc:
                 errors += 1
                 logger.warning("reddit feed %s failed: %s", url, exc)
-        if errors == len(SUBREDDIT_URLS) and not signals:
+        if errors == len(feeds) and not signals:
             raise RuntimeError("all reddit feeds failed")
         return signals
 

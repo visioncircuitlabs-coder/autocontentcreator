@@ -20,7 +20,7 @@ If they fight, **this worktree + `docs/agents/invariants.md` win.**
 
 ## Imagine vs stub
 
-`.env` can say `IMAGE_GEN_MODE=stub` while uvicorn was launched with `imagine`. Restart without the export → Pillow card, not Grok. `.env.example` is `imagine`. Imagine needs `XAI_API_KEY`. Failures fall back to stub; the user still sees *a* picture.
+`.env` can say `IMAGE_GEN_MODE=stub` while uvicorn was launched with `imagine`. Restart without the export → Pillow card, not Grok. `.env.example` is `imagine`. Imagine needs `XAI_API_KEY`. Failures fall back to stub; the user still sees *a* picture. **xAI Imagine 2.0 rejects `aspect_ratio: 4:5` (422).** Send `3:4`, `resolution: 2k`, `quality: medium`, model `grok-imagine-image-2.0`. Crop-cover to 1080×1350 in `apply_locks`. Stale `grok-imagine-image` is mapped in code.
 
 ## Make a post must not paint
 
@@ -28,7 +28,7 @@ Old belt composed three Imagine photos while Pick waited. That is why the page h
 
 ## “That took too long” is the proxy
 
-Next `/engine` aborts at 300s. The UI cannot tell Look from Make from Imagine. Do not special-case the string back to “that look.”
+Next `/engine` aborts at 660s (11 minutes) so Imagine's 10-minute budget can finish. The UI cannot tell Look from Make from Imagine. Do not special-case the string back to “that look.”
 
 ## Junk sources
 
@@ -46,9 +46,13 @@ Caption words like monsoon/humid leaked into a cinematic still. `visual_prompt` 
 
 Feed is 1080×1350. CSS `object-fit: contain` + `aspect-ratio: 4/5`. Cover on a square frame sliced the disclaimer.
 
-## Chat 20s timeout
+## Chat 180s timeout
 
-LiteLLM `timeout=20`. Craft/copy often fail open to templates or craft PASS. That is why you still get a walkable caption when Grok is slow. Do not raise this blindly without re-timing Look.
+LiteLLM default `timeout=180` (`CHAT_TIMEOUT_S`). Copywriter retries once at 180s before giving up. Templates only when there is no chat (empty keys). One slow Grok call must not open `CHAT_BREAKER` and dump fixture captions. Restart the API after changing the timeout.
+
+## Imagine 600s timeout
+
+Grok Imagine default `timeout=600` (`IMAGE_TIMEOUT_S`). One attempt; 5xx may retry once. Timeouts are not retried (that would be 20 minutes) and one slow call must not open `IMAGE_BREAKER` into the Pillow fallback. Restart the API after changing the timeout.
 
 ## Only five Grok scores
 
@@ -68,7 +72,7 @@ No `npm` / pip / OpenCode caches on C:. XDG and npm cache on D: under `.cache/`.
 
 ## Overlay vs model
 
-Never put `NEUTROGENA`, claims, or the disclaimer in the Imagine prompt. They are stamped after. If you “just add the logo to the prompt,” you will get misspelled packaging and we lose the legal line.
+Never put `NEUTROGENA`, claims, or the disclaimer in the Imagine prompt. They are stamped after. If you “just add the logo to the prompt,” you will get misspelled packaging and we lose the legal line. **Lays exception:** designed headline/CTA must live in the Imagine prompt (print-ad craft). Do not paint unofficial legal on the Lays still — not in Imagine, not in `apply_locks`.
 
 ## Kenvue deck / Cerebras / gstack
 

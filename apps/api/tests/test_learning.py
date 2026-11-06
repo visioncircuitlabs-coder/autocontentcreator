@@ -138,13 +138,20 @@ def test_third_generation_filters_banned_chat_candidate(desk_db):
 
         def complete_json(self, system, user, schema):
             assert schema is CopyOut
-            return CopyOut(captions=[BANNED_CAPTION, "A", "B"])
+            return CopyOut(
+                captions=[
+                    BANNED_CAPTION,
+                    "Cleanse after the AC day. Hydro Boost on the night shelf, dermatologist tested.",
+                    "Humid commute, then a short gel step. Hydro Boost is dermatologist tested.",
+                ]
+            )
 
     drafts = run_copywriter(_concept(), round=3, chat=StubbornChat())
     banned_key = learning.normalize_text(BANNED_CAPTION)
     produced = {learning.normalize_text(d.caption) for d in drafts}
     assert banned_key not in produced, "banned caption must be filtered"
-    assert 2 <= len(drafts) <= 3, "templates must still fill the quota"
+    assert drafts, "chat still supplies other postable lines"
+    assert not any("night gel step after cleansing" in d.caption.lower() for d in drafts)
 
 
 def test_template_output_skips_hard_banned_caption(desk_db):

@@ -51,7 +51,7 @@ export const BOXES: Box[] = [
     n: 4,
     id: "brand",
     name: "Brand Book",
-    job: "Unofficial Neutrogena voice, India Instagram.",
+    job: "Unofficial brand voice, India Instagram.",
     layer: "memory",
     href: "/factory",
     step: "factory",

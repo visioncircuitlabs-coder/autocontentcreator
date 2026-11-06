@@ -94,4 +94,33 @@ export type Decision = {
   decided_at: string;
 };
 
+export type BrandInfo = {
+  slug: string;
+  name: string;
+  unofficial: boolean;
+  unofficial_line: string;
+  wordmark: string;
+  market: string;
+  timezone: string;
+  currency: string;
+  handle: string;
+  category: string;
+  disclaimer: string;
+  hero_sku: string;
+  look_sub: string;
+  sample_note: string;
+};
+
+export type BrandProduct = {
+  sku: string;
+  name: string;
+  flavour: string;
+  chip_cut: string;
+  pack_color: string;
+  hero: boolean;
+  notes: string;
+  has_image: boolean;
+  image_url: string | null;
+};
+
 export type DeskStep = "home" | "radar" | "factory" | "queue" | "preview";

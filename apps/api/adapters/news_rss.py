@@ -15,6 +15,7 @@ from adapters.common import (
     build_signal,
     request_headers,
 )
+from boxes.brand_pack import load_brand_pack
 from models import Signal
 
 logger = logging.getLogger(__name__)
@@ -30,14 +31,16 @@ SOURCES_YML = Path(__file__).resolve().parent.parent / "fixtures" / "sources.yml
 class NewsRssSource:
     name = "news_rss"
 
-    def __init__(self, client: httpx.Client, url: str = GOOGLE_NEWS_URL) -> None:
+    def __init__(self, client: httpx.Client, url: str | None = None) -> None:
         self.client = client
         self.url = url
 
     def fetch(self, query_id: str) -> list[Signal]:
+        radar = load_brand_pack().get("radar") or {}
+        url = self.url or str(radar.get("rss") or GOOGLE_NEWS_URL)
         return fetch_rss(
             self.client,
-            url=self.url,
+            url=url,
             source="news_rss",
             query_id=query_id,
         )

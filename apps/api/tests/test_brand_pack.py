@@ -60,5 +60,16 @@ def test_unknown_slug_lists_available_slugs():
         assert slug in message
 
 
-def test_available_slugs_include_neutrogena():
-    assert DEFAULT_SLUG in available_slugs()
+def test_available_slugs_include_neutrogena_and_lays():
+    slugs = available_slugs()
+    assert DEFAULT_SLUG in slugs
+    assert "lays" in slugs
+
+
+def test_lays_slug_loads_chile_limon_pack(monkeypatch):
+    monkeypatch.setenv("BRAND_SLUG", "lays")
+    pack = load_brand_pack()
+    assert pack["slug"] == "lays"
+    assert pack["hero_sku"] == "DEMO-CHILE-LIMON"
+    assert pack["logo_path"].is_file()
+    assert pack["disclaimer"].lower().startswith("unofficial")

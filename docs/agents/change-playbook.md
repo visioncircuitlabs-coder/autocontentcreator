@@ -4,7 +4,7 @@ Do the smallest change. Tests with the change. User-facing strings through `word
 
 ## Restart so Imagine + overlay actually run
 
-1. Confirm `.env` or the process has `IMAGE_GEN_MODE=imagine`, `IMAGE_GEN_MODEL=grok-imagine-image`, `XAI_API_KEY` set.
+1. Confirm `.env` or the process has `IMAGE_GEN_MODE=imagine`, `IMAGE_GEN_MODEL=grok-imagine-image-2.0`, `XAI_API_KEY` set.
 2. Kill the process on port 8000. Stale uvicorn serves old `visual.py`.
 3. Start API from `apps/api` with those env vars.
 4. Keep Next on 3050 with `NEXT_PUBLIC_API_URL=/engine`.
@@ -12,9 +12,9 @@ Do the smallest change. Tests with the change. User-facing strings through `word
 
 ## Change the photo look
 
-- Prompt: `apps/api/boxes/visual.py` only. Keep “no text, no logo.” Lighting from a **keyword list**, not the full caption.
+- Prompt: `apps/api/boxes/visual.py` only. **Neutrogena:** keep “no text, no logo.” **Lays:** designed type belongs in the prompt (explosion ad); do not overlay unofficial legal on the still. Lighting from a **keyword list**, not the full caption.
 - Overlay: `boxes/art_director.py` (`rasterize_logo`, `apply_locks`, `_to_feed`).
-- Adapter: `adapters/image_imagine.py` (`aspect_ratio`, timeout, URL).
+- Adapter: `adapters/image_imagine.py` (`aspect_ratio` 3:4, `resolution` 2k, timeout, URL).
 - Tests: `apps/api/tests/test_visual.py`, `test_art_director.py`.
 - UI frame: `apps/web/app/globals.css` `.ig-photo`.
 
@@ -45,7 +45,7 @@ Do the smallest change. Tests with the change. User-facing strings through `word
 
 ## Change Look ranking
 
-`boxes/scorer.py`: exclusion first, then keyword, then optional chat, then `decide_gate`. Closer look is `brand_fit >= 8`. Keep `MAX_CHAT_SCORES` unless you re-time the 300s proxy.
+`boxes/scorer.py`: exclusion first, then keyword, then optional chat, then `decide_gate`. Closer look is `brand_fit >= 8`. Keep `MAX_CHAT_SCORES` unless you re-time the 660s proxy.
 
 ## Change captions
 
@@ -57,7 +57,7 @@ Do the smallest change. Tests with the change. User-facing strings through `word
 
 ## Lengthen timeouts
 
-You are trading Grok cost and a 5-minute spinner. Touch all of: LiteLLM 20s, Imagine 90s, researcher budget, Next `maxDuration` + `PROXY_MS`. Then walk Look and Make on `/engine`, not only pytest.
+You are trading Grok cost and an 11-minute spinner. Touch all of: LiteLLM `CHAT_TIMEOUT_S` (default 180), Imagine `IMAGE_TIMEOUT_S` (default 600), researcher budget, Next `maxDuration` + `PROXY_MS` (660s). Then walk Look and Make on `/engine`, not only pytest.
 
 ## New box
 

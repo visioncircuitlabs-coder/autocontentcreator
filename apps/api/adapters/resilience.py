@@ -25,6 +25,20 @@ _TRANSIENT_NAMES = {
 }
 
 
+def is_timeout(exc: Exception) -> bool:
+    """Slow upstream. Callers may count these as one failure; do not retry them at a 10-minute budget."""
+    if isinstance(exc, TimeoutError):
+        return True
+    try:
+        import httpx
+
+        if isinstance(exc, httpx.TimeoutException):
+            return True
+    except ImportError:
+        pass
+    return "timeout" in type(exc).__name__.lower()
+
+
 def is_transient(exc: Exception) -> bool:
     """True only for timeouts, connection failures, and 5xx. Never 4xx."""
     if isinstance(exc, (TimeoutError, ConnectionError, OSError)):
@@ -54,18 +68,20 @@ def retry_call(
     base_delay: float = BASE_DELAY_S,
     sleep: Callable[[float], None] = time.sleep,
     jitter: bool = True,
+    retry_if: Callable[[Exception], bool] | None = None,
 ) -> T:
-    """Run fn; retry transient errors up to `retries` times with backoff.
+    """Run fn; retry matching errors up to `retries` times with backoff.
 
     Backoff starts at base_delay and doubles per attempt, plus small jitter.
-    Any non-transient error (4xx, bad payload, ...) is raised immediately.
+    `retry_if` defaults to `is_transient`. Non-matching errors raise immediately.
     """
+    should = retry_if if retry_if is not None else is_transient
     attempt = 0
     while True:
         try:
             return fn()
         except Exception as exc:
-            if attempt >= retries or not is_transient(exc):
+            if attempt >= retries or not should(exc):
                 raise
             delay = base_delay * (2**attempt)
             if jitter:

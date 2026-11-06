@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="64" viewBox="0 0 240 64" role="img" aria-label="Unofficial Lay's demo mark">
+  <rect width="240" height="64" rx="8" fill="#0B3A24"/>
+  <circle cx="40" cy="32" r="22" fill="#F5C518"/>
+  <rect x="18" y="22" width="44" height="20" rx="10" fill="#C43B3B"/>
+  <text x="40" y="36" text-anchor="middle" font-family="Georgia, Times, serif" font-size="11" font-style="italic" font-weight="700" fill="#FFFFFF">Lay's</text>
+  <text x="150" y="30" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#FFFFFF">LAY'S*</text>
+  <text x="150" y="48" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#C6E86A">unofficial demo</text>
+</svg>

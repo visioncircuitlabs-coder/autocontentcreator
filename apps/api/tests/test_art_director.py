@@ -132,13 +132,16 @@ def test_imagine_adapter_saves_png_from_url(
     from adapters.image_imagine import IMAGINE_URL, ImagineImageGen
 
     monkeypatch.setenv("XAI_API_KEY", "xai-test")
+    monkeypatch.delenv("IMAGE_GEN_MODEL", raising=False)
     payload = _png_bytes((40, 80, 120), size=(64, 64))
 
     def handler(request: httpx.Request) -> httpx.Response:
         if str(request.url) == IMAGINE_URL:
             body = json.loads(request.content)
-            assert body["model"] == "grok-imagine-image"
-            assert body.get("aspect_ratio") == "4:5"
+            assert body["model"] == "grok-imagine-image-2.0"
+            assert body.get("aspect_ratio") == "3:4"
+            assert body.get("resolution") == "2k"
+            assert body.get("quality") == "medium"
             return httpx.Response(
                 200, json={"data": [{"url": "https://imgen.example/out.png"}]}
             )
@@ -152,6 +155,65 @@ def test_imagine_adapter_saves_png_from_url(
         "Photoreal still life, no text, no logo", dest
     )
     assert dest.read_bytes()[:8] == PNG_MAGIC
+
+
+def test_legacy_imagine_model_maps_to_2_0(monkeypatch: pytest.MonkeyPatch) -> None:
+    from adapters.image_imagine import ImagineImageGen, resolve_imagine_model
+
+    monkeypatch.setenv("IMAGE_GEN_MODEL", "grok-imagine-image")
+    gen = ImagineImageGen(key="xai-test")
+    assert gen.model == "grok-imagine-image-2.0"
+    assert resolve_imagine_model("grok-imagine-image") == "grok-imagine-image-2.0"
+    assert resolve_imagine_model("grok-imagine-image-2.0") == "grok-imagine-image-2.0"
+
+
+def test_imagine_http_error_logs_body(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    import logging
+
+    from adapters.image_imagine import IMAGINE_URL, ImagineImageGen
+
+    monkeypatch.setenv("XAI_API_KEY", "xai-test")
+    monkeypatch.delenv("IMAGE_GEN_MODEL", raising=False)
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert str(request.url) == IMAGINE_URL
+        return httpx.Response(
+            422, json={"error": {"message": "aspect_ratio 4:5 is not allowed"}}
+        )
+
+    client = httpx.Client(transport=httpx.MockTransport(handler))
+    from harness.breaker import IMAGE_BREAKER
+
+    IMAGE_BREAKER.reset()
+    try:
+        with caplog.at_level(logging.WARNING, logger="adapters.image_imagine"):
+            with pytest.raises(RuntimeError, match="Grok Imagine"):
+                ImagineImageGen(client=client, key="xai-test").generate(
+                    "nope", tmp_path / "imagine-fail.png"
+                )
+    finally:
+        IMAGE_BREAKER.reset()
+    assert "422" in caplog.text
+    assert "aspect_ratio 4:5" in caplog.text
+
+
+def test_compose_crop_covers_3x4_to_feed(tmp_path: Path) -> None:
+    from PIL import Image
+
+    class ThreeByFour:
+        def generate(self, prompt: str, out_path: Path) -> Path:
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            Image.new("RGB", (768, 1024), (20, 80, 40)).save(out_path, "PNG")
+            return out_path
+
+    from boxes.art_director import compose
+
+    result = compose(
+        _draft(), "portrait still", image_gen=ThreeByFour(), out_path=tmp_path / "34.png"
+    )
+    assert Image.open(result.image_path).size == (1080, 1350)
 
 
 def test_http_adapter_posts_prompt_size_and_bearer(tmp_path: Path) -> None:

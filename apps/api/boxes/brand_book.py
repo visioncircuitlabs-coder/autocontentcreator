@@ -14,11 +14,11 @@ from boxes.brand_pack import load_brand_pack
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_BRAND_PATH = load_brand_pack()["book_path"]
+DEFAULT_BRAND_PATH = None  # resolved live via load_brand_pack()
 
 
 def load_brand(path: Path | None = None) -> dict[str, Any]:
-    path = path or DEFAULT_BRAND_PATH
+    path = path or load_brand_pack()["book_path"]
     raw = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(raw, dict):
         raise ValueError("brand.json must be an object")

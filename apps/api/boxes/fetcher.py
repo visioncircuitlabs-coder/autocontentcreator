@@ -10,6 +10,7 @@ from adapters.gdelt import GdeltSource
 from adapters.grok_web import GrokWebSource
 from adapters.news_rss import NewsRssSource, extra_rss_sources
 from adapters.reddit_json import RedditJsonSource
+from boxes.brand_pack import load_brand_pack
 from models import Signal
 from obs import emit
 from ports import TrendSource
@@ -50,13 +51,15 @@ def dedupe_by_url(signals: list[Signal]) -> list[Signal]:
 
 
 def run_fetch(
-    query_id: str = DEFAULT_QUERY_ID,
+    query_id: str | None = None,
     *,
     sources: list[TrendSource] | None = None,
     client: httpx.Client | None = None,
     persist: bool = True,
 ) -> list[Signal]:
     """Collect free-source signals. One dead source logs and the rest continue."""
+    radar = load_brand_pack().get("radar") or {}
+    query_id = query_id or str(radar.get("query_id") or DEFAULT_QUERY_ID)
     owns_client = client is None
     client = client or build_client()
     try:

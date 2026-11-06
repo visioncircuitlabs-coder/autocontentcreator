@@ -7,8 +7,11 @@ import {
   downloadZip,
   friendlyError,
   loadBrief,
+  loadBrand,
+  loadProducts,
   openFixtureDive,
   paintDraft,
+  productImageUrl,
   runFactory,
   runRadar,
   decideDraft,
@@ -21,7 +24,7 @@ import {
   alsoTodayHeadlines,
   shouldOfferFixture,
 } from "../desk/review";
-import type { BriefPack, Decision, Draft, Score, Signal, TrendReport } from "../desk/types";
+import type { BrandInfo, BrandProduct, BriefPack, Decision, Draft, Score, Signal, TrendReport } from "../desk/types";
 import {
   Alert,
   LoadingDesk,
@@ -41,14 +44,16 @@ import {
   LOOK_SUB,
   LOOK_TITLE,
   LOOKING_STEPS,
-  memoryLine,
-  MAKE_BUTTON,
+  makePostFor,
   MAKING_STEPS,
   MAKE_TITLE,
+  memoryLine,
   NAME_LABEL,
   NAME_REQUIRED_NOTE,
   NO_BUTTON,
   NO_PICTURE_NOTE,
+  PACKET_HINT,
+  PACKET_TITLE,
   PAUSED_NOTE,
   PICTURE_BUTTON,
   PICTURE_WAIT,
@@ -131,9 +136,22 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
   const [decision, setDecision] = useState<Decision | null>(null);
   const [imgBroken, setImgBroken] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [brand, setBrand] = useState<BrandInfo | null>(null);
+  const [products, setProducts] = useState<BrandProduct[]>([]);
+  const [sku, setSku] = useState("");
 
   useEffect(() => {
     setUser(readName());
+    void (async () => {
+      try {
+        const [info, catalog] = await Promise.all([loadBrand(), loadProducts()]);
+        setBrand(info);
+        setProducts(catalog.products ?? []);
+        setSku((current) => current || catalog.hero_sku || info.hero_sku || "");
+      } catch {
+        /* walk still works; preview falls back to loaded copy */
+      }
+    })();
   }, []);
 
   const quiet = missingSources(signals);
@@ -199,7 +217,7 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
     setError(null);
     setMaking(true);
     try {
-      const made = await runFactory(picked.report_id);
+      const made = await runFactory(picked.report_id, sku || undefined);
       setDrafts(made);
       setChosen(made[0] ?? null);
       const briefId = made[0]?.brief_id;
@@ -313,11 +331,14 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
   }
 
   return (
-    <WalkShell
+      <WalkShell
       beat={beat}
       showMachine={showMachine}
       onToggleMachine={() => setShowMachine((v) => !v)}
       onJump={(n) => setBeat(n)}
+      brandSlug={brand?.slug}
+      brandName={brand?.name}
+      unofficialLine={brand?.unofficial_line}
     >
       {showMachine ? (
         <MachineGraph beat={beat} watching={looking || making || painting} />
@@ -327,7 +348,7 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
       {beat === 1 ? (
         <section className="panel" aria-labelledby="look-title" onKeyDown={onPanelKey}>
           <h2 id="look-title">{LOOK_TITLE}</h2>
-          <p className="panel-sub">{LOOK_SUB}</p>
+          <p className="panel-sub">{brand?.look_sub || LOOK_SUB}</p>
           {looking ? (
             <LoadingDesk label={lookText || LOOKING_STEPS[0]} />
           ) : null}
@@ -355,7 +376,7 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
           ) : null}
           {!picked && !sampleBusy && offerSample ? (
             <div className="sample ticket">
-              <p>{SAMPLE_NOTE}</p>
+              <p>{brand?.sample_note || SAMPLE_NOTE}</p>
               <button
                 className="btn btn-ink"
                 type="button"
@@ -371,10 +392,57 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
             <div className="picked ticket">
               <p className="tag">{sample ? PRACTICE_TAG : NEWS_TAG}</p>
               <h3>{picked.what}</h3>
-              <p>{sample ? SAMPLE_NOTE : picked.why_now}</p>
+              <p>{sample ? brand?.sample_note || SAMPLE_NOTE : picked.why_now}</p>
               {sample ? null : <SourcesFold sources={picked.sources} />}
+              {products.length > 0 ? (
+                <div className="packet-picker">
+                  <h3 id="packet-title">{PACKET_TITLE}</h3>
+                  <p className="hint-line">{PACKET_HINT}</p>
+                  <div
+                    className="packet-grid"
+                    role="radiogroup"
+                    aria-labelledby="packet-title"
+                  >
+                    {products.map((item) => {
+                      const selected = sku === item.sku;
+                      return (
+                        <button
+                          key={item.sku}
+                          type="button"
+                          role="radio"
+                          aria-checked={selected}
+                          data-sel={selected ? "true" : "false"}
+                          data-hero={item.hero ? "true" : "false"}
+                          className="packet-card"
+                          style={
+                            item.pack_color
+                              ? { ["--pack" as string]: item.pack_color }
+                              : undefined
+                          }
+                          onClick={() => setSku(item.sku)}
+                        >
+                          <span className="packet-art">
+                            {item.has_image ? (
+                              <img
+                                src={productImageUrl(item.sku)}
+                                alt={item.name}
+                              />
+                            ) : (
+                              <span className="packet-swatch" aria-hidden="true" />
+                            )}
+                          </span>
+                          <strong>{item.name}</strong>
+                          {item.hero ? <span className="tag">This demo</span> : null}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : null}
               <button className="btn" type="button" disabled={making} onClick={makePost}>
-                {making ? makeText || MAKING_STEPS[0] : MAKE_BUTTON}
+                {making
+                  ? makeText || MAKING_STEPS[0]
+                  : makePostFor(products.find((row) => row.sku === sku)?.name || "")}
               </button>
             </div>
           ) : null}
@@ -544,11 +612,14 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
           {chosen ? (
             <div className="ig" aria-label="Phone preview, not live">
               <div className="ig-paused">{PAUSED_NOTE}</div>
+              {brand?.unofficial_line ? (
+                <div className="ig-unofficial">{brand.unofficial_line}</div>
+              ) : null}
               <div className="ig-top">
                 <span className="ig-avatar" aria-hidden="true" />
                 <div>
-                  <div className="ig-name">Neutrogena</div>
-                  <div className="ig-handle">skincare</div>
+                  <div className="ig-name">{brand?.name || "Brand"}</div>
+                  <div className="ig-handle">{brand?.handle || brand?.category || "post"}</div>
                 </div>
               </div>
               <div className="ig-photo">
@@ -561,6 +632,11 @@ export function WalkApp({ initialBeat = 1 }: { initialBeat?: number }) {
                     onError={() => setImgBroken(true)}
                   />
                 )}
+              </div>
+              <div className="ig-actions" aria-hidden="true">
+                <span>♥</span>
+                <span>💬</span>
+                <span>➤</span>
               </div>
               <div className="ig-caption">{chosen.caption}</div>
             </div>

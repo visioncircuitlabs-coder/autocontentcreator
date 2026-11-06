@@ -36,10 +36,12 @@ Template: `.env.example`. Local: `.env` (gitignored).
 | `SQLITE_PATH` | SQLite file. Compose forces `/data/demo.db` |
 | `LOG_PATH` | JSONL. Compose `/data/logs/machine.jsonl` |
 | `CHAT_MODEL` | Default `xai/grok-4.6` |
+| `CHAT_TIMEOUT_S` | LiteLLM completion timeout. Default `180` |
+| `IMAGE_TIMEOUT_S` | Grok Imagine HTTP timeout. Default `600` (10 minutes) |
 | `XAI_API_KEY` | Grok chat + Imagine + optional Grok web fetch |
 | `GEMINI_API_KEY` / `GROQ_API_KEY` | Alternate chat |
 | `IMAGE_GEN_MODE` | `imagine` \| `stub` \| `http` |
-| `IMAGE_GEN_MODEL` | `grok-imagine-image` |
+| `IMAGE_GEN_MODEL` | `grok-imagine-image-2.0` (stale `grok-imagine-image` maps to 2.0) |
 | `IMAGE_GEN_URL` / `IMAGE_GEN_KEY` | Only for `http` mode |
 | `NEXT_PUBLIC_API_URL` | Browser origin. Walk uses `/engine` |
 | `ENGINE_URL` | Server-side proxy target (`http://127.0.0.1:8000` or `http://api:8000`) |
@@ -80,7 +82,7 @@ Force Imagine even if `.env` says stub:
 
 ```text
 $env:IMAGE_GEN_MODE = "imagine"
-$env:IMAGE_GEN_MODEL = "grok-imagine-image"
+$env:IMAGE_GEN_MODEL = "grok-imagine-image-2.0"
 $env:CHAT_MODEL = "xai/grok-4.6"
 ```
 
@@ -88,9 +90,9 @@ Kill whatever already owns 8000 before restarting. Two uvicorns = stale overlay/
 
 ## Time budget
 
-The page waits **5 minutes** (`maxDuration = 300`, proxy abort 300s). Look + Make + Imagine all share that if they go through `/engine`.
+The page waits **11 minutes** (`maxDuration = 660`, proxy abort 660s) so a 10-minute Imagine call can finish. Look + Make + Imagine all share that if they go through `/engine`.
 
-What eats it: sequential Grok 20s timeouts, up to 5 scores, factory loop (writer + judge + craft × rounds), Imagine 90s. That is why photos are not made on Pick.
+What eats it: sequential Grok scores, factory loop (writer + judge + craft × rounds), Imagine up to 600s. That is why photos are not made on Pick.
 
 ## Data you must not commit
 

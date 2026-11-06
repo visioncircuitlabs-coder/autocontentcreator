@@ -49,7 +49,7 @@ npm run build
 npx next dev --hostname 127.0.0.1 --port 3050
 ```
 
-Set `NEXT_PUBLIC_API_URL=/engine` and `ENGINE_URL=http://127.0.0.1:8000` for the local Next proxy (300s).
+Set `NEXT_PUBLIC_API_URL=/engine` and `ENGINE_URL=http://127.0.0.1:8000` for the local Next proxy (11 minutes).
 
 CI: `.github/workflows/ci.yml` — Python 3.12 `compileall` + `pytest`, Node 22 `npm run build`. No Docker in CI.
 
@@ -88,7 +88,7 @@ Keep everything on `D:\PROJECTS\autocontentcreator` (C: is full). Isolated work 
 - SOTA hunts treat **X and GitHub as first-class**. A landing page without a repo or a named customer cannot beat readable code. X threads are `operator` until confirmed.
 - Demo brand = **unofficial Neutrogena** fixture. Not a partner engagement.
 - `google-analytics.com` is junk and does not contain the substring `google.com`. Denylist both.
-- Next `/engine` timeout is 5 minutes. Factory and Imagine share it with Look.
+- Next `/engine` timeout is 11 minutes so a 10-minute Imagine call can finish. Factory and Imagine share it with Look.
 - Full trap list: `docs/agents/gotchas.md`.
 
 ## Skill routing

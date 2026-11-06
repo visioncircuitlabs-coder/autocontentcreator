@@ -1,6 +1,8 @@
 # How to run the demo
 
-You will open **Make today’s post** on http://localhost:3050 and walk Look → Pick → Make → Your call → Preview.
+You will open **Make today’s post** on http://localhost:3050 and walk Look → Pick the moment → Pick the packet → Make → Your call → Preview.
+
+The client demo uses unofficial Lay's (`BRAND_SLUG=lays` in `.env.example`). Neutrogena still ships as a fixture.
 
 ## Prerequisites
 
@@ -49,7 +51,7 @@ To force Grok Imagine (if `.env` still says stub):
 
 ```text
 $env:IMAGE_GEN_MODE = "imagine"
-$env:IMAGE_GEN_MODEL = "grok-imagine-image"
+$env:IMAGE_GEN_MODEL = "grok-imagine-image-2.0"
 $env:CHAT_MODEL = "xai/grok-4.6"
 ```
 
@@ -67,7 +69,7 @@ Set those on the **API** process, then restart uvicorn.
 |---|---|
 | News engine is not running | Start the API on 8000, keep Next on 3050 |
 | Too many searches | Wait a minute |
-| That took too long | Try again. Look + Make + picture share a 5-minute page wait |
+| That took too long | Try again. Look + Make + picture share an 11-minute page wait |
 | Dark card instead of a photo | Imagine is off or the key failed. Check `IMAGE_GEN_MODE` on the API process |
 | Nothing worth a closer look | Use **Use a sample idea (practice)** |
 

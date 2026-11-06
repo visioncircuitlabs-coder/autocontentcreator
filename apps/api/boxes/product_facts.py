@@ -16,7 +16,7 @@ from models import Claim
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_CLAIMS_PATH = load_brand_pack()["claims_path"]
+DEFAULT_CLAIMS_PATH = None  # resolved live via load_brand_pack()
 
 ClaimStatus = Literal["approved", "conditional", "forbidden"]
 
@@ -43,7 +43,7 @@ def _pattern_for(phrase: str) -> re.Pattern[str]:
 
 
 def load_claims(path: Path | None = None) -> list[dict[str, Any]]:
-    path = path or DEFAULT_CLAIMS_PATH
+    path = path or load_brand_pack()["claims_path"]
     raw = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(raw, dict):
         raise ValueError("claims.json must be an object")

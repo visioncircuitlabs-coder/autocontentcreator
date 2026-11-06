@@ -19,6 +19,8 @@ from adapters.chat_litellm import build_chat
 from boxes.audit import build_audit, render_audit_html
 from boxes.auth import create_key
 from boxes.belt import paint_chosen, run_factory, run_radar
+from boxes.brand_pack import public_brand
+from boxes.products import get_product, list_products, public_product
 from boxes.fixture_dive import persist_unofficial_fixture
 from boxes.export import export_pack
 from boxes.fetcher import run_fetch
@@ -84,6 +86,7 @@ def _friendly(exc: Exception) -> JSONResponse:
 
 class FactoryRunIn(BaseModel):
     report_id: str = Field(min_length=1)
+    sku: str | None = None
 
 
 class FactoryImageIn(BaseModel):
@@ -176,6 +179,29 @@ async def log_requests(request: Request, call_next):
 @app.get("/health")
 def health() -> dict[str, object]:
     return {"ok": True, "chat": bool(build_chat())}
+
+
+@app.get("/brand")
+def get_brand() -> dict[str, object]:
+    return public_brand()
+
+
+@app.get("/brand/products")
+def get_brand_products() -> dict[str, object]:
+    rows = [public_product(item) for item in list_products()]
+    brand = public_brand()
+    return {"products": rows, "hero_sku": brand.get("hero_sku") or ""}
+
+
+@app.get("/brand/products/{sku}/image")
+def get_brand_product_image(sku: str):
+    row = get_product(sku)
+    path = row.get("image_path") if row else None
+    if path is None or not Path(path).is_file():
+        return JSONResponse(status_code=404, content={"error": "No pack photo for that flavour."})
+    suffix = Path(path).suffix.lower()
+    media = "image/jpeg" if suffix in {".jpg", ".jpeg"} else "image/png"
+    return FileResponse(path, media_type=media)
 
 
 def _last_event_ts(kind: str) -> str | None:
@@ -361,8 +387,8 @@ def factory_run(body: FactoryRunIn, request: Request):
     set_run_id(run_row["run_id"])
     try:
         with run_slot("interactive"):
-            result = run_factory(body.report_id, chat=build_chat())
-        emit("factory_end", report_id=body.report_id)
+            result = run_factory(body.report_id, sku=body.sku, chat=build_chat())
+        emit("factory_end", report_id=body.report_id, sku=body.sku)
         idempotency.store(key, "factory_run", result)
         update_run(run_row["run_id"], status="done")
         return result

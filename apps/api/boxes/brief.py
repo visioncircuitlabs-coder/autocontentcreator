@@ -6,7 +6,9 @@ import hashlib
 import logging
 
 from boxes.brand_book import query_brand
+from boxes.brand_pack import load_brand_pack
 from boxes.product_facts import load_claims
+from boxes.products import hero_sku
 from db import get_brief, get_report, upsert_brief
 from models import Brief
 
@@ -39,11 +41,15 @@ def load_brief(brief_id: str) -> Brief:
 def _featured_sku(sku: str | None) -> str:
     if sku and sku.strip():
         return sku.strip()
+    featured = hero_sku()
+    if featured:
+        return featured
     for row in load_claims():
         row_sku = str(row.get("sku") or "").strip()
         if row.get("status") == "approved" and row_sku and row_sku != "*":
             return row_sku
-    return DEFAULT_SKU
+    pack = load_brand_pack()
+    return str(pack.get("hero_sku") or DEFAULT_SKU)
 
 
 def _claims_for_sku(sku: str, market: str) -> list[dict]:

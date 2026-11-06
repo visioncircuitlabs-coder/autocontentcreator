@@ -1,0 +1,182 @@
+{
+  "disclaimer": "UNOFFICIAL DEMO — not PepsiCo. Not a real Lay's advertisement.",
+  "brand": "Lay's",
+  "market_default": "IN",
+  "claims": [
+    {
+      "claim_id": "approved-lime-chilli",
+      "text": "lime and chilli flavour",
+      "sku": "DEMO-CHILE-LIMON",
+      "market": "IN",
+      "evidence_ref": "fixtures/lays/claims.json#approved-lime-chilli",
+      "status": "approved",
+      "expires_at": null,
+      "lookalikes": [
+        "lime & chilli flavour",
+        "lime and chili flavour",
+        "chilli-lime flavour"
+      ]
+    },
+    {
+      "claim_id": "approved-ridged-chips",
+      "text": "ridged potato chips",
+      "sku": "DEMO-CHILE-LIMON",
+      "market": "IN",
+      "evidence_ref": "fixtures/lays/claims.json#approved-ridged-chips",
+      "status": "approved",
+      "expires_at": null,
+      "lookalikes": [
+        "ridged chips",
+        "crinkle-cut chips"
+      ]
+    },
+    {
+      "claim_id": "approved-potato-chips",
+      "text": "potato chips",
+      "sku": "*",
+      "market": "IN",
+      "evidence_ref": "fixtures/lays/claims.json#approved-potato-chips",
+      "status": "approved",
+      "expires_at": null,
+      "lookalikes": ["potato chip"]
+    },
+    {
+      "claim_id": "approved-masala-flavour",
+      "text": "masala flavour",
+      "sku": "DEMO-MAGIC-MASALA",
+      "market": "IN",
+      "evidence_ref": "fixtures/lays/claims.json#approved-masala-flavour",
+      "status": "approved",
+      "expires_at": null,
+      "lookalikes": ["magic masala flavour"]
+    },
+    {
+      "claim_id": "approved-salted",
+      "text": "salted potato chips",
+      "sku": "DEMO-CLASSIC-SALTED",
+      "market": "IN",
+      "evidence_ref": "fixtures/lays/claims.json#approved-salted",
+      "status": "approved",
+      "expires_at": null,
+      "lookalikes": ["classic salted"]
+    },
+    {
+      "claim_id": "approved-tomato",
+      "text": "tomato flavour",
+      "sku": "DEMO-TOMATO-TANGO",
+      "market": "IN",
+      "evidence_ref": "fixtures/lays/claims.json#approved-tomato",
+      "status": "approved",
+      "expires_at": null,
+      "lookalikes": ["spanish tomato"]
+    },
+    {
+      "claim_id": "approved-cream-onion",
+      "text": "cream and onion flavour",
+      "sku": "DEMO-CREAM-ONION",
+      "market": "IN",
+      "evidence_ref": "fixtures/lays/claims.json#approved-cream-onion",
+      "status": "approved",
+      "expires_at": null,
+      "lookalikes": ["cream & onion flavour"]
+    },
+    {
+      "claim_id": "forbidden-healthy-chips",
+      "text": "healthy chips",
+      "sku": "*",
+      "market": "IN",
+      "evidence_ref": "fixtures/lays/claims.json#forbidden-healthy-chips",
+      "status": "forbidden",
+      "expires_at": null,
+      "lookalikes": [
+        "healthy snack",
+        "nutritious chips",
+        "good for you chips"
+      ]
+    },
+    {
+      "claim_id": "forbidden-number-one-chips",
+      "text": "#1 chips",
+      "sku": "*",
+      "market": "IN",
+      "evidence_ref": "fixtures/lays/claims.json#forbidden-number-one-chips",
+      "status": "forbidden",
+      "expires_at": null,
+      "lookalikes": [
+        "number 1 chips",
+        "number one chips",
+        "no.1 chips"
+      ]
+    },
+    {
+      "claim_id": "forbidden-cures-hunger",
+      "text": "cures hunger",
+      "sku": "*",
+      "market": "IN",
+      "evidence_ref": "fixtures/lays/claims.json#forbidden-cures-hunger",
+      "status": "forbidden",
+      "expires_at": null,
+      "lookalikes": ["cure hunger", "heals hunger"]
+    }
+  ],
+  "registry": [
+    {
+      "claim_id": "reg-lime-chilli",
+      "text": "lime and chilli flavour",
+      "sku": "DEMO-CHILE-LIMON",
+      "market": "IN",
+      "source_url": "https://example.com/unofficial-lays-chile-limon",
+      "evidence_ref": "fixtures/lays/claims.json#reg-lime-chilli",
+      "status": "approved",
+      "review_by": "2027-03-31",
+      "notes": "Unofficial demo seed. Flavour name on the India pack. Not PepsiCo-approved.",
+      "lookalikes": ["lime & chilli flavour", "lime and chili flavour"]
+    },
+    {
+      "claim_id": "reg-ridged-chips",
+      "text": "ridged potato chips",
+      "sku": "DEMO-CHILE-LIMON",
+      "market": "IN",
+      "source_url": "https://example.com/unofficial-lays-chile-limon",
+      "evidence_ref": "fixtures/lays/claims.json#reg-ridged-chips",
+      "status": "approved",
+      "review_by": "2027-03-31",
+      "notes": "Cut visible on the unofficial pack photo.",
+      "lookalikes": ["ridged chips"]
+    },
+    {
+      "claim_id": "reg-potato-chips",
+      "text": "potato chips",
+      "sku": "*",
+      "market": "IN",
+      "source_url": "https://example.com/unofficial-lays-chile-limon",
+      "evidence_ref": "fixtures/lays/claims.json#reg-potato-chips",
+      "status": "approved",
+      "review_by": "2027-03-31",
+      "notes": "Category line on the India pack.",
+      "lookalikes": ["potato chip"]
+    },
+    {
+      "claim_id": "reg-forbidden-healthy",
+      "text": "healthy chips",
+      "sku": "*",
+      "market": "IN",
+      "source_url": "",
+      "evidence_ref": "fixtures/lays/claims.json#reg-forbidden-healthy",
+      "status": "forbidden",
+      "review_by": null,
+      "notes": "Health halo. Never usable in copy."
+    },
+    {
+      "claim_id": "reg-forbidden-number-one",
+      "text": "#1 chips",
+      "sku": "*",
+      "market": "IN",
+      "source_url": "",
+      "evidence_ref": "fixtures/lays/claims.json#reg-forbidden-number-one",
+      "status": "forbidden",
+      "review_by": null,
+      "notes": "Ranking claim. Never usable in copy."
+    }
+  ]
+}

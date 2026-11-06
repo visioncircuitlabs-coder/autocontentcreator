@@ -1,0 +1,50 @@
+{
+  "disclaimer": "UNOFFICIAL DEMO — not PepsiCo. Not a real Lay's catalogue.",
+  "brand": "Lay's",
+  "market_default": "IN",
+  "hero_sku": "DEMO-CHILE-LIMON",
+  "products": [
+    {
+      "sku": "DEMO-CLASSIC-SALTED",
+      "name": "Classic Salted",
+      "flavour": "Classic Salted",
+      "chip_cut": "classic",
+      "pack_color": "#F5C518",
+      "hero": false
+    },
+    {
+      "sku": "DEMO-MAGIC-MASALA",
+      "name": "India's Magic Masala",
+      "flavour": "India's Magic Masala",
+      "chip_cut": "classic",
+      "pack_color": "#C43B1A",
+      "hero": false
+    },
+    {
+      "sku": "DEMO-TOMATO-TANGO",
+      "name": "Spanish Tomato Tango",
+      "flavour": "Spanish Tomato Tango",
+      "chip_cut": "classic",
+      "pack_color": "#D94B3B",
+      "hero": false
+    },
+    {
+      "sku": "DEMO-CREAM-ONION",
+      "name": "American Style Cream & Onion",
+      "flavour": "American Style Cream & Onion",
+      "chip_cut": "classic",
+      "pack_color": "#3D8B4F",
+      "hero": false
+    },
+    {
+      "sku": "DEMO-CHILE-LIMON",
+      "name": "Chile Limón",
+      "flavour": "Chile Limón",
+      "chip_cut": "ridged",
+      "pack_color": "#0E6B3C",
+      "hero": true,
+      "image": "products/chile-limon.jpg",
+      "notes": "India green bag. Lay's logo already on pack. Unofficial photo."
+    }
+  ]
+}
