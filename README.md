@@ -6,6 +6,8 @@ An always-on content system for regulated consumer brands (Kenvue-class: Neutrog
 
 The demo brand pack is an **unofficial Neutrogena** fixture for show — not a partner build, not medical advice, not a claim that we speak for Kenvue.
 
+**Why we built this:** [docs/GOAL.md](docs/GOAL.md)
+
 ## What it does
 
 - **Trend Radar** — Look for ideas pulls GDELT / Google News RSS / Reddit JSON (and optional Grok search), scores what fits, deep-dives one closer look.
