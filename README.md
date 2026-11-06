@@ -12,6 +12,8 @@ Open that folder for `docker compose up`, the five-step walk, and the agent hand
 
 The demo brand pack is an **unofficial Neutrogena** fixture for show — not a partner build, not medical advice, not a claim that we speak for Kenvue.
 
+**Why we built this:** [docs/GOAL.md](docs/GOAL.md)
+
 ## What it does
 
 - **Trend Radar** — a scheduled loop that pulls the outside world and scores what matters to the brand.
