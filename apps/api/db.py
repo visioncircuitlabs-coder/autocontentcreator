@@ -105,6 +105,7 @@ def init_db() -> None:
                 caption TEXT NOT NULL,
                 variant INTEGER NOT NULL,
                 image_path TEXT,
+                video_path TEXT,
                 judge TEXT,
                 rules TEXT NOT NULL,
                 round INTEGER NOT NULL,
@@ -177,6 +178,7 @@ def init_db() -> None:
         _ensure_column(
             conn, "drafts", "flag_human", "flag_human INTEGER NOT NULL DEFAULT 0"
         )
+        _ensure_column(conn, "drafts", "video_path", "video_path TEXT")
         _ensure_column(
             conn,
             "claims_registry",
@@ -368,12 +370,14 @@ def _draft_from_row(row: sqlite3.Row) -> Draft:
     if isinstance(judge, dict):
         judge = dict(judge)
         judge["flag_human"] = flag
+    keys = set(row.keys())
     return Draft(
         draft_id=row["draft_id"],
         brief_id=row["brief_id"],
         caption=row["caption"],
         variant=row["variant"],
         image_path=row["image_path"],
+        video_path=row["video_path"] if "video_path" in keys else None,
         judge=judge,
         rules=_json_load(row["rules"], []),
         round=row["round"],
@@ -487,9 +491,9 @@ def upsert_draft(draft: Draft) -> None:
         conn.execute(
             """
             INSERT OR REPLACE INTO drafts (
-                draft_id, brief_id, caption, variant, image_path,
+                draft_id, brief_id, caption, variant, image_path, video_path,
                 judge, rules, round, flag_human
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 draft.draft_id,
@@ -497,6 +501,7 @@ def upsert_draft(draft: Draft) -> None:
                 draft.caption,
                 draft.variant,
                 draft.image_path,
+                draft.video_path,
                 json.dumps(payload) if payload is not None else None,
                 json.dumps(list(draft.rules or [])),
                 draft.round,

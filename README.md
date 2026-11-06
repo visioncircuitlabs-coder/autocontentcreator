@@ -12,7 +12,7 @@ The demo brand pack is an **unofficial Neutrogena** fixture for show — not a p
 
 - **Trend Radar** — Look for ideas pulls GDELT / Google News RSS / Reddit JSON (and optional Grok search), scores what fits, deep-dives one closer look.
 - **Brand Brain** — unofficial Neutrogena brand book, approved claims, disclaimer, exclusion list, past decisions.
-- **Content Factory** — a conveyor belt. Code moves work. Agents write captions. Hard rules + a locked judge catch claims. After you pick a version, **Grok Imagine** makes a 4:5 photo; code stamps the wordmark and disclaimer.
+- **Content Factory** — a conveyor belt. Code moves work. Agents write captions. Hard rules + a locked judge catch claims. After you pick a version, **Grok Imagine** makes a 4:5 photo (Chile Limón image-edits the real pack). Neutrogena stamps wordmark + disclaimer in code; Lays does not.
 - **Command Center** — you approve with a reason. The machine never publishes. Export is a paused ZIP.
 
 ## Look at the architecture
@@ -73,7 +73,7 @@ If `.env` still says `IMAGE_GEN_MODE=stub`, a restart will draw the dark card ev
 1. `docker compose up --build`
 2. Open http://localhost:3050 → **Look for ideas**
 3. Pick a closer-look card (or **Use a sample idea (practice)** if this search is empty)
-4. **Make a post** → pick Version 1, 2, or 3 → **Make the picture**
+4. **Make a post** → pick Version 1, 2, or 3 → **Make the picture** → **Make a short video**
 5. **Your call** (name + why) → phone preview → **Download pack** (does not go live)
 
 Train someone with [docs/runbooks/make-a-post.md](docs/runbooks/make-a-post.md). Words we use: [docs/conventions/words-we-use.md](docs/conventions/words-we-use.md). Picture-first explainer: `docs/eli5-make-a-post/eli5-make-a-post.html`.

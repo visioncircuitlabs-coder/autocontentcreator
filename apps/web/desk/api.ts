@@ -100,6 +100,10 @@ export function draftImageUrl(draftId: string): string {
   return `${API_URL}/drafts/${encodeURIComponent(draftId)}/image`;
 }
 
+export function draftVideoUrl(draftId: string): string {
+  return `${API_URL}/drafts/${encodeURIComponent(draftId)}/video`;
+}
+
 export async function loadDesk(): Promise<{
   signals: Signal[];
   scores: Score[];
@@ -130,6 +134,13 @@ export function runFactory(reportId: string) {
 
 export function paintDraft(draftId: string) {
   return api<Draft>("/factory/image", {
+    method: "POST",
+    body: JSON.stringify({ draft_id: draftId }),
+  });
+}
+
+export function filmDraft(draftId: string) {
+  return api<Draft>("/factory/video", {
     method: "POST",
     body: JSON.stringify({ draft_id: draftId }),
   });

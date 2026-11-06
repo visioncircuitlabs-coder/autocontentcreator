@@ -108,6 +108,8 @@ class CircuitBreaker:
 
 # Shared process-wide breakers. All LLM steps route through CHAT_BREAKER;
 # image generation routes through IMAGE_BREAKER — a dead upstream fails
-# fast everywhere instead of per-step retry pain.
+# fast everywhere instead of per-step retry pain. Video uses its own breaker
+# so a stuck clip API does not freeze stills.
 CHAT_BREAKER = CircuitBreaker(threshold=3, cooldown_s=60.0)
 IMAGE_BREAKER = CircuitBreaker(threshold=3, cooldown_s=120.0)
+VIDEO_BREAKER = CircuitBreaker(threshold=3, cooldown_s=120.0)

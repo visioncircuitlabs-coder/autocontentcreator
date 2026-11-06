@@ -204,3 +204,5 @@ def test_unofficial_fixture_dive_is_labeled_and_runnable(
     assert drafts
     assert drafts[0]["caption"].strip()
     assert "pcos" not in drafts[0]["caption"].lower()
+    assert not drafts[0].get("image_path")
+    assert not drafts[0].get("video_path")

@@ -13,6 +13,10 @@ import time
 from datetime import datetime, timedelta, timezone
 
 from boxes.image_budget import budget_usd, spent_usd
+from boxes.video_budget import (
+    budget_usd as video_budget_usd,
+    spent_usd as video_spent_usd,
+)
 from db import connect, init_db
 from harness.breaker import CHAT_BREAKER
 from harness.slo import degraded_runs
@@ -66,8 +70,8 @@ def _decision_stats(conn) -> dict:
 
 
 def _event_stats(conn) -> dict:
-    """Last-run timestamps plus paints inside the rolling window."""
-    row = conn.execute(
+    """Last-run timestamps plus paints/films inside the rolling window."""
+    times = conn.execute(
         """
         SELECT MAX(CASE WHEN kind = 'radar_end' THEN ts END) AS radar_ts,
                MAX(CASE WHEN kind = 'factory_end' THEN ts END) AS factory_ts
@@ -76,20 +80,25 @@ def _event_stats(conn) -> dict:
         """
     ).fetchone()
     painted = 0
+    filmed = 0
     rows = conn.execute(
-        "SELECT payload FROM events WHERE kind = 'paint_end' AND ts >= ?",
+        "SELECT kind, payload FROM events WHERE kind IN ('paint_end', 'film_end') AND ts >= ?",
         (_window_cutoff_iso(),),
     ).fetchall()
-    for paint in rows:
+    for item in rows:
         try:
-            if json.loads(paint["payload"]).get("image"):
-                painted += 1
+            payload = json.loads(item["payload"])
         except (json.JSONDecodeError, TypeError):
             continue
+        if item["kind"] == "paint_end" and payload.get("image"):
+            painted += 1
+        if item["kind"] == "film_end" and payload.get("video"):
+            filmed += 1
     return {
         "images_painted_24h": painted,
-        "last_radar_run_at": row["radar_ts"],
-        "last_factory_run_at": row["factory_ts"],
+        "videos_made_24h": filmed,
+        "last_radar_run_at": times["radar_ts"],
+        "last_factory_run_at": times["factory_ts"],
     }
 
 
@@ -112,6 +121,8 @@ def collect_metrics() -> dict:
         **stats,
         "image_spend_usd": spent_usd(),
         "image_budget_usd": budget_usd(),
+        "video_spend_usd": video_spent_usd(),
+        "video_budget_usd": video_budget_usd(),
         "breaker_state": CHAT_BREAKER.state,
         "chat_model": _chat_model(),
         "uptime_s": max(0, int(time.time() - PROCESS_STARTED_AT)),

@@ -114,7 +114,7 @@ export const BOXES: Box[] = [
     n: 11,
     id: "art",
     name: "Art Director",
-    job: "Unlocked picture. Logo and disclaimer in code.",
+    job: "Picture, then a short video. Logo and disclaimer in code.",
     layer: "factory",
     href: "/factory",
     step: "factory",

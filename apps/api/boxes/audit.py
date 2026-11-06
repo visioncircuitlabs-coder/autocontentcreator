@@ -30,7 +30,7 @@ def build_audit(draft_id: str) -> dict:
         list_scores,
         list_signals,
     )
-    from boxes.visual import visual_prompt
+    from boxes.visual import video_prompt, visual_prompt
 
     draft = get_draft(draft_id)
     if draft is None:
@@ -63,6 +63,7 @@ def build_audit(draft_id: str) -> dict:
             "judge": d.judge,
             "flag_human": bool(d.flag_human),
             "image_path": d.image_path,
+            "video_path": d.video_path,
             "chosen": d.draft_id == draft.draft_id,
         }
         for d in sorted(siblings, key=lambda x: (x.variant, x.round, x.draft_id))
@@ -103,12 +104,23 @@ def build_audit(draft_id: str) -> dict:
     ]
 
     image_mode = (os.environ.get("IMAGE_GEN_MODE") or "stub").strip().lower() or "stub"
+    video_mode = (
+        os.environ.get("VIDEO_GEN_MODE") or os.environ.get("IMAGE_GEN_MODE") or "stub"
+    ).strip().lower() or "stub"
     image_provenance = {
         "prompt_used": visual_prompt(draft),
         "adapter": image_mode,
         "image_path": draft.image_path,
         "brand_locks_applied_in_code": True,
         "note": "No brand marks or claims are sent to the image model.",
+    }
+    video_provenance = {
+        "prompt_used": video_prompt(draft),
+        "adapter": video_mode,
+        "video_path": draft.video_path,
+        "duration_s": 5,
+        "brand_locks_applied_in_code": True,
+        "note": "No brand marks, claims, or disclaimers are sent to the video model.",
     }
 
     return {
@@ -123,6 +135,7 @@ def build_audit(draft_id: str) -> dict:
             "judge": draft.judge,
             "flag_human": bool(draft.flag_human),
             "image_path": draft.image_path,
+            "video_path": draft.video_path,
         },
         "signal": signal.model_dump(mode="json") if signal else None,
         "score": score.model_dump(mode="json") if score else None,
@@ -133,6 +146,7 @@ def build_audit(draft_id: str) -> dict:
         "decisions": decisions,
         "events": events,
         "image_provenance": image_provenance,
+        "video_provenance": video_provenance,
     }
 
 
@@ -301,7 +315,18 @@ def render_audit_html(audit: dict) -> str:
         ("Note", ip.get("note")),
     ]))
 
-    parts.append("<h2>8. Decision (who / when / why)</h2>")
+    parts.append("<h2>8. Video provenance</h2>")
+    vp = audit.get("video_provenance") or {}
+    parts.append(_kv_table([
+        ("Prompt used", vp.get("prompt_used")),
+        ("Adapter", vp.get("adapter")),
+        ("Video path", vp.get("video_path")),
+        ("Duration (seconds)", vp.get("duration_s")),
+        ("Brand locks applied in code", vp.get("brand_locks_applied_in_code")),
+        ("Note", vp.get("note")),
+    ]))
+
+    parts.append("<h2>9. Decision (who / when / why)</h2>")
     decisions = audit.get("decisions") or []
     if decisions:
         rows = "".join(
@@ -316,7 +341,7 @@ def render_audit_html(audit: dict) -> str:
     else:
         parts.append("<p class='stamp'>Not decided yet — pack is paused.</p>")
 
-    parts.append("<h2>9. Event log for this draft</h2>")
+    parts.append("<h2>10. Event log for this draft</h2>")
     events = audit.get("events") or []
     if events:
         rows = "".join(

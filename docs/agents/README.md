@@ -34,7 +34,7 @@ Also load: `.grok/skills/repo-context`, `stay-in-worktree`, `bar-driven-upgrade`
 
 ## What this product is
 
-Unofficial Neutrogena **pilot** for Vision Circuit Labs (Kerala). A content person looks at today’s news, makes a caption, makes one picture, says yes or no with a reason, and downloads a **paused** ZIP. Nothing goes live.
+Unofficial Neutrogena **pilot** for Vision Circuit Labs (Kerala). A content person looks at today’s news, makes a caption, makes one picture, makes a short video, says yes or no with a reason, and downloads a **paused** ZIP. Nothing goes live.
 
 Four layers, seventeen boxes:
 
@@ -52,11 +52,12 @@ Code moves work. Models sit **inside** steps. No CrewAI.
 ```text
 1 Look     POST /radar/run          headlines + one closer look
 2 Pick     (UI only)                person picks the idea
-3 Make     POST /factory/run        2–3 captions, claims loop, NO photo
+3 Make     POST /factory/run        2–3 captions, claims loop, NO photo, NO video
            then pick a version
-           POST /factory/image      Grok Imagine 4:5 + wordmark/disclaimer
+           POST /factory/image      Grok Imagine 4:5 (pack-edit for Chile Limón)
+           POST /factory/video      I2V from the campaign still (~5s)
 4 Your call POST /review/{id}       name + why required
-5 Preview  GET  /export/{id}        paused ZIP
+5 Preview  GET  /export/{id}        paused ZIP (still + clip)
 ```
 
 Live UI: http://localhost:3050 (`WalkApp`). Optional **How it is made** graph.

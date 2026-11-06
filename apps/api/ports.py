@@ -17,4 +17,20 @@ class ChatModel(Protocol):
 
 
 class ImageGen(Protocol):
-    def generate(self, prompt: str, out_path: Path) -> Path: ...
+    def generate(
+        self,
+        prompt: str,
+        out_path: Path,
+        *,
+        source_image: Path | None = None,
+    ) -> Path: ...
+
+
+class VideoGen(Protocol):
+    def generate(
+        self,
+        prompt: str,
+        out_path: Path,
+        *,
+        source_image: Path | None = None,
+    ) -> Path: ...

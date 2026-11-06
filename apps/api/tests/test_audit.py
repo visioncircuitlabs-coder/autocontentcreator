@@ -159,6 +159,9 @@ def test_build_audit_full_chain() -> None:
     assert audit["decisions"][0]["user"] == "priya"
     assert audit["image_provenance"]["prompt_used"]
     assert "no logo" in audit["image_provenance"]["prompt_used"]
+    assert audit["video_provenance"]["prompt_used"]
+    assert "no logo" in audit["video_provenance"]["prompt_used"]
+    assert audit["video_provenance"]["duration_s"] == 5
 
 
 def test_audit_unknown_draft_is_friendly() -> None:

@@ -11,6 +11,7 @@ import {
   OPS_LABEL_APPROVE,
   OPS_LABEL_RUNS,
   OPS_LABEL_SPEND,
+  OPS_LABEL_VIDEO_SPEND,
   OPS_TITLE,
   OPS_MAKE_WORD,
   OPS_RUN_WORD,
@@ -21,6 +22,8 @@ type MetricsPayload = {
   approve_rate: number | null;
   image_spend_usd: number;
   image_budget_usd: number;
+  video_spend_usd: number;
+  video_budget_usd: number;
   breaker_state: string;
   last_radar_run_at: string | null;
   last_factory_run_at: string | null;
@@ -60,6 +63,9 @@ export function OpsStrip() {
   const fillPct = Math.round(
     spendFraction(data.image_spend_usd, data.image_budget_usd) * 100,
   );
+  const videoFillPct = Math.round(
+    spendFraction(data.video_spend_usd ?? 0, data.video_budget_usd ?? 0) * 100,
+  );
   const nowMs = Date.now();
 
   return (
@@ -81,6 +87,21 @@ export function OpsStrip() {
             <span style={{ width: `${fillPct}%` }} />
           </span>
           {formatMoney(data.image_spend_usd)} / {formatMoney(data.image_budget_usd)}
+        </span>
+      </span>
+      <span className="ops-cell">
+        <span className="ops-k">{OPS_LABEL_VIDEO_SPEND}</span>
+        <span className="ops-v ops-spend">
+          <span
+            className="ops-fill"
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={videoFillPct}
+          >
+            <span style={{ width: `${videoFillPct}%` }} />
+          </span>
+          {formatMoney(data.video_spend_usd ?? 0)} / {formatMoney(data.video_budget_usd ?? 0)}
         </span>
       </span>
       <span className="ops-cell">

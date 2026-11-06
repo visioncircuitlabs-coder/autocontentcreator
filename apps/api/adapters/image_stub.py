@@ -56,9 +56,19 @@ def _headline(prompt: str) -> str:
 class StubImageGen:
     """Unlocked zone only: dark Instagram card with the prompt as headline."""
 
-    def generate(self, prompt: str, out_path: Path) -> Path:
+    def generate(
+        self,
+        prompt: str,
+        out_path: Path,
+        *,
+        source_image: Path | None = None,
+    ) -> Path:
         dest = Path(out_path)
         dest.parent.mkdir(parents=True, exist_ok=True)
+        if source_image is not None:
+            from boxes.pack_photo import composite_from_pack
+
+            return composite_from_pack(source_image, dest)
 
         width, height = STUB_SIZE
         img = Image.new("RGB", STUB_SIZE, BG)

@@ -12,10 +12,10 @@ Do the smallest change. Tests with the change. User-facing strings through `word
 
 ## Change the photo look
 
-- Prompt: `apps/api/boxes/visual.py` only. Keep “no text, no logo.” Lighting from a **keyword list**, not the full caption.
-- Overlay: `boxes/art_director.py` (`rasterize_logo`, `apply_locks`, `_to_feed`).
-- Adapter: `adapters/image_imagine.py` (`aspect_ratio`, timeout, URL).
-- Tests: `apps/api/tests/test_visual.py`, `test_art_director.py`.
+- Prompt: `apps/api/boxes/visual.py` only. Lighting from a **keyword list**, not the full caption. Chile Limón: keep the real pack; type in the art; no second LAY'S wordmark.
+- Overlay: `boxes/art_director.py` (`rasterize_logo`, `apply_locks`, `stamp_locks`). Skip for Chile Limón. Video: `boxes/video.py` + `boxes/video_encode.py`. Pack photo: `boxes/pack_photo.py`.
+- Adapter: `adapters/image_imagine.py` (generations **or** edits). Video: `adapters/video_imagine.py`.
+- Tests: `apps/api/tests/test_visual.py`, `test_art_director.py`, `test_factory_video.py`.
 - UI frame: `apps/web/app/globals.css` `.ig-photo`.
 
 ## Stop / start painting at a different beat
@@ -24,7 +24,9 @@ Do the smallest change. Tests with the change. User-facing strings through `word
 |---|---|
 | No photo on Make a post | Keep `run_factory` free of `compose`. UI `makePost` → `runFactory` only |
 | Photo after version pick | `makePicture` → `paintDraft` → `POST /factory/image` |
+| Short video after the still | `makeVideo` → `filmDraft` → `POST /factory/video`. Keep `run_factory` free of `compose_video` |
 | Photo on download if missing | `export._ensure_image` already composes. Do not also paint earlier “to be safe” |
+| Clip on download if missing | `export._ensure_video` already films a stub. Same rule. |
 
 ## Add a banned word
 
@@ -45,7 +47,7 @@ Do the smallest change. Tests with the change. User-facing strings through `word
 
 ## Change Look ranking
 
-`boxes/scorer.py`: exclusion first, then keyword, then optional chat, then `decide_gate`. Closer look is `brand_fit >= 8`. Keep `MAX_CHAT_SCORES` unless you re-time the 300s proxy.
+`boxes/scorer.py`: exclusion first, then keyword, then optional chat, then `decide_gate`. Closer look is `brand_fit >= 8`. Keep `MAX_CHAT_SCORES` unless you re-time the 900s proxy.
 
 ## Change captions
 

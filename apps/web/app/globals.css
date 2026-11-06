@@ -590,10 +590,29 @@ textarea {
   background: #1a1714;
 }
 
-.ig-photo img {
+.ig-photo img,
+.ig-photo video {
   width: 100%;
   height: 100%;
   object-fit: contain;
+}
+
+.make-still,
+.review-media {
+  margin: 16px 0;
+  max-width: 280px;
+  aspect-ratio: 4 / 5;
+  background: #1a1714;
+  overflow: hidden;
+}
+
+.make-still img,
+.review-media img,
+.review-media video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
 }
 
 .ig-photo .missing {

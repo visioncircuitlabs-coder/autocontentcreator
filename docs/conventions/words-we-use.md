@@ -13,6 +13,7 @@ On-screen language for the Content Machine. Agents: if a reviewer cannot fail a 
 | Gate `discard` / safety kill | Don't use |
 | Factory / belt (text) | Make a post |
 | Image gen / compose | Make the picture |
+| Video gen / compose | Make a short video |
 | Queue / clerk | Your call / your name |
 | Preview / export | Phone preview / download pack |
 | Fixture | Sample idea (practice) |

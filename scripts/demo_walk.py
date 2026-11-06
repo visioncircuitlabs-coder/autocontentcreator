@@ -17,7 +17,7 @@ import urllib.request
 from typing import Any
 
 BASE = "http://127.0.0.1:8000"
-TIMEOUT = 60
+TIMEOUT = 900
 
 
 def _req(
@@ -89,6 +89,18 @@ def main() -> int:
         return 1
     print(f"ok: /factory/run -> {draft_id} ({len(drafts)} draft(s))")
 
+    painted = _req("POST", "/factory/image", {"draft_id": draft_id})
+    if not isinstance(painted, dict) or not painted.get("image_path"):
+        print(f"FAIL: factory image: {painted!r}")
+        return 1
+    print(f"ok: /factory/image -> {painted.get('image_path')}")
+
+    filmed = _req("POST", "/factory/video", {"draft_id": draft_id})
+    if not isinstance(filmed, dict) or not filmed.get("video_path"):
+        print(f"FAIL: factory video: {filmed!r}")
+        return 1
+    print(f"ok: /factory/video -> {filmed.get('video_path')}")
+
     try:
         png = _req("GET", f"/drafts/{draft_id}/image", expect_json=False)
     except Exception as exc:  # noqa: BLE001
@@ -98,6 +110,16 @@ def main() -> int:
         print("FAIL: draft image is not a PNG")
         return 1
     print(f"ok: /drafts/{draft_id}/image ({len(png)} bytes)")
+
+    try:
+        clip = _req("GET", f"/drafts/{draft_id}/video", expect_json=False)
+    except Exception as extra:  # noqa: BLE001
+        print(f"FAIL: draft video ({extra})")
+        return 1
+    if not isinstance(clip, (bytes, bytearray)) or clip[4:8] != b"ftyp":
+        print("FAIL: draft video is not an mp4")
+        return 1
+    print(f"ok: /drafts/{draft_id}/video ({len(clip)} bytes)")
 
     decision = _req(
         "POST",

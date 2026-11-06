@@ -14,6 +14,12 @@ export const MAKING_STEPS = [
 ];
 export const PICTURE_BUTTON = "Make the picture";
 export const PICTURE_WAIT = "Making the picture…";
+export const VIDEO_BUTTON = "Make a short video";
+export const VIDEO_WAIT = "Making a short video…";
+export const VIDEO_HINT =
+  "About five seconds. It starts from the picture you just made. This does not go live.";
+export const PICTURE_FIRST_VIDEO =
+  "Make the picture first. Then we can make a short video.";
 
 export const SAMPLE_BUTTON = "Use a sample idea (practice)";
 export const SAMPLE_NOTE =
@@ -51,6 +57,7 @@ export const VERDICT_FAIL = "Claim check: failed";
 export const VERDICT_NONE = "Not checked yet";
 export const EMPTY_MAKE_NOTE = "Make a post from the idea you picked.";
 export const NO_PICTURE_NOTE = "No picture on this version yet.";
+export const NO_VIDEO_NOTE = "No short video on this version yet.";
 export const REVIEW_FORM_TITLE = "Who made this call";
 export const NAME_REQUIRED_NOTE = "Add your name and a reason to unlock Yes or No.";
 export const ANGLE_PREFIX = "Angle:";
@@ -135,6 +142,7 @@ export function checkLines(draft: {
 export const OPS_TITLE = "Desk pulse";
 export const OPS_LABEL_APPROVE = "Approve rate";
 export const OPS_LABEL_SPEND = "Image spend";
+export const OPS_LABEL_VIDEO_SPEND = "Video spend";
 export const OPS_LABEL_RUNS = "Last runs";
 export const OPS_RUN_WORD = "Look";
 export const OPS_MAKE_WORD = "Make";

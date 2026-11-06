@@ -99,11 +99,11 @@ export const BOX_STORY: Record<string, BoxStory> = {
     grok: "Yes. If Grok writes junk, we drop it and use a plain fallback.",
   },
   art: {
-    does: "Makes a bright 4:5 product photo. Logo and disclaimer sit in code.",
+    does: "Makes a bright 4:5 product photo, then a five-second clip. Logo and disclaimer sit in code.",
     takes: "The caption version you picked.",
-    gives: "One Instagram-shaped still for the phone preview.",
+    gives: "One Instagram-shaped still and one short video for the phone preview.",
     then: "The pack is ready for your call.",
-    grok: "Yes, after you pick a version. One picture.",
+    grok: "Yes, after you pick a version. One picture, then one short video.",
   },
   judge: {
     does: "Checks every sentence against Product Facts.",

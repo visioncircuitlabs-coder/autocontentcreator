@@ -31,6 +31,7 @@ The git `main` checkout can still look like “design only.” That is stale. **
 - Treat box specs as a file map (they lag). **Code + `invariants.md` win.** Then note the drift.
 - Put brand marks or disclaimer text into Grok Imagine. Overlay is code.
 - Paint images inside `POST /factory/run`. Picture is `POST /factory/image` after a person picks a caption.
+- Film clips inside `POST /factory/run`. Video is `POST /factory/video` after the picture.
 - Publish to Instagram or any live channel
 - Write secrets, `.env`, `.pptx`, or C: caches
 - Use CrewAI. The belt is plain Python in `apps/api/boxes/belt.py`

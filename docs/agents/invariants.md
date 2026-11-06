@@ -23,7 +23,9 @@ A reviewer must be able to fail a PR from this file. Do not “improve” a lock
 | Disclaimer required on benefit lines | Fixture text in `fixtures/neutrogena/disclaimer.txt` |
 | Writer ≠ judge | `boxes/loop.py`: hard rules + claims judge + craft review. Max 3 rounds, then `flag_human`. |
 | Named human, non-empty reason | API `boxes/review.py` and UI both reject blanks. |
-| Brand marks not in the image model | Imagine prompt: no text, no logo. `art_director.apply_locks` paints `NEUTROGENA` + disclaimer. |
+| Neutrogena marks stay in Pillow | Hydro Boost stills: Imagine prompt has no Neutrogena logo. `apply_locks` paints `NEUTROGENA` + disclaimer. |
+| Chile Limón pack is the provided photo | Campaign still composites or image-edits FROM `fixtures/lays/products/chile-limon.jpg`. Do not redraw the bag. Logo on that pack may stay in Imagine. `overlay_disclaimer=false`, `always_disclaimer=false`. Do not Pillow-stamp a second LAY'S wordmark or unofficial bar. Type (TANGY LIME. SPICY HIT. / CRUNCH THE HEAT. / DARE A BITE?) lives in the art. |
+| Video starts from the campaign still | I2V from that still (~5s). Freeze layout and type; only open-pack / burst motion. Never I2V from a fixture pack photo as `draft.image_path`. Neutrogena clips still get the coded overlay. Lays clips do not. |
 
 ## Radar and factory shape
 
@@ -35,6 +37,7 @@ A reviewer must be able to fail a PR from this file. Do not “improve” a lock
 | One closer look per Look | `MAX_DEEP_DIVES = 1` |
 | One concept into copy | `MAX_FACTORY_CONCEPTS = 1` then 2–3 caption variants |
 | Picture waits for a pick | `run_factory` does not compose. `paint_chosen` is `POST /factory/image` |
+| Video waits for the picture | `film_chosen` refuses without a campaign still. Never text-to-video as the happy path. Never a fixture pack JPEG/PNG as the still. `POST /factory/video` after `POST /factory/image` |
 | Locked queries | Fetcher uses `skincare_in`. Grok web uses `LOCKED_QUERY`. Do not “search the whole web.” |
 
 ## Build / ops
@@ -63,8 +66,8 @@ Do not collapse these:
 - A second approval path
 - Publishing adapters (Meta, Buffer, later)
 - CrewAI / multi-agent orchestrators as the belt
-- Putting logo/disclaimer/claims into Imagine or any image prompt
-- Generating photos during Look or during `Make a post`
+- Putting a **second** brand wordmark or unofficial disclaimer bar on Lays stills/clips (Pillow). Neutrogena overlay in code stays. Pack-photo logos may remain in Imagine when they are printed on the real pack.
+- Generating photos **or video** during Look or during `Make a post`
 - Auto-approve, including “80% auto-approve”
 - New paid vendors
 - Changing on-screen jargon back to `radar`, `deep_dive`, `gate` on the default walk

@@ -24,8 +24,11 @@ METRIC_KEYS = {
     "flag_human_rate",
     "avg_judge_rounds",
     "images_painted_24h",
+    "videos_made_24h",
     "image_spend_usd",
     "image_budget_usd",
+    "video_spend_usd",
+    "video_budget_usd",
     "breaker_state",
     "chat_model",
     "last_radar_run_at",
@@ -79,6 +82,7 @@ def test_metrics_endpoint_shape_on_empty_desk() -> None:
     assert body["flag_human_rate"] is None
     assert body["avg_judge_rounds"] is None
     assert body["images_painted_24h"] == 0
+    assert body["videos_made_24h"] == 0
     assert body["last_radar_run_at"] is None
     assert body["last_factory_run_at"] is None
     assert body["breaker_state"] == "closed"

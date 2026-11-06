@@ -148,6 +148,7 @@ def test_health_deep_reports_fields(monkeypatch) -> None:
     assert body["ok"] is True
     assert body["chat_configured"] is False
     assert body["image_mode"] == "stub"
+    assert body["video_mode"] == "stub"
     assert body["db_path_bytes"] > 0
     for field in ("last_radar_run_at", "last_factory_run_at"):
         assert field in body

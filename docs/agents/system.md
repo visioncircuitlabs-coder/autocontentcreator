@@ -8,6 +8,7 @@ Four layers. One belt. One walk. Ports at the edges.
 │ fetch/score │   │ fixtures +  │   │ Factory      │   │ Center       │
 │ 1 deep dive │   │ track record│   │ text then    │   │ five beats   │
 │             │   │             │   │ one picture  │   │ paused ZIP   │
+│             │   │             │   │ then ~5s clip│   │              │
 └─────────────┘   └─────────────┘   └──────────────┘   └──────────────┘
 ```
 
@@ -17,35 +18,40 @@ Four layers. One belt. One walk. Ports at the edges.
 apps/api/                 FastAPI engine
   main.py                 HTTP surface
   models.py               Signal, Score, TrendReport, Brief, Concept, Draft, Decision
-  ports.py                TrendSource, ChatModel, ImageGen
+  ports.py                TrendSource, ChatModel, ImageGen, VideoGen
   db.py                   SQLite (signals, scores, reports, claims, briefs,
                           concepts, drafts, decisions, events, track_record,
                           api_keys, runs, claims_registry, idempotency_keys)
   obs.py                  JSONL events
   adapters/               gdelt, news_rss, reddit_json, grok_web, chat_litellm,
-                          image_imagine, image_http, image_stub, resilience
+                          image_imagine, image_http, image_stub,
+                          video_imagine, video_stub, resilience
   boxes/                  one module per box + belt.py
     auth.py               API keys + roles (viewer/approver/admin)
     brand_pack.py         BRAND_SLUG → fixture pack loader
     claims_registry.py    evidence-bound benefit claims
     audit.py              provenance chain for a draft
     evidence.py           hash-chain + manifest (tamper-evident exports)
-    image_budget.py       Grok $ cap gate
+    image_budget.py       Grok $ cap gate (stills)
+    pack_photo.py         Chile Limón JPEG + composite around the real bag
+    video.py              I2V from the campaign still; Neutrogena overlay, Lays skip
+    video_budget.py       Grok $ cap gate (5s clips)
     metrics.py            /metrics aggregation
     learning.py           approval-memory → writer prompt
     rubric.py             deterministic craft scorer v2
     strategist/copywriter/judge/craft/loop/hard_rules/review/export/...
   harness/                agent-harness primitives (no frameworks)
-    breaker.py            circuit breakers (chat + image)
+    breaker.py            circuit breakers (chat + image + video)
     steps.py              StepResult envelope, run-id contextvar
     admission.py          bounded concurrency + 503 shedding
     chat_wallet.py        token/$ accounting
     resumer.py            failed-run resume
     eval.py               golden-set evaluation
   fixtures/neutrogena/    unofficial brand pack
+  fixtures/lays/products/chile-limon.jpg   real Chile Limón India pack photo
 apps/web/                 Next.js App Router
   app/page.tsx            WalkApp (the product)
-  app/engine/[...path]    300s proxy → API
+  app/engine/[...path]    900s proxy → API
   walk/                   five-beat UI
   desk/                   API client, words, ops strip, review helpers
 infra/docker-compose.yml  api :8000, web :3050→3000
@@ -72,11 +78,16 @@ run_factory          picture does NOT run here
   run_loop           hard rules + judge + craft; rewrite ≤3; else flag_human
 
 paint_chosen         after a person picks a version
-  visual_prompt      4:5 bright water-gel ad; lighting from caption keywords only
-  compose            ImageGen then Pillow wordmark + disclaimer bar
+  visual_prompt      Neutrogena water-gel ad, or Chile Limón pack-edit
+  compose            ImageGen (edits when a pack photo exists). Neutrogena overlay.
+                     Chile Limón keeps the provided bag; no second wordmark.
+
+film_chosen          after the still — refuses if there is no campaign still
+  video_prompt       freeze layout + type; open-pack / burst only
+  compose_video      image-to-video from the still. Neutrogena overlay. Lays skip.
 ```
 
-Caps: `MAX_DEEP_DIVES = 1`, `MAX_FACTORY_CONCEPTS = 1`, `MAX_CHAT_SCORES = 5`, chat timeout 20s, Imagine timeout 90s, Next proxy 300s, radar fetch rate 6/min/host.
+Caps: `MAX_DEEP_DIVES = 1`, `MAX_FACTORY_CONCEPTS = 1`, `MAX_CHAT_SCORES = 5`, chat timeout 20s, Imagine still timeout 180s, Imagine video poll 900s every 5s, Next proxy 900s, radar fetch rate 6/min/host.
 
 ## Ports
 
@@ -84,6 +95,7 @@ Caps: `MAX_DEEP_DIVES = 1`, `MAX_FACTORY_CONCEPTS = 1`, `MAX_CHAT_SCORES = 5`, c
 TrendSource.fetch(query_id) -> list[Signal]
 ChatModel.complete_json(system, user, schema) -> BaseModel
 ImageGen.generate(prompt, out_path) -> Path
+VideoGen.generate(prompt, out_path, *, source_image=None) -> Path
 ```
 
 `build_chat()` returns `None` if `XAI_API_KEY`, `GEMINI_API_KEY`, and `GROQ_API_KEY` are all empty. Callers must still walk on templates.
@@ -92,11 +104,20 @@ ImageGen.generate(prompt, out_path) -> Path
 
 | `IMAGE_GEN_MODE` | Adapter |
 |---|---|
-| `imagine` / `grok-imagine` / `grok_imagine` | `ImagineImageGen` → `POST https://api.x.ai/v1/images/generations` model `grok-imagine-image`, `aspect_ratio: 4:5` |
+| `imagine` / `grok-imagine` / `grok_imagine` | `ImagineImageGen` → T2I `POST /v1/images/generations`, or `POST /v1/images/edits` when a pack photo is the source (`grok-imagine-image-2.0`) |
 | `http` | `HttpImageGen` → `IMAGE_GEN_URL` |
 | `stub` or unknown | `StubImageGen` Pillow card |
 
-Imagine failure falls back to stub (unless already stub). Overlay always runs.
+Imagine failure falls back to stub (unless already stub). Neutrogena overlay then runs. Chile Limón skips overlay and composites the pack photo if the edit failed.
+
+`build_video_gen()`:
+
+| `VIDEO_GEN_MODE` (falls back to `IMAGE_GEN_MODE`) | Adapter |
+|---|---|
+| `imagine` / `grok-imagine` / `grok-imagine-video` | `ImagineVideoGen` → `POST https://api.x.ai/v1/videos/generations` model `grok-imagine-video-1.5`, `duration: 5`, `image.url` = campaign still, `generate_audio: false`, poll `GET /v1/videos/{request_id}` every 5s up to 900s |
+| `stub` or unknown | `StubVideoGen` loops the campaign still → mp4 |
+
+Video failure falls back to stub (unless already stub), still looping the campaign still. Neutrogena overlay then runs. Chile Limón skips it. ffmpeg is required to write the mp4. Text-to-video is not the happy path.
 
 ## Data (SQLite)
 
@@ -108,7 +129,7 @@ Brand memory (dual store): SQLite is the machine truth; `MEMORY_DIR=data/memory`
 mirrors it into human-editable Markdown — see [memory.md](memory.md). Only
 `lessons.md` survives rebuilds; the rest regenerates from SQLite.
 
-IDs: `signal_id` = sha256(url). Drafts: `dft_…`. Images: `data/images/{draft_id}.png`. ZIPs: `data/exports/{draft_id}_paused.zip`.
+IDs: `signal_id` = sha256(url). Drafts: `dft_…`. Images: `data/images/{draft_id}.png`. Videos: `data/videos/{draft_id}.mp4`. ZIPs: `data/exports/{draft_id}_paused.zip`.
 
 Datetimes ISO-8601, timezone-aware.
 
@@ -127,7 +148,7 @@ On-screen copy lives in `apps/web/desk/words.ts`. Internal names stay in code.
 - `X-Request-Id` on HTTP
 - User never sees a stack trace
 
-Kinds: `api_start`, `http`, `fetch_source`, `radar_start`, `radar_scored`, `radar_end`, `radar_fail`, `paint_start`, `paint_end`, `ui.look_click`, `ui.look_fail`, `ui.fetch_fail`.
+Kinds: `api_start`, `http`, `fetch_source`, `radar_start`, `radar_scored`, `radar_end`, `radar_fail`, `paint_start`, `paint_end`, `film_start`, `film_end`, `ui.look_click`, `ui.look_fail`, `ui.fetch_fail`.
 
 ## Tests
 

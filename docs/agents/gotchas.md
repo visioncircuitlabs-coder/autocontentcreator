@@ -22,13 +22,13 @@ If they fight, **this worktree + `docs/agents/invariants.md` win.**
 
 `.env` can say `IMAGE_GEN_MODE=stub` while uvicorn was launched with `imagine`. Restart without the export → Pillow card, not Grok. `.env.example` is `imagine`. Imagine needs `XAI_API_KEY`. Failures fall back to stub; the user still sees *a* picture.
 
-## Make a post must not paint
+## Make a post must not paint or film
 
-Old belt composed three Imagine photos while Pick waited. That is why the page hit 5 minutes and the banner blamed Look. `run_factory` is text. `paint_chosen` is the later button.
+Old belt composed three Imagine photos while Pick waited. That is why the page hit 5 minutes and the banner blamed Look. `run_factory` is text. `paint_chosen` is the later button. `film_chosen` is the button after that.
 
 ## “That took too long” is the proxy
 
-Next `/engine` aborts at 300s. The UI cannot tell Look from Make from Imagine. Do not special-case the string back to “that look.”
+Next `/engine` aborts at 900s so a live Imagine clip can finish. Stub video is instant. The UI cannot tell Look from Make from Imagine. Do not special-case the string back to “that look.”
 
 ## Junk sources
 
@@ -40,7 +40,7 @@ Fixture used to replace `signals`. Keep this-run headlines. Practice is a labele
 
 ## Night-rain Hydro Boost
 
-Caption words like monsoon/humid leaked into a cinematic still. `visual_prompt` is a bright 4:5 water-gel ad. Lighting is a short keyword map, not the caption pasted into Imagine. No people, no letters in the model. Wordmark is Pillow, not SVG text (SVG text often vanished → navy rectangle).
+Caption words like monsoon/humid leaked into a cinematic still. `visual_prompt` is a bright 4:5 water-gel ad for Neutrogena. Chile Limón stills edit the real pack photo and put campaign type in the art. Lighting is a short keyword map, not the caption pasted into Imagine. Neutrogena wordmark is Pillow, not SVG text (SVG text often vanished → navy rectangle).
 
 ## Preview crop
 
@@ -68,7 +68,11 @@ No `npm` / pip / OpenCode caches on C:. XDG and npm cache on D: under `.cache/`.
 
 ## Overlay vs model
 
-Never put `NEUTROGENA`, claims, or the disclaimer in the Imagine prompt. They are stamped after. If you “just add the logo to the prompt,” you will get misspelled packaging and we lose the legal line.
+Neutrogena: never put `NEUTROGENA`, claims, or the disclaimer in the Imagine **prompt**. They are stamped in Pillow. If you “just add the logo to the prompt,” you will get misspelled packaging.
+
+Chile Limón (founder override): the pack in the ad **is** `fixtures/lays/products/chile-limon.jpg`. Composite or image-edit FROM that JPEG. The Lay's mark already printed on the bag may stay in Imagine. Do **not** Pillow-stamp a second LAY'S wordmark. Do **not** stamp unofficial/disclaimer (`overlay_disclaimer=false`, `always_disclaimer=false`). Type belongs in the art (TANGY LIME. SPICY HIT. / CRUNCH THE HEAT. / DARE A BITE?), not a legal bar. Night Shift stills that redrew the bag were rejected.
+
+Video **does** start from the campaign still as the first frame. Do not start from a fixture pack photo. Neutrogena clips get the coded overlay again so the legal line cannot warp. Lays clips skip that overlay.
 
 ## Kenvue deck / Cerebras / gstack
 

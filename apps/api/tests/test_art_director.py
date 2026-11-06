@@ -261,3 +261,141 @@ def test_http_adapter_refuses_empty_url(tmp_path: Path) -> None:
     gen = HttpImageGen(url="", key="k")
     with pytest.raises(RuntimeError, match="IMAGE_GEN_URL"):
         gen.generate("nope", tmp_path / "missing.png")
+
+
+def _chile_draft() -> Draft:
+    return Draft(
+        draft_id="dft_lays_1",
+        brief_id="b1",
+        caption="Chile Limon crunch after the match.",
+        variant=1,
+        image_path=None,
+        judge=None,
+        rules=[],
+        round=1,
+    )
+
+
+def test_chile_limon_still_keeps_pack_photo_and_skips_overlay(tmp_path: Path) -> None:
+    from boxes.art_director import compose
+    from boxes.pack_photo import chile_limon_pack_photo, pack_paste_box
+    from boxes.visual import visual_prompt
+
+    pack = chile_limon_pack_photo()
+    assert pack is not None and pack.is_file()
+    dest = tmp_path / "chile.png"
+    result = compose(_chile_draft(), visual_prompt(_chile_draft()), out_path=dest)
+    path = Path(result.image_path)
+    assert path.is_file()
+    assert "fixtures" not in {part.lower() for part in path.resolve().parts}
+    still = Image.open(path).convert("RGB")
+    assert still.size == (1080, 1350)
+    original = Image.open(pack).convert("RGB")
+    box = pack_paste_box(original.size)
+    placed = original.resize((box[2] - box[0], box[3] - box[1]), Image.Resampling.LANCZOS)
+    crop = still.crop(box)
+    err = 0
+    n = 0
+    for y in range(0, placed.height, 4):
+        for x in range(0, placed.width, 4):
+            a = placed.getpixel((x, y))
+            b = crop.getpixel((x, y))
+            err += sum(abs(a[i] - b[i]) for i in range(3))
+            n += 1
+    assert n > 50
+    assert err / n < 12, "campaign still must paste the provided pack, not redraw it"
+
+    # No Neutrogena navy wordmark, no unofficial/disclaimer bar.
+    assert not _has_color(path, LOGO_NAVY, y0=0.0, y1=0.12, tol=12)
+    w, h = still.size
+    dark = 0
+    samples = 0
+    for x in range(0, w, 6):
+        px = still.getpixel((x, h - 18))
+        samples += 1
+        if px[0] < 30 and px[1] < 32 and px[2] < 45:
+            dark += 1
+    assert dark < samples * 0.35
+
+
+def test_chile_limon_compose_passes_pack_to_generator(tmp_path: Path) -> None:
+    from boxes.art_director import compose
+    from boxes.pack_photo import chile_limon_pack_photo
+
+    seen: list[Path | None] = []
+    pack = chile_limon_pack_photo()
+    assert pack is not None
+
+    class Spy:
+        def generate(
+            self,
+            prompt: str,
+            out_path: Path,
+            *,
+            source_image: Path | None = None,
+        ) -> Path:
+            seen.append(source_image)
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            Image.new("RGB", (1080, 1350), (110, 170, 40)).save(out_path, "PNG")
+            return out_path
+
+    compose(
+        _chile_draft(),
+        "keep this bag",
+        image_gen=Spy(),
+        out_path=tmp_path / "spy-chile.png",
+    )
+    assert seen == [pack]
+
+
+def test_imagine_chile_limon_posts_image_edits(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from adapters.image_imagine import IMAGINE_EDIT_URL, IMAGINE_URL, ImagineImageGen
+    from boxes.pack_photo import chile_limon_pack_photo
+    from boxes.visual import visual_prompt
+    from harness.breaker import IMAGE_BREAKER
+
+    IMAGE_BREAKER.reset()
+    monkeypatch.setenv("XAI_API_KEY", "xai-test")
+    pack = chile_limon_pack_photo()
+    assert pack is not None
+    payload = _png_bytes((40, 80, 120), size=(64, 64))
+    posts: list[tuple[str, dict]] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        url = str(request.url)
+        if request.method == "POST":
+            posts.append((url, json.loads(request.content)))
+            if url == IMAGINE_EDIT_URL:
+                return httpx.Response(
+                    200, json={"data": [{"url": "https://imgen.example/out.png"}]}
+                )
+            return httpx.Response(500, text="generations must not run for pack edits")
+        if "imgen.example" in url:
+            return httpx.Response(200, content=payload)
+        return httpx.Response(404, text="missing")
+
+    client = httpx.Client(transport=httpx.MockTransport(handler))
+    dest = tmp_path / "imagine-chile.png"
+    ImagineImageGen(client=client, key="xai-test").generate(
+        visual_prompt(_chile_draft()), dest, source_image=pack
+    )
+    assert dest.read_bytes()[:8] == PNG_MAGIC
+    assert len(posts) == 1
+    url, body = posts[0]
+    assert url == IMAGINE_EDIT_URL
+    assert url != IMAGINE_URL
+    assert body["model"] == "grok-imagine-image-2.0"
+    assert body.get("aspect_ratio") == "4:5"
+    image = body.get("image")
+    assert isinstance(image, dict)
+    assert str(image.get("url") or "").startswith("data:image/jpeg;base64,")
+    assert image.get("type") == "image_url"
+    prompt = str(body.get("prompt") or "").lower()
+    assert "tangy lime" in prompt
+    assert "dare a bite" in prompt
+    assert "second" in prompt
+    assert "not jalapeño" in prompt or "not jalapeno" in prompt
+    assert "keep this bag" in prompt or "do not redraw" in prompt
+

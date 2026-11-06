@@ -2,7 +2,7 @@
 
 FastAPI app: `apps/api/main.py`. Title `Content Machine`. CORS allows localhost/127.0.0.1 on ports **3000** and **3050**.
 
-Base URL for the walk: `http://localhost:3050/engine` (Next proxy, 300s). Direct: `http://127.0.0.1:8000`.
+Base URL for the walk: `http://localhost:3050/engine` (Next proxy, 900s). Direct: `http://127.0.0.1:8000`.
 
 Errors: JSON `{"error": "<friendly sentence>"}`. Typical status 400, 404, 429, 500, 502, 504. No stack traces.
 
@@ -75,9 +75,21 @@ Returns `Draft[]` (usually 2–3 caption variants). **`image_path` is null.** Lo
 { "draft_id": "dft_…" }
 ```
 
-Returns one `Draft` with `image_path` set. Always regenerates via `visual_prompt` then overlay.
+Returns one `Draft` with `image_path` set. Always regenerates via `visual_prompt`. Neutrogena then overlays wordmark + disclaimer. Chile Limón composites or image-edits the provided pack photo and does not stamp a second wordmark.
 
 500: `"Could not make that picture. Please try again."`
+
+### `POST /factory/video`
+
+```json
+{ "draft_id": "dft_…" }
+```
+
+Returns one `Draft` with `video_path` set. Requires a campaign still on the draft (make the picture first). Image-to-video from that still. Neutrogena then applies the coded overlay; Chile Limón does not. Does **not** publish.
+
+400: `"Make the picture first. Then we can make a short video."`
+
+500: `"Could not make that short video. Please try again."`
 
 ## Review and export
 
@@ -91,7 +103,7 @@ Returns one `Draft` with `image_path` set. Always regenerates via `visual_prompt
 
 ### `GET /export/{draft_id}`
 
-`application/zip` named `{draft_id}_paused.zip`. If the PNG is missing, export may compose one. Contents: preview HTML, PNG, JSON sidecar. Stamp: paused / does not go live.
+`application/zip` named `{draft_id}_paused.zip`. If the PNG or mp4 is missing, export may compose them. Contents: preview HTML, PNG, MP4, JSON sidecar, signed manifest. Stamp: paused / does not go live.
 
 ## Reads
 
@@ -105,6 +117,7 @@ Returns one `Draft` with `image_path` set. Always regenerates via `visual_prompt
 | GET | `/drafts` | All drafts |
 | GET | `/drafts/{draft_id}` | 404 `"That draft is not in the queue."` |
 | GET | `/drafts/{draft_id}/image` | `image/png` |
+| GET | `/drafts/{draft_id}/video` | `video/mp4` |
 | GET | `/queue` | Drafts waiting a human |
 
 ## Domain shapes (Python)
